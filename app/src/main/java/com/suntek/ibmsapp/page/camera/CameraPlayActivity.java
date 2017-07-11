@@ -106,7 +106,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             }
         };
         //时间线程
-        new Thread(this).start();
+     //   new Thread(this).start();
     }
 
     /**

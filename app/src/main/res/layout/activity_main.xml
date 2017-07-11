@@ -5,35 +5,16 @@
                 android:background="#f1f0f6"
                 android:orientation="vertical">
 
-   <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="50dp"
-       android:orientation="horizontal"
-       android:gravity="center"
-       android:background="@color/card_view_background"
-       >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="标题栏"/>
-   </LinearLayout>
-
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/fl_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/result_TV"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:text="Hello World!"
-            android:textSize="16sp"/>
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-        <Button
-            android:id="@+id/click_me_BN"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="点我"
-            android:textSize="16dp"/>
-    </LinearLayout>
+    <com.ashokvarma.bottomnavigation.BottomNavigationBar
+        android:id="@+id/bnb_tab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
 </LinearLayout>

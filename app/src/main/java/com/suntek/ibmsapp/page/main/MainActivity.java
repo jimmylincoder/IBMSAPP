@@ -1,27 +1,34 @@
 package com.suntek.ibmsapp.page.main;
 
-import android.content.Intent;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
+
+
+import com.ashokvarma.bottomnavigation.BottomNavigationBar;
+import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
-import com.suntek.ibmsapp.network.RetrofitHelper;
-import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
-import java.util.Map;
-import butterknife.BindView;
-import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import com.suntek.ibmsapp.page.main.fragment.CameraHistoryFragment;
+import com.suntek.ibmsapp.page.main.fragment.CameraListFragment;
+import com.suntek.ibmsapp.page.main.fragment.MeFragment;
 
-public class MainActivity extends BaseActivity
+import java.util.ArrayList;
+
+import butterknife.BindView;
+
+public class MainActivity extends BaseActivity implements BottomNavigationBar.OnTabSelectedListener
 {
-    @BindView(R.id.click_me_BN)
-    Button clickMeBN;
-    @BindView(R.id.result_TV)
-    TextView resultTV;
+
+    private ArrayList<Fragment> fragments;
+    @BindView(R.id.bnb_tab)
+    BottomNavigationBar bnbTab;
+    int lastSelectedPosition = 0;
+
+    private CameraListFragment cameraListFragment;
+    private CameraHistoryFragment cameraHistoryFragment;
+    private MeFragment meFragment;
 
     @Override
     public int getLayoutId()
@@ -32,7 +39,26 @@ public class MainActivity extends BaseActivity
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-        loadData();
+        bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
+        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_tv_play,"视频").setActiveColor(R.color.orange))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_history,"历史").setActiveColor(R.color.orange))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_account,"我的").setActiveColor(R.color.orange))
+                .setFirstSelectedPosition(lastSelectedPosition)
+                .initialise();;
+
+
+        bnbTab.setTabSelectedListener(this);
+        setDefaultFragment();
+    }
+
+    private void setDefaultFragment()
+    {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+
+        cameraListFragment = new CameraListFragment();
+        transaction.replace(R.id.fl_content,cameraListFragment);
+        transaction.commit();
     }
 
     @Override
@@ -41,35 +67,51 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    public void loadData()
+    public void onTabSelected(int position)
     {
-        RetrofitHelper.getMovieAPI()
-                .getTopMovie(0,10)
-                .compose(this.<Map<String,Object>>bindToLifecycle())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Map<String, Object>>()
+        FragmentManager fm = this.getFragmentManager();
+        FragmentTransaction transation = fm.beginTransaction();
+        switch (position)
+        {
+            case 0:
+                if(cameraListFragment == null)
                 {
-                    @Override
-                    public void call(Map<String, Object> stringObjectMap)
-                    {
-                        resultTV.setText(stringObjectMap.toString());
-                    }
-                }, new Action1<Throwable>()
+                    cameraListFragment = new CameraListFragment();
+                }
+                transation.replace(R.id.fl_content,cameraListFragment);
+                break;
+
+            case 1:
+                if(cameraHistoryFragment == null)
                 {
-                    @Override
-                    public void call(Throwable throwable)
-                    {
-                        resultTV.setText(throwable.getMessage());
-                    }
-                });
+                    cameraHistoryFragment = new CameraHistoryFragment();
+                }
+                transation.replace(R.id.fl_content,cameraHistoryFragment);
+                break;
+
+            case 2:
+                if(meFragment == null)
+                {
+                    meFragment = new MeFragment();
+                }
+                transation.replace(R.id.fl_content,meFragment);
+                break;
+            default:
+                break;
+        }
+
+        transation.commit();
     }
 
-    @OnClick(R.id.click_me_BN)
-    public void onClick()
+    @Override
+    public void onTabUnselected(int position)
     {
-        Intent intent = new Intent(MainActivity.this, CameraPlayActivity.class);
-        startActivity(intent);
+
+    }
+
+    @Override
+    public void onTabReselected(int position)
+    {
+
     }
 }
