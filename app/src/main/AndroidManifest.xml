@@ -22,16 +22,21 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".page.main.MainActivity"
+        <activity android:name=".page.login.UserLoginActivity"
             android:theme="@style/MainViewTheme"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask">
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity android:name=".page.main.MainActivity"
+                  android:theme="@style/MainViewTheme"
+                  android:screenOrientation="portrait"
+                  android:launchMode="singleTask"/>
+
         <activity
             android:name=".page.camera.CameraPlayActivity"
             android:screenOrientation="portrait"
