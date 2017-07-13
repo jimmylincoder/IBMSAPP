@@ -91,26 +91,7 @@
                 android:layout_weight="1.5"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-             <!--   <ImageView
-                    android:id="@+id/iv_take_pic"
-                    android:layout_gravity="top|left"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_loading_error"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginTop="10dp"
-                    />
 
-                <ImageView
-                    android:id="@+id/iv_change_mode"
-                    android:layout_gravity="top|left"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_loading_error"
-                    android:layout_marginLeft="80dp"
-                    android:layout_marginTop="10dp"
-                    />
-  -->
             </LinearLayout>
         </LinearLayout>
 
@@ -119,7 +100,7 @@
     <LinearLayout
         android:id="@+id/ll_oper"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:orientation="horizontal"
         android:background="@color/C2E2720"
         >
@@ -199,6 +180,20 @@
                 />
 
         </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_time"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:visibility="gone">
+
+        <com.suntek.ibmsapp.widget.TimeAxis
+            android:id="@+id/ta_time"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </LinearLayout>
 

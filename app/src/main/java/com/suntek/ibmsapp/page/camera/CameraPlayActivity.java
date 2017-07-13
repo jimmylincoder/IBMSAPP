@@ -1,26 +1,19 @@
 package com.suntek.ibmsapp.page.camera;
 
 import android.content.pm.ActivityInfo;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
@@ -28,20 +21,18 @@ import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
+import com.suntek.ibmsapp.widget.TimeAlgorithm;
+import com.suntek.ibmsapp.widget.TimeAxis;
 import com.suntek.ibmsapp.widget.ToastHelper;
-import com.tv.danmaku.ijk.media.widget.media.IRenderView;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
 import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
@@ -67,15 +58,20 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     LinearLayout llHead;
     @BindView(R.id.ll_oper)
     LinearLayout llOper;
+    @BindView(R.id.ll_time)
+    LinearLayout llTime;
     @BindView(R.id.ll_message)
     LinearLayout llMessage;
     @BindView(R.id.fl_video)
     FrameLayout flVideo;
     @BindView(R.id.tv_nowtime)
     TextView tvNowTime;
+    @BindView(R.id.ta_time)
+    TimeAxis taTime;
     private Handler timeHandler;
 
     private boolean mBackPressed;
+    private boolean isTimeRun = true;
     private int playerState = PLAYER_NOT_FULL;
 
     @Override
@@ -89,6 +85,27 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         initVideoView();
         initTimeView();
+
+        taTime.setOnValueChangeListener(new TimeAxis.OnValueChangeListener()
+        {
+            @Override
+            public void onValueChange(TimeAlgorithm _value)
+            {
+
+            }
+
+            @Override
+            public void onStartValueChange(TimeAlgorithm _value)
+            {
+
+            }
+
+            @Override
+            public void onStopValueChange(TimeAlgorithm _value)
+            {
+
+            }
+        });
     }
 
     /**
@@ -106,7 +123,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             }
         };
         //时间线程
-     //   new Thread(this).start();
+        new Thread(this).start();
     }
 
     /**
@@ -123,7 +140,21 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
         {
             @Override
-            public void onTouchEvent(MotionEvent ev)
+            public void onSingleTouchEvent(MotionEvent ev)
+            {
+                if(llOper.getVisibility() == View.GONE)
+                {
+                    llOper.setVisibility(View.VISIBLE);
+                    llTime.setVisibility(View.GONE);
+                }else
+                {
+                    llOper.setVisibility(View.GONE);
+                    llTime.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onDoubleTouchEvent(MotionEvent ev)
             {
                 ivvVideo.toggleAspectRatio();
             }
@@ -160,6 +191,13 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             ivvVideo.enterBackground();
         }
         IjkMediaPlayer.native_profileEnd();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        isTimeRun = false;
+        super.onDestroy();
     }
 
     @OnClick(R.id.iv_back)
@@ -259,7 +297,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         try
         {
-            while (true)
+            while (isTimeRun)
             {
                 SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss");
                 String str = sdf.format(new Date());

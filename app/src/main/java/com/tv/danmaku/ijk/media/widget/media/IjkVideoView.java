@@ -34,7 +34,6 @@ import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
@@ -791,15 +790,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
-        if (isInPlaybackState() && mMediaController != null)
-        {
-            toggleMediaControlsVisiblity();
-        }
-        if (onVideoTouchListener != null)
-        {
-            onVideoTouchListener.onTouchEvent(ev);
-        }
-        return false;
+        gestureDetector.onTouchEvent(ev);
+        return true;
     }
 
     @Override
@@ -1385,9 +1377,23 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     GestureDetector gestureDetector = new GestureDetector(mAppContext, new GestureDetector.SimpleOnGestureListener()
     {
         @Override
+        public boolean onSingleTapConfirmed(MotionEvent e)
+        {
+            if (isInPlaybackState() && mMediaController != null)
+            {
+                toggleMediaControlsVisiblity();
+            }
+            if (onVideoTouchListener != null)
+            {
+                onVideoTouchListener.onSingleTouchEvent(e);
+            }
+            return super.onSingleTapConfirmed(e);
+        }
+
+        @Override
         public boolean onDoubleTap(MotionEvent e)
         {
-            ToastHelper.getInstance(mAppContext).shortShowMessage("双击");
+            onVideoTouchListener.onDoubleTouchEvent(e);
             return super.onDoubleTap(e);
         }
     });

@@ -2,6 +2,7 @@ package com.suntek.ibmsapp.page.camera;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.suntek.ibmsapp.R;
@@ -21,7 +22,7 @@ import butterknife.OnClick;
  *
  * @author jimmy
  */
-public class CameraChooseActivity extends BaseActivity
+public class CameraChooseActivity extends BaseActivity implements AdapterView.OnItemClickListener
 {
     @BindView(R.id.lv_area)
     ListView lvArea;
@@ -45,6 +46,7 @@ public class CameraChooseActivity extends BaseActivity
         }
         areaListAdapter = new AreaListAdapter(this,areaList);
         lvArea.setAdapter(areaListAdapter);
+        lvArea.setOnItemClickListener(this);
     }
 
     @Override
@@ -55,6 +57,12 @@ public class CameraChooseActivity extends BaseActivity
 
     @OnClick(R.id.ll_back)
     public void back(View view)
+    {
+        finish();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         finish();
     }

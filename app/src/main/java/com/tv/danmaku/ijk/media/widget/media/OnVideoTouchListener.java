@@ -9,5 +9,7 @@ import android.view.MotionEvent;
  */
 public interface OnVideoTouchListener
 {
-    void onTouchEvent(MotionEvent ev);
+    void onSingleTouchEvent(MotionEvent ev);
+
+    void onDoubleTouchEvent(MotionEvent ev);
 }

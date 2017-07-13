@@ -16,7 +16,7 @@ public class ToastHelper
     private boolean isToastShow=false;
     public ToastHelper(Context context)
     {
-        this.context=context;
+        this.context=context.getApplicationContext();
     }
 
     /**
