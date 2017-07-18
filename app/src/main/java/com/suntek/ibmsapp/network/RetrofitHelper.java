@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.network;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.suntek.ibmsapp.app.IBMSApp;
 import com.suntek.ibmsapp.network.api.MovieService;
+import com.suntek.ibmsapp.network.api.UserService;
 import com.suntek.ibmsapp.network.auxiliary.ApiConstants;
 import com.suntek.ibmsapp.util.CommonUtil;
 
@@ -36,6 +37,11 @@ public class RetrofitHelper
 
     public static MovieService getMovieAPI() {
         return createApi(MovieService.class, ApiConstants.MOVIE_BASE_URL);
+    }
+
+    public static UserService getUserApi()
+    {
+        return createApi(UserService.class,ApiConstants.IBMS_BASE_URL);
     }
 
     /**

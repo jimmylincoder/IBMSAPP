@@ -54,7 +54,7 @@ public class LoadingDialog implements DialogInterface.OnKeyListener
 
     private LoadingDialog(Context context)
     {
-        this.context = context;
+        this.context = context.getApplicationContext();
         handler = new Handler();
     }
 

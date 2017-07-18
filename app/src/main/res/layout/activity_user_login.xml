@@ -46,6 +46,7 @@
 
 
                 <EditText
+                    android:id="@+id/et_account"
                     android:layout_marginLeft="10dp"
                     android:hint="请输入账号"
                     android:textSize="14dp"
@@ -85,6 +86,7 @@
 
 
                 <EditText
+                    android:id="@+id/et_password"
                     android:layout_marginLeft="10dp"
                     android:hint="请输入密码"
                     android:textSize="14dp"
