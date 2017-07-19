@@ -9,9 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.model.Camera;
 
 import java.util.List;
 import java.util.Map;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  *
@@ -54,35 +58,44 @@ public class CameraListAdapter extends BaseAdapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        if(convertView == null)
+        CameraListAdapter.ViewHolder holder;
+        if(convertView != null)
         {
-            viewHolder = new ViewHolder();
-            convertView = LayoutInflater.from(context).inflate(R.layout.item_camera_list,null);
-            viewHolder.ivPreView = (ImageView) convertView.findViewById(R.id.iv_preview);
-            viewHolder.tvName = (TextView) convertView.findViewById(R.id.tv_camera_name);
+            holder = (CameraListAdapter.ViewHolder) convertView.getTag();
+
         }
         else
         {
-            viewHolder = (ViewHolder) convertView.getTag();
-        }
+            convertView = LayoutInflater.from(context).inflate(R.layout.item_camera_list,null);
+            holder = new CameraListAdapter.ViewHolder(convertView);
+            convertView.setTag(holder);        }
 
+        holder.tvName.setText((String) cameraList.get(position).get("name"));
         return convertView;
     }
 
-    private class ViewHolder
+    static class ViewHolder
     {
         //摄像机预览
-        private ImageView ivPreView;
+        @BindView(R.id.iv_preview)
+        ImageView ivPreView;
+
         //摄像机名称
-        private TextView tvName;
+        @BindView(R.id.tv_camera_name)
+        TextView tvName;
+
+        public ViewHolder(View view)
+        {
+            ButterKnife.bind(this,view);
+        }
     }
 
-    public List<Map<String, Object>> getCameraList()
+    public List<Map<String,Object>> getCameraList()
     {
         return cameraList;
     }
 
-    public void setCameraList(List<Map<String, Object>> cameraList)
+    public void setCameraList(List<Map<String,Object>> cameraList)
     {
         this.cameraList = cameraList;
     }

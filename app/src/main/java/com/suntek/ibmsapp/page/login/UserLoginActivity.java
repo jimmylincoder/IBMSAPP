@@ -8,6 +8,7 @@ import android.widget.EditText;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.HttpRequest;
 import com.suntek.ibmsapp.component.HttpResponse;
+import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.User;
 import com.suntek.ibmsapp.network.RetrofitHelper;
@@ -46,7 +47,8 @@ public class UserLoginActivity extends BaseActivity
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-
+        etAccount.setText("admin");
+        etPassword.setText("suntek");
     }
 
     @Override
@@ -58,39 +60,34 @@ public class UserLoginActivity extends BaseActivity
     @OnClick(R.id.ll_login)
     public void login(View view)
     {
+        HttpRequest request = null;
         String account = etAccount.getText().toString();
         String password  = etPassword.getText().toString();
-
-        if(account == null || "".equals(account))
+        try
         {
-            ToastHelper.getInstance(this).shortShowMessage("账号不能为空");
+            request = new RequestBody()
+                    .putParams("user_name",account,true,"账号不能为空")
+                    .putParams("password",password,true,"密码不能为空")
+                    .build();
+        }catch (Exception e)
+        {
+            ToastHelper.getInstance(this).shortShowMessage(e.getMessage());
             return;
         }
-        if(password == null || "".equals(password))
-        {
-            ToastHelper.getInstance(this).shortShowMessage("密码不能为空");
-            return;
-        }
-
-        HttpRequest httpRequest = new HttpRequest();
-        Map<String,Object> params = new HashMap<>();
-        params.put("user_name",account);
-        params.put("password",password);
-        httpRequest.setParams(params);
 
         LoadingDialog.getInstance(this).showLoading("登录中，请稍候...");
         RetrofitHelper.getUserApi()
-                .login(httpRequest)
+                .login(request)
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse<User>>()
+                .subscribe(new Action1<HttpResponse>()
                 {
                     @Override
-                    public void call(HttpResponse<User> userHttpResponse)
+                    public void call(HttpResponse userHttpResponse)
                     {
                         LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
-                        if (userHttpResponse.getStatus() == HttpResponse.STATUS_SUCCESS)
+                        if (userHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
                         {
                             Intent intent = new Intent(UserLoginActivity.this, MainActivity.class);
                             startActivity(intent);
@@ -106,7 +103,8 @@ public class UserLoginActivity extends BaseActivity
                     @Override
                     public void call(Throwable throwable)
                     {
-                        ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage(throwable.getMessage());
+                        LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
+                        ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("请检查网络设置是否连通");
                     }
                 });
     }

@@ -2,7 +2,6 @@ package com.suntek.ibmsapp.network.api;
 
 import com.suntek.ibmsapp.component.HttpRequest;
 import com.suntek.ibmsapp.component.HttpResponse;
-import com.suntek.ibmsapp.model.User;
 
 import retrofit2.http.Body;
 import retrofit2.http.Headers;
@@ -10,13 +9,13 @@ import retrofit2.http.POST;
 import rx.Observable;
 
 /**
- * 用户api
+ * 区域api
  *
  * @author jimmy
  */
-public interface UserService
+public interface AreaService
 {
     @Headers({"Content-Type: application/json","Accept: application/json"})
-    @POST("user/login")
-    Observable<HttpResponse> login(@Body HttpRequest request);
+    @POST("area/list")
+    Observable<HttpResponse> list(@Body HttpRequest request);
 }

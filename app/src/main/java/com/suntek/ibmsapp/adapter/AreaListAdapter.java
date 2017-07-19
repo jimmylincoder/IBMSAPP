@@ -65,6 +65,8 @@ public class AreaListAdapter extends BaseAdapter
             holder = new AreaListAdapter.ViewHolder(view);
             view.setTag(holder);
         }
+
+        holder.tvAreaName.setText(cameraList.get(i).get("name") + "");
         return view;
     }
 

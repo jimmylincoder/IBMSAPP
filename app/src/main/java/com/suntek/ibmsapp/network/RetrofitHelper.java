@@ -2,6 +2,8 @@ package com.suntek.ibmsapp.network;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.suntek.ibmsapp.app.IBMSApp;
+import com.suntek.ibmsapp.network.api.AreaService;
+import com.suntek.ibmsapp.network.api.CameraService;
 import com.suntek.ibmsapp.network.api.MovieService;
 import com.suntek.ibmsapp.network.api.UserService;
 import com.suntek.ibmsapp.network.auxiliary.ApiConstants;
@@ -31,23 +33,35 @@ public class RetrofitHelper
 {
     private static OkHttpClient mOkHttpClient;
 
-    static {
+    static
+    {
         initOkHttpClient();
     }
 
-    public static MovieService getMovieAPI() {
+    public static MovieService getMovieAPI()
+    {
         return createApi(MovieService.class, ApiConstants.MOVIE_BASE_URL);
     }
 
     public static UserService getUserApi()
     {
-        return createApi(UserService.class,ApiConstants.IBMS_BASE_URL);
+        return createApi(UserService.class, ApiConstants.IBMS_BASE_URL);
     }
 
+    public static CameraService getCameraApi()
+    {
+        return createApi(CameraService.class,ApiConstants.IBMS_BASE_URL);
+    }
+
+    public static AreaService getAreaPai()
+    {
+        return createApi(AreaService.class,ApiConstants.IBMS_BASE_URL);
+    }
     /**
      * 根据传入的baseUrl，和api创建retrofit
      */
-    private static <T> T createApi(Class<T> clazz, String baseUrl) {
+    private static <T> T createApi(Class<T> clazz, String baseUrl)
+    {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(baseUrl)
                 .client(mOkHttpClient)
@@ -61,12 +75,16 @@ public class RetrofitHelper
     /**
      * 初始化OKHttpClient,设置缓存,设置超时时间,设置打印日志,设置UA拦截器
      */
-    private static void initOkHttpClient() {
+    private static void initOkHttpClient()
+    {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        if (mOkHttpClient == null) {
-            synchronized (RetrofitHelper.class) {
-                if (mOkHttpClient == null) {
+        if (mOkHttpClient == null)
+        {
+            synchronized (RetrofitHelper.class)
+            {
+                if (mOkHttpClient == null)
+                {
                     //设置Http缓存
                     Cache cache = new Cache(new File(IBMSApp.getInstance().getCacheDir(), "HttpCache"), 1024 * 1024 * 10);
                     mOkHttpClient = new OkHttpClient.Builder()
@@ -75,9 +93,9 @@ public class RetrofitHelper
                             .addNetworkInterceptor(new CacheInterceptor())
                             .addNetworkInterceptor(new StethoInterceptor())
                             .retryOnConnectionFailure(true)
-                            .connectTimeout(30, TimeUnit.SECONDS)
-                            .writeTimeout(20, TimeUnit.SECONDS)
-                            .readTimeout(20, TimeUnit.SECONDS)
+                            .connectTimeout(3, TimeUnit.SECONDS)
+                            .writeTimeout(2, TimeUnit.SECONDS)
+                            .readTimeout(2, TimeUnit.SECONDS)
                             .addInterceptor(new UserAgentInterceptor())
                             .build();
                 }
@@ -106,28 +124,36 @@ public class RetrofitHelper
     /**
      * 为okhttp添加缓存，这里是考虑到服务器不支持缓存时，从而让okhttp支持缓存
      */
-    private static class CacheInterceptor implements Interceptor {
+    private static class CacheInterceptor implements Interceptor
+    {
         @Override
-        public Response intercept(Chain chain) throws IOException {
+        public Response intercept(Chain chain) throws IOException
+        {
             // 有网络时 设置缓存超时时间1个小时
             int maxAge = 60 * 60;
             // 无网络时，设置超时为1天
             int maxStale = 60 * 60 * 24;
             Request request = chain.request();
-            if (CommonUtil.isNetworkAvailable(IBMSApp.getInstance())) {
+            if (CommonUtil.isNetworkAvailable(IBMSApp.getInstance()))
+            {
                 //有网络时只从网络获取
                 request = request.newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build();
-            } else {
+            }
+            else
+            {
                 //无网络时只从缓存中读取
                 request = request.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build();
             }
             Response response = chain.proceed(request);
-            if (CommonUtil.isNetworkAvailable(IBMSApp.getInstance())) {
+            if (CommonUtil.isNetworkAvailable(IBMSApp.getInstance()))
+            {
                 response = response.newBuilder()
                         .removeHeader("Pragma")
                         .header("Cache-Control", "public, max-age=" + maxAge)
                         .build();
-            } else {
+            }
+            else
+            {
                 response = response.newBuilder()
                         .removeHeader("Pragma")
                         .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)

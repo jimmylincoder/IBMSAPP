@@ -53,6 +53,7 @@
                     android:background="@mipmap/ic_search"/>
 
                 <EditText
+                    android:id="@+id/et_keyword"
                     android:hint="搜索摄像头"
                     android:textSize="14dp"
                     android:layout_width="match_parent"

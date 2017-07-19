@@ -13,7 +13,14 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraListAdapter;
+import com.suntek.ibmsapp.component.HttpRequest;
+import com.suntek.ibmsapp.component.HttpResponse;
+import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.network.RetrofitHelper;
+import com.suntek.ibmsapp.widget.LoadingDialog;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +30,9 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * 摄像机列表
@@ -75,13 +85,6 @@ public class CameraListActivity extends BaseActivity
         });
 
         cameraList = new ArrayList<>();
-
-        for(int i = 0;i < 10;i++)
-        {
-            Map<String,Object> map = new HashMap<>();
-            cameraList.add(map);
-        }
-
         cameraListAdapter = new CameraListAdapter(this,cameraList);
         ListView actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
@@ -91,6 +94,40 @@ public class CameraListActivity extends BaseActivity
     public void initToolBar()
     {
 
+    }
+
+    private void getCameraList()
+    {
+        HttpRequest request = new RequestBody().build();
+        RetrofitHelper.getCameraApi()
+                      .list(request)
+                      .compose(bindToLifecycle())
+                      .subscribeOn(Schedulers.io())
+                      .observeOn(AndroidSchedulers.mainThread())
+                      .subscribe(new Action1<HttpResponse>()
+                      {
+                          @Override
+                          public void call(HttpResponse listHttpResponse)
+                          {
+                                if(listHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
+                                {
+                                    List<Map<String,Object>> list = (List<Map<String,Object>>) listHttpResponse.getData().get("camera_list");
+                                    cameraList.addAll(list);
+                                    cameraListAdapter.notifyDataSetChanged();
+                                }
+                                else
+                                {
+                                    ToastHelper.getInstance(CameraListActivity.this).shortShowMessage(listHttpResponse.getErrorMessage());
+                                }
+                          }
+                      }, new Action1<Throwable>()
+                      {
+                          @Override
+                          public void call(Throwable throwable)
+                          {
+
+                          }
+                      });
     }
 
     private class GetDataTask extends AsyncTask<Void, Void, String>

@@ -12,10 +12,17 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraListAdapter;
+import com.suntek.ibmsapp.component.HttpRequest;
+import com.suntek.ibmsapp.component.HttpResponse;
+import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseFragment;
+import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
+import com.suntek.ibmsapp.page.camera.CameraListActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +31,9 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * 摄像机列表
@@ -35,6 +45,8 @@ public class CameraListFragment extends BaseFragment
     private List<Map<String,Object>> cameraList;
 
     private CameraListAdapter cameraListAdapter;
+
+    private ListView actualListView;
 
     @BindView(R.id.ptr_camera_list)
     PullToRefreshListView ptrCameraList;
@@ -61,7 +73,7 @@ public class CameraListFragment extends BaseFragment
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
 
                 // Do work to refresh the list here.
-                new CameraListFragment.GetDataTask().execute();
+                getCameraList();
             }
         });
 
@@ -77,15 +89,11 @@ public class CameraListFragment extends BaseFragment
 
         cameraList = new ArrayList<>();
 
-        for(int i = 0;i < 10;i++)
-        {
-            Map<String,Object> map = new HashMap<>();
-            cameraList.add(map);
-        }
-
         cameraListAdapter = new CameraListAdapter(getActivity(),cameraList);
-        ListView actualListView = ptrCameraList.getRefreshableView();
+        actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
+
+        getCameraList();
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -102,38 +110,49 @@ public class CameraListFragment extends BaseFragment
         startActivity(intent);
     }
 
-    private class GetDataTask extends AsyncTask<Void, Void, String>
+    private void getCameraList()
     {
-
-        //后台处理部分
-        @Override
-        protected String doInBackground(Void... params)
+        HttpRequest request = null;
+        try
         {
-            // Simulates a background job.
-            try
-            {
-                Thread.sleep(1000);
-            } catch (InterruptedException e)
-            {
-            }
-            String str = "Added after refresh...I add";
-            return str;
+            request = new RequestBody()
+                    .putParams("page","1",false,"")
+                    .build();
+        }catch (Exception e)
+        {
+            ToastHelper.getInstance(getActivity()).shortShowMessage(e.getMessage());
         }
 
-        //这里是对刷新的响应，可以利用addFirst（）和addLast()函数将新加的内容加到LISTView中
-        //根据AsyncTask的原理，onPostExecute里的result的值就是doInBackground()的返回值
-        @Override
-        protected void onPostExecute(String result)
-        {
-            //在头部增加新添内容
-            //  mListItems.addFirst(result);
-
-            //通知程序数据集已经改变，如果不做通知，那么将不会刷新mListItems的集合
-            //  mAdapter.notifyDataSetChanged();
-            // Call onRefreshComplete when the list has been refreshed.
-            ptrCameraList.onRefreshComplete();
-
-            super.onPostExecute(result);
-        }
+        RetrofitHelper.getCameraApi()
+                .list(request)
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<HttpResponse>()
+                {
+                    @Override
+                    public void call(HttpResponse listHttpResponse)
+                    {
+                        if(listHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
+                        {
+                            List<Map<String,Object>> cameraList = (List) listHttpResponse.getData().get("camera_list");
+                            cameraList.addAll(cameraList);
+                            cameraListAdapter.setCameraList(cameraList);
+                            cameraListAdapter.notifyDataSetChanged();
+                        }
+                        else
+                        {
+                            ToastHelper.getInstance(getActivity()).shortShowMessage(listHttpResponse.getErrorMessage());
+                        }
+                        ptrCameraList.onRefreshComplete();
+                    }
+                }, new Action1<Throwable>()
+                {
+                    @Override
+                    public void call(Throwable throwable)
+                    {
+                        ptrCameraList.onRefreshComplete();
+                    }
+                });
     }
 }

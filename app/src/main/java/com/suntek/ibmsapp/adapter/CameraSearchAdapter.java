@@ -65,6 +65,7 @@ public class CameraSearchAdapter extends BaseAdapter
             holder = new CameraSearchAdapter.ViewHolder(view);
             view.setTag(holder);
         }
+        holder.tvCameraName.setText(cameraList.get(i).get("name") + "");
         return view;
     }
 
@@ -80,5 +81,15 @@ public class CameraSearchAdapter extends BaseAdapter
         {
             ButterKnife.bind(this,view);
         }
+    }
+
+    public List<Map<String, Object>> getCameraList()
+    {
+        return cameraList;
+    }
+
+    public void setCameraList(List<Map<String, Object>> cameraList)
+    {
+        this.cameraList = cameraList;
     }
 }

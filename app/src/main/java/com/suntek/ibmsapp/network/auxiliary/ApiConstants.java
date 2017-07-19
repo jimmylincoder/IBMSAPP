@@ -9,5 +9,5 @@ public class ApiConstants
 {
     public static final String COMMON_UA_STR = "IBMSApp Android Client/2.1 ";
     public static final String MOVIE_BASE_URL = "https://api.douban.com/v2/movie/";
-    public static final String IBMS_BASE_URL = "http://192.168.1.100:8080/api/";
+    public static final String IBMS_BASE_URL = "http://192.168.1.101:8080/api/";
 }
