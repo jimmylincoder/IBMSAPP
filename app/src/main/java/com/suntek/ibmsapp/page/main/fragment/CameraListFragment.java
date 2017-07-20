@@ -83,6 +83,7 @@ public class CameraListFragment extends BaseFragment
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
+                intent.putExtra("cameraId",cameraList.get(position).get("id") + "");
                 startActivity(intent);
             }
         });
@@ -135,7 +136,7 @@ public class CameraListFragment extends BaseFragment
                     {
                         if(listHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
                         {
-                            List<Map<String,Object>> cameraList = (List) listHttpResponse.getData().get("camera_list");
+                            cameraList = (List) listHttpResponse.getData().get("camera_list");
                             cameraList.addAll(cameraList);
                             cameraListAdapter.setCameraList(cameraList);
                             cameraListAdapter.notifyDataSetChanged();

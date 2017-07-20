@@ -17,7 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.component.HttpRequest;
+import com.suntek.ibmsapp.component.HttpResponse;
+import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
@@ -33,6 +37,9 @@ import java.util.Date;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
@@ -85,7 +92,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         initVideoView();
         initTimeView();
-
+        loadData();
         taTime.setOnValueChangeListener(new TimeAxis.OnValueChangeListener()
         {
             @Override
@@ -106,6 +113,38 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
             }
         });
+    }
+
+    @Override
+    public void loadData()
+    {
+        String cameraId =  getIntent().getStringExtra("cameraId");
+        HttpRequest request = null;
+        try
+        {
+            if(cameraId != null)
+            {
+                request = new RequestBody()
+                        .putParams("camera_id",cameraId,false,"")
+                        .build();
+                RetrofitHelper.getCameraApi()
+                        .addHistory(request)
+                        .compose(bindToLifecycle())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<HttpResponse>()
+                        {
+                            @Override
+                            public void call(HttpResponse httpResponse)
+                            {
+
+                            }
+                        });
+            }
+        }catch (Exception e)
+        {
+            ToastHelper.getInstance(this).shortShowMessage(e.getMessage());
+        }
     }
 
     /**

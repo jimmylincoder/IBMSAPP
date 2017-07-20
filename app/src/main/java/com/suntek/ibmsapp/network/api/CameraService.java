@@ -25,4 +25,12 @@ public interface CameraService
     @Headers({"Content-Type: application/json","Accept: application/json"})
     @POST("camera/list_by_keyword")
     Observable<HttpResponse> listByKeyWord(@Body HttpRequest request);
+
+    @Headers({"Content-Type: application/json","Accept: application/json"})
+    @POST("camera/add_history")
+    Observable<HttpResponse> addHistory(@Body HttpRequest request);
+
+    @Headers({"Content-Type: application/json","Accept: application/json"})
+    @POST("camera/history_list")
+    Observable<HttpResponse> history(@Body HttpRequest request);
 }
