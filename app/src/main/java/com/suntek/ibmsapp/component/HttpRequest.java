@@ -9,6 +9,8 @@ import java.util.Map;
  */
 public class HttpRequest
 {
+    private String serviceName;
+
     private String os;
 
     private Map<String,Object> params;
@@ -31,5 +33,15 @@ public class HttpRequest
     public void setParams(Map<String, Object> params)
     {
         this.params = params;
+    }
+
+    public String getServiceName()
+    {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName)
+    {
+        this.serviceName = serviceName;
     }
 }

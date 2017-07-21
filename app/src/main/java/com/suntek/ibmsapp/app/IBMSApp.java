@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.app;
 import android.app.Application;
 
 import com.squareup.leakcanary.LeakCanary;
+import com.suntek.ibmsapp.component.base.BaseApplication;
 
 /**
  *
@@ -10,7 +11,7 @@ import com.squareup.leakcanary.LeakCanary;
  *
  *  @author jimmy
  */
-public class IBMSApp extends Application
+public class IBMSApp extends BaseApplication
 {
     public static IBMSApp mInstance;
 

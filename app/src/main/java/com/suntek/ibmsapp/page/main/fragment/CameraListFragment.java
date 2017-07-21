@@ -83,7 +83,9 @@ public class CameraListFragment extends BaseFragment
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
-                intent.putExtra("cameraId",cameraList.get(position).get("id") + "");
+                Map<String,Object> camera = cameraList.get(position - 1);
+                intent.putExtra("cameraId",camera.get("id") + "");
+                intent.putExtra("cameraName",camera.get("name") + "");
                 startActivity(intent);
             }
         });

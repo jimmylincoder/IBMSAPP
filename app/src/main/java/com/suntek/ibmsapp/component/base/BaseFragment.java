@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.trello.rxlifecycle.components.RxFragment;
 
 import butterknife.ButterKnife;
@@ -24,6 +25,7 @@ public abstract class BaseFragment extends RxFragment
     {
         View view = inflater.inflate(getLayoutId(),container,false);
         bind = ButterKnife.bind(this,view);
+        ComponentEngine.bind(this);
         initViews(savedInstanceState);
         return view;
     }

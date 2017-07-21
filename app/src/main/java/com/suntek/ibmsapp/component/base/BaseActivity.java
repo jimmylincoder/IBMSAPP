@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Window;
 
+import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import butterknife.ButterKnife;
@@ -28,6 +29,8 @@ public abstract class BaseActivity extends RxAppCompatActivity
         setContentView(getLayoutId());
         //初始化黄油刀控件绑定框架
         bind = ButterKnife.bind(this);
+        //组件绑定
+        ComponentEngine.bind(this);
         //初始化控件
         initViews(savedInstanceState);
         //初始化ToolBar

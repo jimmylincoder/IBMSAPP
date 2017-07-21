@@ -75,6 +75,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     TextView tvNowTime;
     @BindView(R.id.ta_time)
     TimeAxis taTime;
+    @BindView(R.id.tv_camera_name)
+    TextView tvCameraName;
     private Handler timeHandler;
 
     private boolean mBackPressed;
@@ -119,6 +121,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     public void loadData()
     {
         String cameraId =  getIntent().getStringExtra("cameraId");
+        String cameraName = getIntent().getStringExtra("cameraName");
+        if(cameraName != null)
+            tvCameraName.setText(cameraName);
+
         HttpRequest request = null;
         try
         {

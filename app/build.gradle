@@ -87,4 +87,9 @@ dependencies {
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 
     compile 'com.ashokvarma.android:bottom-navigation-bar:1.2.0'
+
+    compile 'com.alibaba:fastjson:1.1.45.android'
+    compile 'org.bouncycastle:bcprov-jdk16:1.46'
+    compile 'commons-io:commons-io:2.4'
+
 }

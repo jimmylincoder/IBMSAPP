@@ -70,6 +70,9 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
+        Map<String,Object> camera = cameraList.get(i - 1);
+        intent.putExtra("cameraId",camera.get("id") + "");
+        intent.putExtra("cameraName",camera.get("name") + "");
         startActivity(intent);
     }
 
