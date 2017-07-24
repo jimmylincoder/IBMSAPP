@@ -20,7 +20,7 @@ public class IBMSApp extends BaseApplication
     {
         super.onCreate();
         mInstance = this;
-        init();
+     //   init();
     }
 
     private void init() {

@@ -132,9 +132,10 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         Intent intent = new Intent(CameraSearchActivity.this,CameraPlayActivity.class);
-        Map<String,Object> camera = cameraList.get(i - 1);
+        Map<String,Object> camera = cameraList.get(i);
         intent.putExtra("cameraId",camera.get("id") + "");
-        intent.putExtra("cameraName",camera.get("name") + "");        startActivity(intent);
+        intent.putExtra("cameraName",camera.get("name") + "");
+        startActivity(intent);
         finish();
     }
 }

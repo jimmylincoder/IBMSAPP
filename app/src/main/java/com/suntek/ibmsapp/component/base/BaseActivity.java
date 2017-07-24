@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.component.base;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Window;
@@ -21,10 +22,13 @@ public abstract class BaseActivity extends RxAppCompatActivity
 {
     private Unbinder bind;
 
+    public static Context context;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        context = this;
         //设置布局内容
         setContentView(getLayoutId());
         //初始化黄油刀控件绑定框架

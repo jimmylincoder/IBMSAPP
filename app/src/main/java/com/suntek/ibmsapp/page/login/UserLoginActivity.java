@@ -10,9 +10,11 @@ import com.suntek.ibmsapp.component.HttpRequest;
 import com.suntek.ibmsapp.component.HttpResponse;
 import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.User;
 import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.page.main.MainActivity;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
@@ -38,6 +40,9 @@ public class UserLoginActivity extends BaseActivity
     @BindView(R.id.et_password)
     EditText etPassword;
 
+    @Autowired
+    SaveDataWithSharedHelper sharedHelper;
+
     @Override
     public int getLayoutId()
     {
@@ -49,6 +54,7 @@ public class UserLoginActivity extends BaseActivity
     {
         etAccount.setText("admin");
         etPassword.setText("suntek");
+        initArea();
     }
 
     @Override
@@ -107,5 +113,15 @@ public class UserLoginActivity extends BaseActivity
                         ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("请检查网络设置是否连通");
                     }
                 });
+    }
+
+    private void initArea()
+    {
+        String chooseArea = sharedHelper.getString("choose_area");
+        if(chooseArea == null || "".equals(chooseArea))
+        {
+            sharedHelper.save("choose_area","1");
+            sharedHelper.save("choose_name","华侨城中心小区");
+        }
     }
 }

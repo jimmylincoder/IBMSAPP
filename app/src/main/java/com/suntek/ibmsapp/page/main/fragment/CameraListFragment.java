@@ -7,6 +7,7 @@ import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
@@ -16,12 +17,14 @@ import com.suntek.ibmsapp.component.HttpRequest;
 import com.suntek.ibmsapp.component.HttpResponse;
 import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseFragment;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
 import com.suntek.ibmsapp.page.camera.CameraListActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
@@ -51,6 +54,13 @@ public class CameraListFragment extends BaseFragment
     @BindView(R.id.ptr_camera_list)
     PullToRefreshListView ptrCameraList;
 
+    @BindView(R.id.tv_area)
+    TextView tvArea;
+
+    @Autowired
+    SaveDataWithSharedHelper sharedHelper;
+
+    private String areaId;
 
     @Override
     public int getLayoutId()
@@ -61,6 +71,7 @@ public class CameraListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        ptrCameraList.setMode(PullToRefreshBase.Mode.BOTH);
         ptrCameraList.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>()
         {
             @Override
@@ -95,8 +106,6 @@ public class CameraListFragment extends BaseFragment
         cameraListAdapter = new CameraListAdapter(getActivity(),cameraList);
         actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
-
-        getCameraList();
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -120,6 +129,7 @@ public class CameraListFragment extends BaseFragment
         {
             request = new RequestBody()
                     .putParams("page","1",false,"")
+                    .putParams("area_id",areaId,false,"")
                     .build();
         }catch (Exception e)
         {
@@ -157,5 +167,14 @@ public class CameraListFragment extends BaseFragment
                         ptrCameraList.onRefreshComplete();
                     }
                 });
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        tvArea.setText(sharedHelper.getString("choose_name"));
+        areaId = sharedHelper.getString("choose_org_code");
+        getCameraList();
     }
 }
