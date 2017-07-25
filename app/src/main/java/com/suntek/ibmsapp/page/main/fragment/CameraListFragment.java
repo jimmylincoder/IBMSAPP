@@ -71,7 +71,7 @@ public class CameraListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-        ptrCameraList.setMode(PullToRefreshBase.Mode.BOTH);
+        ptrCameraList.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
         ptrCameraList.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>()
         {
             @Override

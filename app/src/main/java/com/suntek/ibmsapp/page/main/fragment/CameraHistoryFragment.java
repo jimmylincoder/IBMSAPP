@@ -55,11 +55,6 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     public void initViews(Bundle savedInstanceState)
     {
         cameraList = new ArrayList<>();
-        for(int i = 0;i < 10;i++)
-        {
-            Map<String,Object> map = new HashMap<>();
-            cameraList.add(map);
-        }
         cameraSearchAdapter = new CameraSearchAdapter(getActivity(),cameraList);
         ptrHistory.setAdapter(cameraSearchAdapter);
         ptrHistory.setOnItemClickListener(this);
