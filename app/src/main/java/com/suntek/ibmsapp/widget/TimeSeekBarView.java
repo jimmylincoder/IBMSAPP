@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -24,15 +25,15 @@ import java.util.Date;
 
 /**
  * SeekBar
- *
+ * <p>
  * 执行流程
- *
+ * <p>
  * 1.首先实例化对象调用构造函数，初始化需要的实例
- *
+ * <p>
  * 2.onMeasure()测量控件大小(本类无)---->onLayout()重新放置控制-->onDraw()进行控件界面绘制
- *
+ * <p>
  * 3.onDraw()中执行步骤
- *
+ * <p>
  * a.绘制视频已有录像背景
  * b.绘制刻度
  * c.绘制seekbar的中间线
@@ -44,11 +45,11 @@ public class TimeSeekBarView extends View
     // 一小格的长度，单位dp
     private static final float INTERVAL_LENGTH = 0.08f;
     // 30分钟一大格
-    private static final int BIG_TIME_INTERVAL = 1800;
+    private static final int BIG_TIME_INTERVAL = 3600;
     // 1秒钟一小格 ,小刻度线不画
     private static final int SMALL_TIME_INTERVAL = 1;
     // 大刻度线高度
-    private static final int TICK_MARK_HEIGHT = 50;
+    private static final int TICK_MARK_HEIGHT = 60;
     // 文字大小
     private static final int TEXT_SIZE = 12;
     // 屏幕密度 dp*screenDensity=px
@@ -88,11 +89,11 @@ public class TimeSeekBarView extends View
      */
     public interface OnValueChangeListener
     {
-         void onValueChange(TimeAlgorithm _value);
+        void onValueChange(TimeAlgorithm _value);
 
-         void onStartValueChange(TimeAlgorithm _value);
+        void onStartValueChange(TimeAlgorithm _value);
 
-         void onStopValueChange(TimeAlgorithm _value);
+        void onStopValueChange(TimeAlgorithm _value);
     }
 
     public TimeSeekBarView(Context context, AttributeSet attrs)
@@ -129,7 +130,7 @@ public class TimeSeekBarView extends View
         isEnabled = true;
 
         //设置背景色
-        setBackgroundColor(Color.parseColor("#88424242"));
+        setBackgroundColor(Color.parseColor("#302922"));
     }
 
     public void setVg(ViewPager _vg)
@@ -331,14 +332,14 @@ public class TimeSeekBarView extends View
         canvas.save();
         //绘制刻度画笔
         Paint linePaint = new Paint();
-        linePaint.setStrokeWidth(2);
+        linePaint.setStrokeWidth(4);
         //红色
-        linePaint.setColor(Color.rgb(255, 0, 0));
+        linePaint.setColor(Color.rgb(62, 54, 47));
 
         //绘制时间画笔
         TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         //黄色
-        textPaint.setColor(Color.rgb(255, 255, 0));
+        textPaint.setColor(Color.rgb(150, 150, 150));
         textPaint.setTextSize(TEXT_SIZE * screenDensity * 0.7f);
 
         //x位置，字体宽度
@@ -360,42 +361,47 @@ public class TimeSeekBarView extends View
         //设置字体大小
         textPaint.setTextSize(TEXT_SIZE * screenDensity);
         //设置字体黄色
-        textPaint.setColor(Color.rgb(255, 0, 0));
+        textPaint.setColor(Color.rgb(150, 150, 150));
         //画的次数
         float drawCount = 0;
         for (int i = 0; drawCount < viewWidth; i++)
         {
+            //画左侧的刻度线
             //(view宽度 / 2 - 移动距离) +        * (每一秒宽度dp * 密度)px
-            xPosition = (viewWidth / 2 - moveDistance) + ((1800 - mod) + 1800 * i)
+            xPosition = (viewWidth / 2 - moveDistance) + ((BIG_TIME_INTERVAL - mod) + BIG_TIME_INTERVAL * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition + getPaddingRight() < viewWidth)
             {
                 //画刻度线
-                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
+                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity
+                        * TICK_MARK_HEIGHT) / 2, xPosition, screenDensity
                         * TICK_MARK_HEIGHT, linePaint);
 
                 //画时间值
-                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
-                                SMALL_TIME_INTERVAL * i * 1800 + 1800 - mod)
-                                .getData()), xPosition - (textWidth * numSize)
-                                / 2, getHeight() - textWidth, textPaint);
+                TimeAlgorithm timeMark = nowTimeValue.addOrSub(
+                        SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
+                 canvas.drawText(String.valueOf(timeMark.getData()), xPosition - (textWidth * numSize)
+                            / 2, getHeight() - textWidth, textPaint);
+
             }
 
 
-            xPosition = (viewWidth / 2 - moveDistance) - (mod + 1800 * i)
+            //画右侧的刻度线
+            xPosition = (viewWidth / 2 - moveDistance) - (mod + BIG_TIME_INTERVAL * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition > getPaddingLeft())
             {
-                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
+                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity
+                        * TICK_MARK_HEIGHT) / 2, xPosition, screenDensity
                         * TICK_MARK_HEIGHT, linePaint);
 
-                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
-                        -SMALL_TIME_INTERVAL * 1800 * i - mod).getData()),
-                        xPosition - (textWidth * numSize) / 2, getHeight()
-                                - textWidth, textPaint);
-
+                TimeAlgorithm timeMark = nowTimeValue.addOrSub(
+                        SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
+                    canvas.drawText(String.valueOf(timeMark.getData()),
+                            xPosition - (textWidth * numSize) / 2, getHeight()
+                                    - textWidth, textPaint);
             }
-            drawCount += 2 * INTERVAL_LENGTH * screenDensity * 1800;
+            drawCount += 2 * INTERVAL_LENGTH * screenDensity * BIG_TIME_INTERVAL;
         }
         canvas.restore();
     }
@@ -409,15 +415,9 @@ public class TimeSeekBarView extends View
     {
         canvas.save();
         Paint redPaint = new Paint();
-        redPaint.setStrokeWidth(2);
-        redPaint.setColor(Color.rgb(255, 255, 0));
+        redPaint.setStrokeWidth(4);
+        redPaint.setColor(Color.rgb(255, 255, 255));
         canvas.drawLine(viewWidth / 2, 0, viewWidth / 2, viewHeight, redPaint);
-        Paint ovalPaint = new Paint();
-        ovalPaint.setColor(Color.rgb(255, 255, 0));
-        ovalPaint.setStrokeWidth(24);
-        canvas.drawLine(viewWidth / 2, 0, viewWidth / 2, 10, ovalPaint);
-        canvas.drawLine(viewWidth / 2, viewHeight - 10, viewWidth / 2, viewHeight,
-                ovalPaint);
         canvas.restore();
     }
 
@@ -437,7 +437,7 @@ public class TimeSeekBarView extends View
         {
             //点击动作,必定触发
             case MotionEvent.ACTION_DOWN:
-              //  vg.requestDisallowInterceptTouchEvent(true);
+                //  vg.requestDisallowInterceptTouchEvent(true);
                 //通知监听器当前值
                 listener.onStartValueChange(nowTimeValue);
                 scroller.forceFinished(true);
@@ -449,7 +449,7 @@ public class TimeSeekBarView extends View
 
             //移动动作
             case MotionEvent.ACTION_MOVE:
-               // vg.requestDisallowInterceptTouchEvent(true);
+                // vg.requestDisallowInterceptTouchEvent(true);
                 //算出移动距离
                 moveDistance += (beginPointX - xPosition);
                 //更新界面变化和值变化通知
@@ -460,9 +460,9 @@ public class TimeSeekBarView extends View
             case MotionEvent.ACTION_UP:
 
 
-            //动作取消
+                //动作取消
             case MotionEvent.ACTION_CANCEL:
-              //  vg.requestDisallowInterceptTouchEvent(false);
+                //  vg.requestDisallowInterceptTouchEvent(false);
                 countVelocityTracker(event);
                 countMoveEnd();
                 break;
