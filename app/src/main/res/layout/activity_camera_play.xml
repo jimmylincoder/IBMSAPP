@@ -191,7 +191,7 @@
         android:layout_height="80dp"
         android:visibility="gone">
 
-        <com.suntek.ibmsapp.widget.TimeAxis
+        <com.suntek.ibmsapp.widget.TimeSeekBarView
             android:id="@+id/ta_time"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

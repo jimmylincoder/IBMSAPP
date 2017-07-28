@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -26,7 +27,7 @@ import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.TimeAlgorithm;
-import com.suntek.ibmsapp.widget.TimeAxis;
+import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
 import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
@@ -74,7 +75,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @BindView(R.id.tv_nowtime)
     TextView tvNowTime;
     @BindView(R.id.ta_time)
-    TimeAxis taTime;
+    TimeSeekBarView taTime;
     @BindView(R.id.tv_camera_name)
     TextView tvCameraName;
     private Handler timeHandler;
@@ -95,7 +96,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         initVideoView();
         initTimeView();
         loadData();
-        taTime.setOnValueChangeListener(new TimeAxis.OnValueChangeListener()
+        taTime.setOnValueChangeListener(new TimeSeekBarView.OnValueChangeListener()
         {
             @Override
             public void onValueChange(TimeAlgorithm _value)
@@ -112,7 +113,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             @Override
             public void onStopValueChange(TimeAlgorithm _value)
             {
-
+                Log.e("Time",_value.getData());
             }
         });
     }

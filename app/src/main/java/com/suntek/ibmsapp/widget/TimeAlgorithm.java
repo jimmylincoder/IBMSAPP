@@ -6,17 +6,28 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * 时间算法对象
+ *
+ * @author jimmy
+ *
+ */
 public class TimeAlgorithm
 {
+    //当前时间字符串(不包含日期)
     private String mTime;
 
     public TimeAlgorithm(String _mTime)
     {
-        // TODO Auto-generated constructor stub
         mTime = _mTime;
     }
 
-    // 加上或减去_sec秒
+    /**
+     * 加上或减去秒数
+     *
+     * @param _sec
+     * @return
+     */
     public TimeAlgorithm addOrSub(int _sec)
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -37,6 +48,12 @@ public class TimeAlgorithm
 
     }
 
+    /**
+     * 当前时间值取余数
+     *
+     * @param _timeInterval 秒数
+     * @return
+     */
     public int mod(int _timeInterval)
     {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -46,7 +63,9 @@ public class TimeAlgorithm
             date = sdf.parse("2015-07-07 " + mTime);
             Calendar calendarObj = Calendar.getInstance(Locale.CHINA);
             calendarObj.setTime(date);
+            //获取分钟数
             int m = calendarObj.get(Calendar.MINUTE);
+            //获取秒数
             int s = calendarObj.get(Calendar.SECOND);
             return (60 * m + s) % _timeInterval;
         } catch (ParseException e)
