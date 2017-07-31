@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -25,15 +24,15 @@ import java.util.Date;
 
 /**
  * SeekBar
- * <p>
+ *
  * 执行流程
- * <p>
+ *
  * 1.首先实例化对象调用构造函数，初始化需要的实例
- * <p>
+ *
  * 2.onMeasure()测量控件大小(本类无)---->onLayout()重新放置控制-->onDraw()进行控件界面绘制
- * <p>
+ *
  * 3.onDraw()中执行步骤
- * <p>
+ *
  * a.绘制视频已有录像背景
  * b.绘制刻度
  * c.绘制seekbar的中间线
@@ -45,7 +44,7 @@ public class TimeSeekBarView extends View
     // 一小格的长度，单位dp
     private static final float INTERVAL_LENGTH = 0.08f;
     // 30分钟一大格
-    private static final int BIG_TIME_INTERVAL = 3600;
+    private static final int BIG_TIME_INTERVAL = 1800;
     // 1秒钟一小格 ,小刻度线不画
     private static final int SMALL_TIME_INTERVAL = 1;
     // 大刻度线高度
@@ -366,42 +365,37 @@ public class TimeSeekBarView extends View
         float drawCount = 0;
         for (int i = 0; drawCount < viewWidth; i++)
         {
-            //画左侧的刻度线
             //(view宽度 / 2 - 移动距离) +        * (每一秒宽度dp * 密度)px
-            xPosition = (viewWidth / 2 - moveDistance) + ((BIG_TIME_INTERVAL - mod) + BIG_TIME_INTERVAL * i)
+            xPosition = (viewWidth / 2 - moveDistance) + ((1800 - mod) + 1800 * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition + getPaddingRight() < viewWidth)
             {
                 //画刻度线
-                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity
-                        * TICK_MARK_HEIGHT) / 2, xPosition, screenDensity
+                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
                         * TICK_MARK_HEIGHT, linePaint);
 
                 //画时间值
-                TimeAlgorithm timeMark = nowTimeValue.addOrSub(
-                        SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
-                 canvas.drawText(String.valueOf(timeMark.getData()), xPosition - (textWidth * numSize)
-                            / 2, getHeight() - textWidth, textPaint);
-
+                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
+                        SMALL_TIME_INTERVAL * i * 1800 + 1800 - mod)
+                        .getData()), xPosition - (textWidth * numSize)
+                        / 2, getHeight() - textWidth, textPaint);
             }
 
 
-            //画右侧的刻度线
-            xPosition = (viewWidth / 2 - moveDistance) - (mod + BIG_TIME_INTERVAL * i)
+            xPosition = (viewWidth / 2 - moveDistance) - (mod + 1800 * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition > getPaddingLeft())
             {
-                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity
-                        * TICK_MARK_HEIGHT) / 2, xPosition, screenDensity
+                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
                         * TICK_MARK_HEIGHT, linePaint);
 
-                TimeAlgorithm timeMark = nowTimeValue.addOrSub(
-                        SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
-                    canvas.drawText(String.valueOf(timeMark.getData()),
-                            xPosition - (textWidth * numSize) / 2, getHeight()
-                                    - textWidth, textPaint);
+                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
+                        -SMALL_TIME_INTERVAL * 1800 * i - mod).getData()),
+                        xPosition - (textWidth * numSize) / 2, getHeight()
+                                - textWidth, textPaint);
+
             }
-            drawCount += 2 * INTERVAL_LENGTH * screenDensity * BIG_TIME_INTERVAL;
+            drawCount += 2 * INTERVAL_LENGTH * screenDensity * 1800;
         }
         canvas.restore();
     }
