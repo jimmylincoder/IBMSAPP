@@ -33,7 +33,7 @@ public class TimeAlgorithm
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try
         {
-            Date date = sdf.parse("2015-07-07 " + mTime);
+            Date date = sdf.parse("2017-07-30 " + mTime);
             Calendar calendarObj = Calendar.getInstance();
             calendarObj.setTime(date);
             calendarObj.add(Calendar.SECOND, _sec);

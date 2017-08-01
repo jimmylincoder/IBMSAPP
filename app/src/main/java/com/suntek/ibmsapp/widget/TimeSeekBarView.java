@@ -21,18 +21,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * SeekBar
- *
+ * <p>
  * 执行流程
- *
+ * <p>
  * 1.首先实例化对象调用构造函数，初始化需要的实例
- *
+ * <p>
  * 2.onMeasure()测量控件大小(本类无)---->onLayout()重新放置控制-->onDraw()进行控件界面绘制
- *
+ * <p>
  * 3.onDraw()中执行步骤
- *
+ * <p>
  * a.绘制视频已有录像背景
  * b.绘制刻度
  * c.绘制seekbar的中间线
@@ -44,7 +46,7 @@ public class TimeSeekBarView extends View
     // 一小格的长度，单位dp
     private static final float INTERVAL_LENGTH = 0.08f;
     // 30分钟一大格
-    private static final int BIG_TIME_INTERVAL = 1800;
+    private static final int BIG_TIME_INTERVAL = 360;
     // 1秒钟一小格 ,小刻度线不画
     private static final int SMALL_TIME_INTERVAL = 1;
     // 大刻度线高度
@@ -82,6 +84,8 @@ public class TimeSeekBarView extends View
     private boolean isEnabled;
     private ViewPager vg;
 
+    //录像时间段
+    private List<Map<String, Object>> recordList;
 
     /**
      * 滑动时时间变化监听器
@@ -158,61 +162,63 @@ public class TimeSeekBarView extends View
         postInvalidate();
     }
 
+    /**
+     * 绘制录像时间段
+     *
+     * @param canvas
+     */
     public void drawVideo(Canvas canvas)
     {
         Paint linePaint = new Paint();
         linePaint.setStrokeWidth(1);
-        Cursor cursor;
         RectF r;
         if (startTime < endTime)
         {
-            cursor = db.rawQuery("select * from VideoList where minValue < "
-                    + endTime + " and maxValue > " + startTime, null);
-            while (cursor.moveToNext())
+            for (Map<String, Object> record : recordList)
             {
-                linePaint.setColor(Color.parseColor("#66FF4040"));
-                r = new RectF((cursor.getLong(1) - startTime) * INTERVAL_LENGTH
-                        * screenDensity, 0, (cursor.getLong(2) - startTime)
+                long recordBeginTime = (long) record.get("beginTime");
+                long recordEndTime = (long) record.get("endTime");
+                linePaint.setColor(Color.parseColor("#673320"));
+                r = new RectF((recordBeginTime - startTime) * INTERVAL_LENGTH
+                        * screenDensity, 0, (recordEndTime - startTime)
                         * INTERVAL_LENGTH * screenDensity, this.getHeight());
                 canvas.drawRoundRect(r, 0, 0, linePaint);
                 linePaint.setColor(Color.parseColor("#88424242"));
-                canvas.drawLine((cursor.getLong(1) - startTime) * INTERVAL_LENGTH
-                        * screenDensity, 0, (cursor.getLong(1) - startTime)
+                canvas.drawLine((recordBeginTime - startTime) * INTERVAL_LENGTH
+                        * screenDensity, 0, (recordBeginTime - startTime)
                         * INTERVAL_LENGTH * screenDensity, getHeight(), linePaint);
+
             }
         }
         else
         {
-            cursor = db.rawQuery(
-                    "select * from VideoList where (minValue < "
-                            + maxValue.getSec(nowDate) + " and maxValue > " + startTime
-                            + ")" + " or (minValue <" + endTime + " and maxValue>"
-                            + minValue.getSec(nowDate) + ")", null);
-            while (cursor.moveToNext())
+            for (Map<String, Object> record : recordList)
             {
-                if (cursor.getLong(2) >= startTime)
+                long recordBeginTime = (long) record.get("beginTime");
+                long recordEndTime = (long) record.get("endTime");
+                if (recordEndTime >= startTime)
                 {
-                    linePaint.setColor(Color.parseColor("#66FF4040"));
-                    r = new RectF((cursor.getLong(1) - startTime) * INTERVAL_LENGTH
-                            * screenDensity, 0, (cursor.getLong(2) - startTime)
+                    linePaint.setColor(Color.parseColor("#673320"));
+                    r = new RectF((recordBeginTime - startTime) * INTERVAL_LENGTH
+                            * screenDensity, 0, (recordEndTime - startTime)
                             * INTERVAL_LENGTH * screenDensity, this.getHeight());
                     canvas.drawRoundRect(r, 0, 0, linePaint);
                     linePaint.setColor(Color.parseColor("#88424242"));
-                    canvas.drawLine((cursor.getLong(1) - startTime) * INTERVAL_LENGTH
-                                    * screenDensity, 0, (cursor.getLong(1) - startTime)
+                    canvas.drawLine((recordBeginTime - startTime) * INTERVAL_LENGTH
+                                    * screenDensity, 0, (recordBeginTime - startTime)
                                     * INTERVAL_LENGTH * screenDensity, getHeight(),
                             linePaint);
                 }
                 else
                 {
-                    linePaint.setColor(Color.parseColor("#66FF4040"));
-                    Long value = cursor.getLong(1) - minValue.getSec(nowDate);
+                    linePaint.setColor(Color.parseColor("#673320"));
+                    Long value = recordBeginTime - minValue.getSec(nowDate);
                     value = value > 0 ? value : 0;
                     r = new RectF(
                             (maxValue.getSec(nowDate) - startTime + value)
                                     * INTERVAL_LENGTH * screenDensity,
                             0,
-                            ((maxValue.getSec(nowDate) - startTime) + cursor.getLong(2) - minValue
+                            ((maxValue.getSec(nowDate) - startTime) + recordEndTime - minValue
                                     .getSec(nowDate))
                                     * INTERVAL_LENGTH
                                     * screenDensity, getHeight());
@@ -226,8 +232,6 @@ public class TimeSeekBarView extends View
                 }
             }
         }
-        cursor.close();
-        cursor = null;
     }
 
     public void setOnValueChangeListener(OnValueChangeListener listener)
@@ -274,11 +278,17 @@ public class TimeSeekBarView extends View
 
     public void setValue(Long miliSec)
     {
+        //获取当前时间值
         Date nowTime = new Date(miliSec);
         SimpleDateFormat sdFormatter = new SimpleDateFormat("HH:mm:ss");
         nowTimeValue = new TimeAlgorithm(sdFormatter.format(nowTime));
+
+        //当前界面的时间长度
         int sec = Math.round(viewWidth / (2 * INTERVAL_LENGTH * screenDensity));
+
+        //界面开始的时间点
         startTime = nowTimeValue.addOrSub(-sec).getSec(nowDate);
+        //界面结束的时间点
         endTime = nowTimeValue.addOrSub(sec).getSec(nowDate);
         postInvalidate();
     }
@@ -308,7 +318,7 @@ public class TimeSeekBarView extends View
         super.onDraw(canvas);
         try
         {
-            if (db != null)
+            if (recordList != null)
             {
                 drawVideo(canvas);
             }
@@ -366,36 +376,60 @@ public class TimeSeekBarView extends View
         for (int i = 0; drawCount < viewWidth; i++)
         {
             //(view宽度 / 2 - 移动距离) +        * (每一秒宽度dp * 密度)px
-            xPosition = (viewWidth / 2 - moveDistance) + ((1800 - mod) + 1800 * i)
+            xPosition = (viewWidth / 2 - moveDistance) + ((BIG_TIME_INTERVAL - mod) + BIG_TIME_INTERVAL * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition + getPaddingRight() < viewWidth)
             {
-                //画刻度线
-                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
-                        * TICK_MARK_HEIGHT, linePaint);
-
+                TimeAlgorithm timeAlgorithm = nowTimeValue.addOrSub(
+                        SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
+                int lineHeight = 0;
                 //画时间值
-                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
-                        SMALL_TIME_INTERVAL * i * 1800 + 1800 - mod)
-                        .getData()), xPosition - (textWidth * numSize)
-                        / 2, getHeight() - textWidth, textPaint);
+                if (timeAlgorithm.mod(1800) == 0)
+                {
+                    canvas.drawText(String.valueOf(timeAlgorithm.getData()), xPosition - (textWidth * numSize)
+                            / 2, getHeight() - textWidth, textPaint);
+                    lineHeight = TICK_MARK_HEIGHT;
+                }
+                else
+                {
+                    lineHeight = 50;
+                }
+
+
+                //画刻度线
+                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity * lineHeight) / 2, xPosition, screenDensity
+                        * lineHeight, linePaint);
             }
 
 
-            xPosition = (viewWidth / 2 - moveDistance) - (mod + 1800 * i)
+            xPosition = (viewWidth / 2 - moveDistance) - (mod + BIG_TIME_INTERVAL * i)
                     * INTERVAL_LENGTH * screenDensity;
             if (xPosition > getPaddingLeft())
             {
-                canvas.drawLine(xPosition, getPaddingTop(), xPosition, screenDensity
-                        * TICK_MARK_HEIGHT, linePaint);
 
-                canvas.drawText(String.valueOf(nowTimeValue.addOrSub(
-                        -SMALL_TIME_INTERVAL * 1800 * i - mod).getData()),
-                        xPosition - (textWidth * numSize) / 2, getHeight()
-                                - textWidth, textPaint);
+                TimeAlgorithm timeAlgorithm = nowTimeValue.addOrSub(
+                        -SMALL_TIME_INTERVAL * BIG_TIME_INTERVAL * i - mod);
+
+                int lineHeight = 0;
+                if (timeAlgorithm.mod(1800) == 0)
+                {
+                    canvas.drawText(String.valueOf(timeAlgorithm.getData()),
+                            xPosition - (textWidth * numSize) / 2, getHeight()
+                                    - textWidth, textPaint);
+                    lineHeight = TICK_MARK_HEIGHT;
+
+                }
+                else
+                {
+                    lineHeight = 50;
+
+                }
+
+                canvas.drawLine(xPosition, getPaddingTop() + (viewHeight - screenDensity * lineHeight) / 2, xPosition, screenDensity
+                        * lineHeight, linePaint);
 
             }
-            drawCount += 2 * INTERVAL_LENGTH * screenDensity * 1800;
+            drawCount += 2 * INTERVAL_LENGTH * screenDensity * BIG_TIME_INTERVAL;
         }
         canvas.restore();
     }
@@ -548,6 +582,13 @@ public class TimeSeekBarView extends View
                 beginPointX = xPosition;
             }
         }
+    }
+
+
+    public void setRecordList(List<Map<String, Object>> recordList)
+    {
+        this.recordList = recordList;
+        postInvalidate();
     }
 }
 

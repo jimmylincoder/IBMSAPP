@@ -33,8 +33,14 @@ import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
 import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
 
 import java.io.File;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -113,26 +119,51 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             @Override
             public void onStopValueChange(TimeAlgorithm _value)
             {
-                Log.e("Time",_value.getData());
+                Log.e("Time", _value.getData());
             }
         });
+        try
+        {
+            List<Map<String, Object>> recordList = new ArrayList<>();
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Calendar calendarObj = Calendar.getInstance();
+            taTime.setValue(format.parse("2017-08-01 07:00:00".toString()).getTime());
+            Map<String, Object> time1 = new HashMap<>();
+            calendarObj.setTime(format.parse("2017-08-01 07:00:00"));
+            time1.put("beginTime", calendarObj.getTimeInMillis() / 1000);
+            calendarObj.setTime(format.parse("2017-08-01 09:30:00"));
+            time1.put("endTime",calendarObj.getTimeInMillis() / 1000);
+
+            Map<String,Object> time2 = new HashMap<>();
+            calendarObj.setTime(format.parse("2017-08-01 00:00:00"));
+            time2.put("beginTime", calendarObj.getTimeInMillis() / 1000);
+            calendarObj.setTime(format.parse("2017-08-01 01:30:00"));
+            time2.put("endTime",calendarObj.getTimeInMillis() / 1000);
+
+            recordList.add(time1);
+            recordList.add(time2);
+            taTime.setRecordList(recordList);
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void loadData()
     {
-        String cameraId =  getIntent().getStringExtra("cameraId");
+        String cameraId = getIntent().getStringExtra("cameraId");
         String cameraName = getIntent().getStringExtra("cameraName");
-        if(cameraName != null)
+        if (cameraName != null)
             tvCameraName.setText(cameraName);
 
         HttpRequest request = null;
         try
         {
-            if(cameraId != null)
+            if (cameraId != null)
             {
                 request = new RequestBody()
-                        .putParams("camera_id",cameraId,false,"")
+                        .putParams("camera_id", cameraId, false, "")
                         .build();
                 RetrofitHelper.getCameraApi()
                         .addHistory(request)
@@ -148,7 +179,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                             }
                         });
             }
-        }catch (Exception e)
+        } catch (Exception e)
         {
             ToastHelper.getInstance(this).shortShowMessage(e.getMessage());
         }
@@ -164,7 +195,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             @Override
             public void handleMessage(Message msg)
             {
-                if(tvNowTime!=null)
+                if (tvNowTime != null)
                     tvNowTime.setText((String) msg.obj);
             }
         };
@@ -180,7 +211,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         ivvVideo.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        ivvVideo.setVideoPath("rtmp://live.hkstv.hk.lxdns.com/live/hks");
+        ivvVideo.setVideoPath("http://tanzi27niu.cdsb.mobi/wps/wp-content/uploads/2017/05/2017-05-17_17-33-30.mp4");
         ivvVideo.start();
 
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
@@ -188,11 +219,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             @Override
             public void onSingleTouchEvent(MotionEvent ev)
             {
-                if(llOper.getVisibility() == View.GONE)
+                if (llOper.getVisibility() == View.GONE)
                 {
                     llOper.setVisibility(View.VISIBLE);
                     llTime.setVisibility(View.GONE);
-                }else
+                }
+                else
                 {
                     llOper.setVisibility(View.GONE);
                     llTime.setVisibility(View.VISIBLE);
@@ -205,6 +237,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 ivvVideo.toggleAspectRatio();
             }
         });
+
 
     }
 
