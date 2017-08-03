@@ -19,10 +19,13 @@ import android.widget.Scroller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * SeekBar
@@ -92,11 +95,11 @@ public class TimeSeekBarView extends View
      */
     public interface OnValueChangeListener
     {
-        void onValueChange(TimeAlgorithm _value);
+        void onValueChange(Date date);
 
-        void onStartValueChange(TimeAlgorithm _value);
+        void onStartValueChange(Date date);
 
-        void onStopValueChange(TimeAlgorithm _value);
+        void onStopValueChange(Date date);
     }
 
     public TimeSeekBarView(Context context, AttributeSet attrs)
@@ -468,7 +471,7 @@ public class TimeSeekBarView extends View
             case MotionEvent.ACTION_DOWN:
                 //  vg.requestDisallowInterceptTouchEvent(true);
                 //通知监听器当前值
-                listener.onStartValueChange(nowTimeValue);
+                listener.onStartValueChange(getNowDate());
                 scroller.forceFinished(true);
                 //记录起点X坐标
                 beginPointX = xPosition;
@@ -512,7 +515,7 @@ public class TimeSeekBarView extends View
             scroller.fling(0, 0, (int) xVelocity, 0, Integer.MIN_VALUE,
                     Integer.MAX_VALUE, 0, 0);
         else if (isEnabled)
-            listener.onStopValueChange(nowTimeValue);
+            listener.onStopValueChange(getNowDate());
     }
 
     /**
@@ -540,7 +543,7 @@ public class TimeSeekBarView extends View
     {
         if (null != listener)
             if (scroller.isFinished())
-                listener.onValueChange(nowTimeValue);
+                listener.onValueChange(getNowDate());
     }
 
     /**
@@ -573,7 +576,7 @@ public class TimeSeekBarView extends View
             {
                 countMoveEnd();
                 if (isEnabled)
-                    listener.onStopValueChange(nowTimeValue);
+                    listener.onStopValueChange(getNowDate());
             }
             else
             {
@@ -586,11 +589,108 @@ public class TimeSeekBarView extends View
     }
 
 
+    /**
+     * 设置录像视频段
+     *
+     * @param recordList
+     */
     public void setRecordList(List<Map<String, Object>> recordList)
     {
         this.recordList = recordList;
         postInvalidate();
     }
+
+
+    /**
+     * 获取当前时间
+     *
+     * @return
+     */
+    private Date getNowDate()
+    {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date = null;
+        try
+        {
+            date = format.parse(nowDate + " " + nowTimeValue.getData());
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    /**
+     * 更新时间
+     */
+    public void updateTime(int sec)
+    {
+        long setTime = (nowTimeValue.getSec(nowDate) + sec) * 1000;
+        //如果不在录像时间则跳至下个录像时间段
+        if (!isInRecord(new Date(setTime)) && setTime < new Date().getTime() - 1 * 1000
+                && nowTimeValue.getSec(nowDate) != 0)
+        {
+            setTime = getLastRecordTime(new Date(setTime)).getTime();
+        }
+        setValue(setTime);
+        postInvalidate();
+    }
+
+    private boolean isInRecord(Date date)
+    {
+        boolean isContain = false;
+        for (Map<String, Object> map : recordList)
+        {
+            long beginTime = (long) map.get("beginTime");
+            long endTime = (long) map.get("endTime");
+            long nowTime = date.getTime() / 1000;
+            if (nowTime > beginTime && nowTime < endTime)
+            {
+                isContain = true;
+                break;
+            }
+        }
+        return isContain;
+    }
+
+    private Date getLastRecordTime(Date date)
+    {
+        List<Map<String, Object>> lastNowTime = new ArrayList<>();
+        long nowTime = date.getTime() / 1000;
+        long theLastedTime = 0;
+        long theLast = 0;
+        for (Map<String, Object> map : recordList)
+        {
+            long beginTime = (long) map.get("beginTime");
+            if (nowTime < beginTime)
+            {
+                lastNowTime.add(map);
+            }
+        }
+
+        for (Map<String, Object> map : lastNowTime)
+        {
+            long endTime = (long) map.get("endTime");
+            long beginTime = (long) map.get("beginTime");
+            if (theLast != 0)
+            {
+                long temp = beginTime - nowTime;
+                if (temp < theLast)
+                {
+                    theLast = temp;
+                    theLastedTime = beginTime;
+                }
+            }
+            else
+            {
+                theLast = beginTime - nowTime;
+                theLastedTime = beginTime;
+            }
+        }
+
+        return new Date(theLastedTime * 1000);
+    }
+
 }
 
 
