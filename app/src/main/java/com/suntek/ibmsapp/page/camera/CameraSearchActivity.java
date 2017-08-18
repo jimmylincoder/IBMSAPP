@@ -14,6 +14,7 @@ import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 
 import com.suntek.ibmsapp.task.camera.CameraSearchTask;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +83,10 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
 
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraSearchActivity.this).shortShowMessage(result.getError().getMessage());
                 }
             }
         }.execute();

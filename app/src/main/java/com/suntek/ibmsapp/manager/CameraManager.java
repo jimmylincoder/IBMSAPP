@@ -152,4 +152,21 @@ public class CameraManager extends BaseComponent
             throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR,response.getErrorMessage());
         }
     }
+
+    /**
+     * 停止播放视频
+     *
+     */
+    public void stopPlay()
+    {
+        Map<String,Object> params = new HashMap<>();
+        HttpResponse response = ibmsHttpEngine.request("camera.stop",params);
+        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+
+        }else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR,response.getErrorMessage());
+        }
+    }
 }

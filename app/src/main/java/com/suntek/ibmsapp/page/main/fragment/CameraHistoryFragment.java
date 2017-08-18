@@ -15,6 +15,7 @@ import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.task.camera.CameraHistoryListTask;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -87,6 +88,11 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
                     ptrHistory.onRefreshComplete();
+                }
+                else
+                {
+                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
+
                 }
             }
         }.execute();

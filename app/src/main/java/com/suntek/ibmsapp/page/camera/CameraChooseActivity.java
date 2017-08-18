@@ -14,6 +14,7 @@ import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Area;
 import com.suntek.ibmsapp.task.area.AreaListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +89,11 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                     {
                         finish();
                     }
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraChooseActivity.this).shortShowMessage(result.getError().getMessage());
+
                 }
             }
         }.execute();

@@ -20,6 +20,7 @@ import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.task.camera.CameraListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,8 +84,8 @@ public class CameraListFragment extends BaseFragment
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
-                intent.putExtra("cameraId",cameraList.get(position).getId());
-                intent.putExtra("cameraName",cameraList.get(position).getName());
+                intent.putExtra("cameraId",cameraList.get(position - 1).getId());
+                intent.putExtra("cameraName",cameraList.get(position -1 ).getName());
                 startActivity(intent);
             }
         });
@@ -124,6 +125,11 @@ public class CameraListFragment extends BaseFragment
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
                     ptrCameraList.onRefreshComplete();
+                }
+                else
+                {
+                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
+
                 }
             }
         }.execute();
