@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
@@ -66,6 +67,7 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tv_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="直播"
@@ -94,6 +96,29 @@
                 android:layout_height="match_parent">
 
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom">
+
+            <com.suntek.ibmsapp.widget.DateSelectView
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <com.suntek.ibmsapp.widget.HorizontalPicker
+                android:id="@+id/hp_date_picker"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:textSize="18sp"
+                app:itemMargin="5dp"
+                app:itemHeight="40dp"
+                app:itemWidth="40dp">
+
+            </com.suntek.ibmsapp.widget.HorizontalPicker>
         </LinearLayout>
 
     </FrameLayout>

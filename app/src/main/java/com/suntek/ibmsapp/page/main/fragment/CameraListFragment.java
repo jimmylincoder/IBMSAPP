@@ -27,6 +27,7 @@ import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +98,9 @@ public class CameraListFragment extends BaseFragment
                 Map<String,Object> camera = cameraList.get(position - 1);
                 intent.putExtra("cameraId",camera.get("id") + "");
                 intent.putExtra("cameraName",camera.get("name") + "");
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("camera", (Serializable) camera);
+                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });

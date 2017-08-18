@@ -4,6 +4,7 @@ import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.suntek.ibmsapp.app.IBMSApp;
 import com.suntek.ibmsapp.network.api.AreaService;
 import com.suntek.ibmsapp.network.api.CameraService;
+import com.suntek.ibmsapp.network.api.IbmsService;
 import com.suntek.ibmsapp.network.api.MovieService;
 import com.suntek.ibmsapp.network.api.UserService;
 import com.suntek.ibmsapp.network.auxiliary.ApiConstants;
@@ -56,6 +57,11 @@ public class RetrofitHelper
     public static AreaService getAreaPai()
     {
         return createApi(AreaService.class,ApiConstants.IBMS_BASE_URL);
+    }
+
+    public static IbmsService getIbmsApi(String url)
+    {
+        return createApi(IbmsService.class,url);
     }
     /**
      * 根据传入的baseUrl，和api创建retrofit

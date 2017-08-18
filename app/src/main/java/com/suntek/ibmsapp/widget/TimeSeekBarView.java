@@ -85,7 +85,6 @@ public class TimeSeekBarView extends View
     private String nowDate;
     //是否可滑动
     private boolean isEnabled;
-    private ViewPager vg;
 
     //录像时间段
     private List<Map<String, Object>> recordList;
@@ -137,11 +136,6 @@ public class TimeSeekBarView extends View
 
         //设置背景色
         setBackgroundColor(Color.parseColor("#302922"));
-    }
-
-    public void setVg(ViewPager _vg)
-    {
-        vg = _vg;
     }
 
     public void setEnabled(boolean arg)

@@ -18,7 +18,7 @@ public interface IbmsService
 {
     @Headers({"Content-Type: application/json","Accept: application/json"})
     @POST("{model}/{action}")
-    Observable<HttpResponse> api(@Path("model") String model,
-                                 @Path("action") String action,
-                                 @Body HttpRequest request);
+    HttpResponse api(@Path("model") String model,
+                     @Path("action") String action,
+                     @Body HttpRequest request);
 }
