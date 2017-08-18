@@ -1,5 +1,8 @@
 package com.suntek.ibmsapp.component;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.suntek.ibmsapp.component.http.BaseHttpResponse;
+
 import java.util.Map;
 
 /**
@@ -7,7 +10,7 @@ import java.util.Map;
  *
  * @author jimmy
  */
-public class HttpResponse
+public class HttpResponse extends BaseHttpResponse
 {
     // 成功状态
     public static final int STATUS_SUCCESS = 200;
@@ -15,10 +18,13 @@ public class HttpResponse
     // 失败状态
     public static final int STATUS_FAILURE = 1;
 
+    @JSONField(name = "code")
     private int code;
 
+    @JSONField(name = "message")
     private String errorMessage;
 
+    @JSONField(name = "data")
     private Map<String,Object> data;
 
 

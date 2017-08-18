@@ -7,25 +7,19 @@ import android.widget.EditText;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.HttpRequest;
-import com.suntek.ibmsapp.component.HttpResponse;
 import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.core.Autowired;
-import com.suntek.ibmsapp.model.User;
-import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.page.main.MainActivity;
+import com.suntek.ibmsapp.task.user.UserLoginTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * 用户登录界面
@@ -82,37 +76,21 @@ public class UserLoginActivity extends BaseActivity
         }
 
         LoadingDialog.getInstance(this).showLoading("登录中，请稍候...");
-        RetrofitHelper.getUserApi()
-                .login(request)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse>()
+        new UserLoginTask(this,account,password)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                if(result.getError() == null)
                 {
-                    @Override
-                    public void call(HttpResponse userHttpResponse)
-                    {
-                        LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
-                        if (userHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
-                        {
-                            Intent intent = new Intent(UserLoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                        else
-                        {
-                            ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage(userHttpResponse.getErrorMessage());
-                        }
-                    }
-                }, new Action1<Throwable>()
-                {
-                    @Override
-                    public void call(Throwable throwable)
-                    {
-                        LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
-                        ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("请检查网络设置是否连通");
-                    }
-                });
+                    LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
+                    ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("登录成功");
+                    Intent intent =  new Intent(UserLoginActivity.this,MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+            }
+        }.execute();
     }
 
     private void initArea()

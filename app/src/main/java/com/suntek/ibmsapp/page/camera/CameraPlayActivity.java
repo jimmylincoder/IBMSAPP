@@ -15,12 +15,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.component.HttpRequest;
-import com.suntek.ibmsapp.component.HttpResponse;
-import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
-import com.suntek.ibmsapp.network.RetrofitHelper;
+import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
+import com.suntek.ibmsapp.task.camera.CameraPlayTask;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
@@ -187,70 +186,44 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        HttpRequest request = null;
-        try
+        new CameraAddHistoryTask(this,cameraId)
         {
-            if (cameraId != null)
+            @Override
+            protected void onPostExecute(TaskResult result)
             {
-                request = new RequestBody()
-                        .putParams("camera_id", cameraId, false, "")
-                        .build();
-                RetrofitHelper.getCameraApi()
-                        .addHistory(request)
-                        .compose(bindToLifecycle())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<HttpResponse>()
-                        {
-                            @Override
-                            public void call(HttpResponse httpResponse)
-                            {
+                super.onPostExecute(result);
+                if(result.getError() == null)
+                {
 
-                            }
-                        });
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                }
             }
-        } catch (Exception e)
-        {
-            ToastHelper.getInstance(this).shortShowMessage(e.getMessage());
-        }
+        }.execute();
     }
 
     private void getCameraAddress()
     {
-        Bundle bundle = getIntent().getExtras();
-        Map<String,Object> camera = (Map<String, Object>) bundle.get("camera");
-        HttpRequest request = new RequestBody().build();
-        RetrofitHelper.getCameraApi()
-                .address(request)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse>()
+        new CameraPlayTask(this)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if(result.getError() == null)
                 {
-                    @Override
-                    public void call(HttpResponse response)
-                    {
-                        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
-                        {
-                            Map<String, Object> map = response.getData();
-                            String address = (String) map.get("address");
-                            ivvVideo.setVideoPath(address);
-                            ivvVideo.start();
-                        }
-                        else
-                        {
-                            LoadingDialog.getInstance(CameraPlayActivity.this).showRequestStatus(response.getErrorMessage(),false,2000);
-
-                        }
-                    }
-                }, new Action1<Throwable>()
+                    String address = (String) result.getResultData();
+                    ivvVideo.setVideoPath(address);
+                    ivvVideo.start();
+                }
+                else
                 {
-                    @Override
-                    public void call(Throwable throwable)
-                    {
-                        LoadingDialog.getInstance(CameraPlayActivity.this).showRequestStatus(throwable.getMessage(),false,2000);
-                    }
-                });
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
     }
 
     /**

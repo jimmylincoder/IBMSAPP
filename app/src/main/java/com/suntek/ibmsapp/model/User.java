@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 用户实体
@@ -43,5 +44,15 @@ public class User
     public void setPassword(String password)
     {
         this.password = password;
+    }
+
+    public static User generateByJson(Map<String,Object> content)
+    {
+        User user = new User();
+        user.setUserName((String) content.get("user_name"));
+        user.setPassword((String) content.get("password"));
+        user.setUserCode((String) content.get("user_code"));
+
+        return user;
     }
 }

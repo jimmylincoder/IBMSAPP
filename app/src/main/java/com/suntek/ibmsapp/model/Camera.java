@@ -1,5 +1,7 @@
 package com.suntek.ibmsapp.model;
 
+import java.util.Map;
+
 /**
  * 摄像机
  *
@@ -26,6 +28,8 @@ public class Camera
     private String userName;
 
     private String password;
+
+    private long playTime;
 
     public String getId()
     {
@@ -125,5 +129,33 @@ public class Camera
     public void setPassword(String password)
     {
         this.password = password;
+    }
+
+    public void setPlayTime(long playTime)
+    {
+        this.playTime = playTime;
+    }
+
+    public long getPlayTime()
+    {
+        return playTime;
+    }
+
+    public static Camera generateByJson(Map<String,Object> content)
+    {
+        Camera camera = new Camera();
+        camera.setId((String) content.get("id"));
+        camera.setName((String) content.get("name"));
+        camera.setType((String) content.get("type"));
+        camera.setPlace((String) content.get("place"));
+        camera.setChannel((String) content.get("channel"));
+        camera.setOrgCode((String) content.get("org_code"));
+        camera.setIp((String) content.get("ip"));
+        camera.setPort((String) content.get("port"));
+        camera.setUserName((String) content.get("user_name"));
+        camera.setPassword((String) content.get("password"));
+//        camera.setPlayTime((Integer) content.get("play_time"));
+
+        return camera;
     }
 }
