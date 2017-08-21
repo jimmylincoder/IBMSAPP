@@ -10,6 +10,7 @@ import android.widget.ListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
 
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 
@@ -79,7 +80,8 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
                 super.onPostExecute(result);
                 if (result.getError() == null)
                 {
-                    cameraList = (List) result.getResultData();
+                    Page<List<Camera>> cameraPage  = (Page<List<Camera>>) result.getResultData();
+                    cameraList = cameraPage.getData();
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
 

@@ -2,6 +2,7 @@ package com.suntek.ibmsapp.task.camera;
 
 import android.content.Context;
 
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.suntek.ibmsapp.component.http.FHttpException;
 import com.suntek.ibmsapp.manager.CameraManager;
@@ -37,7 +38,7 @@ public class CameraListTask extends BaseTask
     {
         try
         {
-            List<Camera> cameraList = cameraManager.getCameraList(areaId, page);
+            Page<List<Camera>> cameraList = cameraManager.getCameraList(areaId, page);
             return new TaskResult(cameraList, null);
         } catch (FHttpException e)
         {

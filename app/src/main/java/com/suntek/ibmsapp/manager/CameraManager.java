@@ -2,6 +2,7 @@ package com.suntek.ibmsapp.manager;
 
 import com.suntek.ibmsapp.component.HttpResponse;
 import com.suntek.ibmsapp.component.IbmsHttpEngine;
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.component.core.BaseComponent;
 import com.suntek.ibmsapp.component.http.FHttpException;
@@ -29,7 +30,7 @@ public class CameraManager extends BaseComponent
      * @param page
      * @return
      */
-    public List<Camera> getCameraList(String areaId,int page)
+    public Page<List<Camera>> getCameraList(String areaId, int page)
     {
         Map<String,Object> params = new HashMap<>();
         params.put("area_id",areaId);
@@ -37,6 +38,7 @@ public class CameraManager extends BaseComponent
 
         List<Camera> cameraList = new ArrayList<>();
         HttpResponse response = ibmsHttpEngine.request("camera.list",params);
+        Page<List<Camera>> cameraPage = new Page<>();
         if(response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
             List<Map<String,Object>> data = (List<Map<String, Object>>) response.getData().get("camera_list");
@@ -45,7 +47,9 @@ public class CameraManager extends BaseComponent
                 Camera camera = Camera.generateByJson(map);
                 cameraList.add(camera);
             }
-            return cameraList;
+            cameraPage.setData(cameraList);
+            cameraPage.setTotalPage((int)response.getData().get("total_page"));
+            return cameraPage;
         }
         else
         {
@@ -59,7 +63,7 @@ public class CameraManager extends BaseComponent
      * @param page
      * @return
      */
-    public List<Camera> getCameraHistoryList(int page)
+    public Page<List<Camera>> getCameraHistoryList(int page)
     {
         Map<String,Object> params = new HashMap<>();
         params.put("page",page + "");
@@ -68,13 +72,16 @@ public class CameraManager extends BaseComponent
         HttpResponse response = ibmsHttpEngine.request("camera.history_list",params);
         if(response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
+            Page<List<Camera>> cameraPage = new Page<>();
             List<Map<String,Object>> data = (List<Map<String, Object>>) response.getData().get("camera_list");
             for(Map<String,Object> map : data)
             {
                 Camera camera = Camera.generateByJson(map);
                 cameraList.add(camera);
             }
-            return cameraList;
+            cameraPage.setData(cameraList);
+            cameraPage.setTotalPage((int) response.getData().get("total_page"));
+            return cameraPage;
         }
         else
         {
@@ -89,7 +96,7 @@ public class CameraManager extends BaseComponent
      * @param page
      * @return
      */
-    public List<Camera> cameraSearch(String keyword,int page)
+    public Page<List<Camera>> cameraSearch(String keyword,int page)
     {
         Map<String,Object> params = new HashMap<>();
         params.put("page",page + "");
@@ -98,13 +105,16 @@ public class CameraManager extends BaseComponent
         HttpResponse response = ibmsHttpEngine.request("camera.list_by_keyword",params);
         if(response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
+            Page<List<Camera>> cameraPage = new Page<>();
             List<Map<String,Object>> data = (List<Map<String, Object>>) response.getData().get("camera_list");
             for(Map<String,Object> map : data)
             {
                 Camera camera = Camera.generateByJson(map);
                 cameraList.add(camera);
             }
-            return cameraList;
+            cameraPage.setData(cameraList);
+            cameraPage.setTotalPage((int) response.getData().get("total_page"));
+            return cameraPage;
         }
         else
         {

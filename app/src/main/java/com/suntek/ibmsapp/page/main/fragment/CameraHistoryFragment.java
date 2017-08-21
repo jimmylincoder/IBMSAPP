@@ -11,6 +11,7 @@ import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
 
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
@@ -28,7 +29,7 @@ import butterknife.BindView;
  *
  * @author jimmy
  */
-public class CameraHistoryFragment extends BaseFragment implements AdapterView.OnItemClickListener,PullToRefreshBase.OnRefreshListener
+public class CameraHistoryFragment extends BaseFragment implements AdapterView.OnItemClickListener, PullToRefreshBase.OnRefreshListener
 {
     @BindView(R.id.ptr_history)
     PullToRefreshListView ptrHistory;
@@ -36,6 +37,10 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     private CameraSearchAdapter cameraSearchAdapter;
 
     private List<Camera> cameraList;
+
+    private int totalPage;
+
+    private int currentPage = 1;
 
     @Override
     public int getLayoutId()
@@ -47,19 +52,31 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     public void initViews(Bundle savedInstanceState)
     {
         cameraList = new ArrayList<>();
-        cameraSearchAdapter = new CameraSearchAdapter(getActivity(),cameraList);
+        cameraSearchAdapter = new CameraSearchAdapter(getActivity(), cameraList);
         ptrHistory.setAdapter(cameraSearchAdapter);
         ptrHistory.setOnItemClickListener(this);
-        getCameraHistory();
+        ptrHistory.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
+        {
+            @Override
+            public void onLastItemVisible()
+            {
+                if (currentPage < totalPage)
+                {
+                    getCameraHistory(++currentPage, false);
+                }
+            }
+        });
+
+        getCameraHistory(currentPage, true);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
+        Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
         Camera camera = cameraList.get(i - 1);
-        intent.putExtra("cameraId",camera.getId());
-        intent.putExtra("cameraName",camera.getName());
+        intent.putExtra("cameraId", camera.getId());
+        intent.putExtra("cameraName", camera.getName());
         startActivity(intent);
     }
 
@@ -71,20 +88,31 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
 
         // Update the LastUpdatedLabel
         refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
-        getCameraHistory();
+        currentPage = 1;
+        getCameraHistory(currentPage, true);
     }
 
-    private void getCameraHistory()
+    private void getCameraHistory(int page, boolean isRefresh)
     {
-        new CameraHistoryListTask(getActivity(),1)
+        new CameraHistoryListTask(getActivity(), page)
         {
             @Override
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
-                if(result.getError() == null)
+                if (result.getError() == null)
                 {
-                    cameraList = (List<Camera>) result.getResultData();
+                    Page<List<Camera>> cameraPage = (Page<List<Camera>>) result.getResultData();
+                    List<Camera> newCameraList = cameraPage.getData();
+                    totalPage = cameraPage.getTotalPage();
+                    if (isRefresh)
+                    {
+                        cameraList = newCameraList;
+                    }
+                    else
+                    {
+                        cameraList.addAll(newCameraList);
+                    }
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
                     ptrHistory.onRefreshComplete();
