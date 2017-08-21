@@ -1,26 +1,29 @@
-package com.suntek.ibmsapp.task.camera;
+package com.suntek.ibmsapp.task.crash;
 
 import android.content.Context;
 
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.suntek.ibmsapp.component.http.FHttpException;
-import com.suntek.ibmsapp.manager.CameraManager;
+import com.suntek.ibmsapp.manager.CrashManager;
 import com.suntek.ibmsapp.task.base.BaseTask;
 
 /**
- * 停止播放视频
+ * 崩溃日志记录
  *
  * @author jimmy
  */
-public class CameraStopTask extends BaseTask
+public class CrashLogTask extends BaseTask
 {
-    private CameraManager cameraManager;
+    private CrashManager crashManager;
 
-    public CameraStopTask(Context context)
+    private String message;
+
+    public CrashLogTask(Context context,String message)
     {
         super(context);
 
-        cameraManager = (CameraManager) ComponentEngine.getInstance(CameraManager.class);
+        this.message = message;
+        crashManager = (CrashManager) ComponentEngine.getInstance(CrashManager.class);
     }
 
     @Override
@@ -28,7 +31,7 @@ public class CameraStopTask extends BaseTask
     {
         try
         {
-            cameraManager.stopPlay();
+            crashManager.logCrash(message);
             return new TaskResult("",null);
         }
         catch (FHttpException e)

@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.model;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -7,13 +8,15 @@ import java.util.Map;
  *
  * @author jimmy
  */
-public class Camera
+public class Camera implements Serializable
 {
     private String id;
 
     private String name;
 
     private String type;
+
+    private String deviceId;
 
     private String place;
 
@@ -141,6 +144,16 @@ public class Camera
         return playTime;
     }
 
+    public void setDeviceId(String deviceId)
+    {
+        this.deviceId = deviceId;
+    }
+
+    public String getDeviceId()
+    {
+        return deviceId;
+    }
+
     public static Camera generateByJson(Map<String,Object> content)
     {
         Camera camera = new Camera();
@@ -154,6 +167,7 @@ public class Camera
         camera.setPort((String) content.get("port"));
         camera.setUserName((String) content.get("user_name"));
         camera.setPassword((String) content.get("password"));
+        camera.setDeviceId((String) content.get("device_id"));
 //        camera.setPlayTime((Integer) content.get("play_time"));
 
         return camera;

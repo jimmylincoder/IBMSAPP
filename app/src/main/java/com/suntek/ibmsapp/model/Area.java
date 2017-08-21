@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.model;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Map;
  *
  *  @author jimmy
  */
-public class Area
+public class Area implements Serializable
 {
     //区域id
     private String id;

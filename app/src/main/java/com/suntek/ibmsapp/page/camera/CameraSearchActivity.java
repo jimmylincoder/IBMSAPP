@@ -84,9 +84,9 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
                 super.onPostExecute(result);
                 if (result.getError() == null)
                 {
-                    Page<List<Camera>> cameraPage  = (Page<List<Camera>>) result.getResultData();
+                    Page<List<Camera>> cameraPage = (Page<List<Camera>>) result.getResultData();
                     cameraList = cameraPage.getData();
-                    if(cameraList.isEmpty())
+                    if (cameraList.isEmpty())
                     {
                         lvSearchResult.setVisibility(View.GONE);
                         llMessage.setVisibility(View.VISIBLE);
@@ -111,9 +111,10 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         Intent intent = new Intent(CameraSearchActivity.this, CameraPlayActivity.class);
-        Camera camera = cameraList.get(i);
-        intent.putExtra("cameraId", camera.getId());
-        intent.putExtra("cameraName", camera.getName());
+        Camera camera = cameraList.get(i - 1);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("camera", camera);
+        intent.putExtras(bundle);
         startActivity(intent);
         finish();
     }

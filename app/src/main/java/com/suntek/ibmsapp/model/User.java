@@ -8,7 +8,7 @@ import java.util.Map;
  *
  * @author jimmy
  */
-public class User
+public class User implements Serializable
 {
     private String userCode;
 

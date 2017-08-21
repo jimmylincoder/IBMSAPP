@@ -18,9 +18,10 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
-import com.suntek.ibmsapp.task.camera.CameraPlayTask;
-import com.suntek.ibmsapp.task.camera.CameraStopTask;
+import com.suntek.ibmsapp.task.camera.control.CameraPlayTask;
+import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
@@ -150,7 +151,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     //定时器
     private Timer timer;
 
+    private String session;
+
     private List<Map<String, Object>> recordList;
+
+    private Camera camera;
 
     @Override
     public int getLayoutId()
@@ -161,6 +166,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        camera = (Camera) getIntent().getExtras().getSerializable("camera");
+
         initVideoView();
         initTimeView();
         loadData();
@@ -172,13 +179,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             textItems.add(new HorizontalPicker.TextItem("S" + i));
         }
         hpDatePicker.setItems(textItems, 1);
+
     }
 
     @Override
     public void loadData()
     {
-        String cameraId = getIntent().getStringExtra("cameraId");
-        String cameraName = getIntent().getStringExtra("cameraName");
+        String cameraId = camera.getId();
+        String cameraName = camera.getName();
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
@@ -202,7 +210,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
     private void getCameraAddress()
     {
-        new CameraPlayTask(this)
+        new CameraPlayTask(this, camera.getDeviceId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
+                camera.getPassword(), null, null)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -210,7 +219,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 super.onPostExecute(result);
                 if (result.getError() == null)
                 {
-                    String address = (String) result.getResultData();
+                    Map<String,Object> map = (Map<String, Object>) result.getResultData();
+                    String address = (String) map.get("address");
+                    session = (String) map.get("session");
                     ivvVideo.setVideoPath(address);
                     ivvVideo.start();
                 }
@@ -601,7 +612,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
      */
     private void stopPlay()
     {
-        new CameraStopTask(this)
+        new CameraStopTask(this,session)
         {
             @Override
             protected void onPostExecute(TaskResult result)

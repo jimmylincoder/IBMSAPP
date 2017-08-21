@@ -29,6 +29,10 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.suntek.ibmsapp.task.base.BaseTask;
+import com.suntek.ibmsapp.task.crash.CrashLogTask;
+import com.suntek.ibmsapp.widget.ToastHelper;
+
 /**
  * UncaughtException处理类,当程序发生Uncaught异常的时候,有该类来接管程序,并记录发送错误报告.
  * <p>
@@ -134,7 +138,30 @@ public class CrashHandler implements UncaughtExceptionHandler
         }.start();
         //保存日志文件
         saveCatchInfo2File(ex);
+        //提交服务器
+
         return true;
+    }
+
+    /**
+     * 发送至服务器
+     *
+     * @param message
+     */
+    private void sendToServer(String message)
+    {
+        new CrashLogTask(mContext,message)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if(!(result.getError() == null))
+                {
+                    ToastHelper.getInstance(mContext).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
     }
 
     /**
@@ -255,6 +282,8 @@ public class CrashHandler implements UncaughtExceptionHandler
                 if (s == null) break;
                 //由于目前尚未确定以何种方式发送，所以先打出log日志。
                 Log.i("info", s.toString());
+
+                sendToServer(s);
             }
         } catch (FileNotFoundException e)
         {
