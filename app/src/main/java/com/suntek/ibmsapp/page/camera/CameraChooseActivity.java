@@ -70,18 +70,19 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private void initAreaListView(String parentId)
     {
-        new AreaListTask(this,parentId)
+        new AreaListTask(this, parentId)
         {
 
             @Override
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
-                if(result.getError() == null)
+                if (result.getError() == null)
                 {
-                    areas = (List<Area>) result.getResultData();
-                    if(!areas.isEmpty())
+                    List<Area> newAreas = (List<Area>) result.getResultData();
+                    if (!newAreas.isEmpty())
                     {
+                        areas.addAll(newAreas);
                         areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
                         lvArea.setAdapter(areaListAdapter);
                     }
@@ -120,21 +121,22 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        String orgCode = (String) areas.get(i).getOgrCode();
-        String id = (String) areas.get(i).getId();
-        String name = (String) areas.get(i).getName();
+        String orgCode = areas.get(i).getOgrCode();
+        String id = areas.get(i).getId();
+        String name = areas.get(i).getName();
         sharedHelper.save("choose_org_code", orgCode);
         sharedHelper.save("choose_name", name);
-        if("01".equals(orgCode))
+        if ("01".equals(orgCode))
         {
             finish();
-        }else
+        }
+        else
         {
             try
             {
                 areas.clear();
                 initAreaListView(id);
-            }catch (Exception e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
             }

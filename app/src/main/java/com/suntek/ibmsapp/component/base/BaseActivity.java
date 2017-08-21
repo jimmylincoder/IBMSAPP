@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 
@@ -17,7 +18,7 @@ import butterknife.Unbinder;
  * @author jimmy
  */
 
-public abstract class BaseActivity extends Activity
+public abstract class BaseActivity extends AppCompatActivity
 {
     private Unbinder bind;
 

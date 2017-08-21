@@ -55,6 +55,7 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
         cameraSearchAdapter = new CameraSearchAdapter(getActivity(), cameraList);
         ptrHistory.setAdapter(cameraSearchAdapter);
         ptrHistory.setOnItemClickListener(this);
+        ptrHistory.setOnRefreshListener(this);
         ptrHistory.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
         {
             @Override

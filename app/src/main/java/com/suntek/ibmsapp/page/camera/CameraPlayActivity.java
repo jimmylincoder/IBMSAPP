@@ -20,12 +20,11 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.task.camera.CameraPlayTask;
+import com.suntek.ibmsapp.task.camera.CameraStopTask;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.HorizontalPicker;
-import com.suntek.ibmsapp.widget.LoadingDialog;
-import com.suntek.ibmsapp.widget.TimeAlgorithm;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
@@ -45,9 +44,6 @@ import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
@@ -175,7 +171,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         {
             textItems.add(new HorizontalPicker.TextItem("S" + i));
         }
-        hpDatePicker.setItems(textItems,1);
+        hpDatePicker.setItems(textItems, 1);
     }
 
     @Override
@@ -186,13 +182,13 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this,cameraId)
+        new CameraAddHistoryTask(this, cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
-                if(result.getError() == null)
+                if (result.getError() == null)
                 {
 
                 }
@@ -212,7 +208,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
-                if(result.getError() == null)
+                if (result.getError() == null)
                 {
                     String address = (String) result.getResultData();
                     ivvVideo.setVideoPath(address);
@@ -479,6 +475,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         isTimeRun = false;
         timer.cancel();
+        stopPlay();
         super.onDestroy();
     }
 
@@ -575,6 +572,13 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     }
 
     @Override
+    protected void onResume()
+    {
+        super.onResume();
+        initVideoView();
+    }
+
+    @Override
     public void run()
     {
         try
@@ -590,5 +594,24 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 停止播放视频
+     */
+    private void stopPlay()
+    {
+        new CameraStopTask(this)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() != null)
+                {
+
+                }
+            }
+        }.execute();
     }
 }

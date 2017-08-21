@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.suntek.ibmsapp.R;
@@ -36,6 +37,9 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
 
     @BindView(R.id.et_keyword)
     EditText etKeyword;
+
+    @BindView(R.id.ll_message)
+    LinearLayout llMessage;
 
     private CameraSearchAdapter cameraSearchAdapter;
 
@@ -82,9 +86,18 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
                 {
                     Page<List<Camera>> cameraPage  = (Page<List<Camera>>) result.getResultData();
                     cameraList = cameraPage.getData();
+                    if(cameraList.isEmpty())
+                    {
+                        lvSearchResult.setVisibility(View.GONE);
+                        llMessage.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        llMessage.setVisibility(View.GONE);
+                        lvSearchResult.setVisibility(View.VISIBLE);
+                    }
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
-
                 }
                 else
                 {

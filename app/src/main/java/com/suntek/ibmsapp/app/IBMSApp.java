@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.app;
 import android.app.Application;
 
 import com.squareup.leakcanary.LeakCanary;
+import com.suntek.ibmsapp.component.CrashHandler;
 import com.suntek.ibmsapp.component.base.BaseApplication;
 
 /**
@@ -20,7 +21,9 @@ public class IBMSApp extends BaseApplication
     {
         super.onCreate();
         mInstance = this;
-     //   init();
+        CrashHandler catchHandler = CrashHandler.getInstance();
+        catchHandler.init(getApplicationContext());
+        //   init();
     }
 
     private void init() {

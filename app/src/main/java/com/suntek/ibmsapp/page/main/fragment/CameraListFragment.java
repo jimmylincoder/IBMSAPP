@@ -83,7 +83,7 @@ public class CameraListFragment extends BaseFragment
 
                 // Do work to refresh the list here.
                 currentPage = 1;
-                getCameraList(currentPage,true);
+                getCameraList(currentPage, true);
             }
 
         });
@@ -93,9 +93,9 @@ public class CameraListFragment extends BaseFragment
             @Override
             public void onLastItemVisible()
             {
-                if(currentPage < totalPage)
+                if (currentPage < totalPage)
                 {
-                    getCameraList(++currentPage,false);
+                //    getCameraList(++currentPage, false);
                 }
             }
         });
@@ -113,7 +113,7 @@ public class CameraListFragment extends BaseFragment
         });
 
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View view = inflater.inflate(R.layout.item_list_empty,null);
+        View view = inflater.inflate(R.layout.item_list_empty, null);
         ptrCameraList.setEmptyView(view);
 
         cameraList = new ArrayList<>();
@@ -124,7 +124,7 @@ public class CameraListFragment extends BaseFragment
 
         areaId = sharedHelper.getString("choose_org_code");
 
-        getCameraList(currentPage,true);
+        getCameraList(currentPage, true);
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -141,7 +141,7 @@ public class CameraListFragment extends BaseFragment
         startActivity(intent);
     }
 
-    private void getCameraList(int page,boolean isRefresh)
+    private void getCameraList(int page, boolean isRefresh)
     {
         new CameraListTask(getActivity(), areaId, page)
         {
@@ -155,7 +155,7 @@ public class CameraListFragment extends BaseFragment
                     List<Camera> newCameraList = cameraPage.getData();
                     totalPage = cameraPage.getTotalPage();
 
-                    if(isRefresh)
+                    if (isRefresh)
                     {
                         cameraList = newCameraList;
                     }
@@ -182,11 +182,11 @@ public class CameraListFragment extends BaseFragment
         super.onResume();
         tvArea.setText(sharedHelper.getString("choose_name"));
         String chooseAreaId = sharedHelper.getString("choose_org_code");
-        if(!areaId.equals(chooseAreaId))
+        if (!areaId.equals(chooseAreaId))
         {
             currentPage = 1;
             areaId = chooseAreaId;
-            getCameraList(currentPage,true);
+            getCameraList(currentPage, true);
         }
     }
 }
