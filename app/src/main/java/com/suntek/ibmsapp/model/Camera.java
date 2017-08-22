@@ -18,6 +18,8 @@ public class Camera implements Serializable
 
     private String deviceId;
 
+    private String parentId;
+
     private String place;
 
     private String channel;
@@ -154,6 +156,16 @@ public class Camera implements Serializable
         return deviceId;
     }
 
+    public void setParentId(String parentId)
+    {
+        this.parentId = parentId;
+    }
+
+    public String getParentId()
+    {
+        return parentId;
+    }
+
     public static Camera generateByJson(Map<String,Object> content)
     {
         Camera camera = new Camera();
@@ -168,8 +180,11 @@ public class Camera implements Serializable
         camera.setUserName((String) content.get("user_name"));
         camera.setPassword((String) content.get("password"));
         camera.setDeviceId((String) content.get("device_id"));
+        camera.setParentId((String) content.get("parent_id"));
 //        camera.setPlayTime((Integer) content.get("play_time"));
 
         return camera;
     }
+
+
 }

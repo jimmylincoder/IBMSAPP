@@ -95,7 +95,7 @@ public class CameraListFragment extends BaseFragment
             {
                 if (currentPage < totalPage)
                 {
-                //    getCameraList(++currentPage, false);
+                    //    getCameraList(++currentPage, false);
                 }
             }
         });
@@ -106,9 +106,9 @@ public class CameraListFragment extends BaseFragment
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
                 Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
-                Camera camera = cameraList.get(position -1);
+                Camera camera = cameraList.get(position - 1);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("camera",camera);
+                bundle.putSerializable("camera", camera);
                 intent.putExtras(bundle);
                 intent.putExtra("cameraId", cameraList.get(position - 1).getId());
                 intent.putExtra("cameraName", cameraList.get(position - 1).getName());

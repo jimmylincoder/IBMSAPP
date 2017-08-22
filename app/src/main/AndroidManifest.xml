@@ -48,6 +48,9 @@
 
         <activity android:name=".page.camera.CameraSearchActivity"
                   android:screenOrientation="portrait"/>
+
+        <activity android:name=".page.about.AboutActivity"
+                  android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

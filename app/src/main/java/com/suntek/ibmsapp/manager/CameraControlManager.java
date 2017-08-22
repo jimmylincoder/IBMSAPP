@@ -27,7 +27,7 @@ public class CameraControlManager extends BaseComponent
      *
      * @return
      */
-    public Map<String,Object> play(String deivceId, String ip, String channel,
+    public Map<String,Object> play(String deivceId, String parentId,String ip, String channel,
                        String user, String password,
                        String beginTime, String endTime)
     {
@@ -37,6 +37,7 @@ public class CameraControlManager extends BaseComponent
         params.put("channel", channel);
         params.put("user", user);
         params.put("password", password);
+        params.put("parent_id",parentId);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);
         if (endTime != null || !"".equals(endTime))

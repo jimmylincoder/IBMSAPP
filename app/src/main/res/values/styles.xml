@@ -28,4 +28,9 @@
     <!-- 主界面 设置Style -->
     <style name="MainActivityColorTranslucentTheme" parent="@style/BaseAppTheme" />
 
+    <style name="Popupwindow">
+        <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
 </resources>

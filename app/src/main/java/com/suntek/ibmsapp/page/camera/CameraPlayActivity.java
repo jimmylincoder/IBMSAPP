@@ -7,12 +7,14 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 
@@ -141,6 +143,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     TextView tvPlayType;
     @BindView(R.id.hp_date_picker)
     HorizontalPicker hpDatePicker;
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+    @BindView(R.id.ll_fail)
+    LinearLayout llFail;
+
+    PopupWindow menu;
     //当前时间handler
     private Handler timeHandler;
     private boolean mBackPressed;
@@ -152,6 +160,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private Timer timer;
 
     private String session;
+
+    private boolean isBackGround = false;
 
     private List<Map<String, Object>> recordList;
 
@@ -208,10 +218,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }.execute();
     }
 
-    private void getCameraAddress()
+    private void getCameraAddress(String startTime, String endTime)
     {
-        new CameraPlayTask(this, camera.getDeviceId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
-                camera.getPassword(), null, null)
+        new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
+                camera.getPassword(), startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -219,7 +229,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 super.onPostExecute(result);
                 if (result.getError() == null)
                 {
-                    Map<String,Object> map = (Map<String, Object>) result.getResultData();
+                    Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     String address = (String) map.get("address");
                     session = (String) map.get("session");
                     ivvVideo.setVideoPath(address);
@@ -227,7 +237,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 }
                 else
                 {
-                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                    llLoading.setVisibility(View.GONE);
+                    llFail.setVisibility(View.VISIBLE);
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("播放失败，请检查后台摄像头配置");
                 }
             }
         }.execute();
@@ -272,6 +284,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     }
                     tvPlayType.setText("回放");
                 }
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String beginTime = format.format(date);
+                String endTime = "2017-08-22 23:00:00";
             }
         });
         try
@@ -412,8 +427,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         ivvVideo.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        getCameraAddress();
-
+        //getCameraAddress("2017-08-22 01:00:00","2017-08-22 13:00:00");
+        getCameraAddress(null, null);
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
         {
             @Override
@@ -429,6 +444,15 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     llOper.setVisibility(View.GONE);
                     llTime.setVisibility(View.VISIBLE);
                 }
+
+
+                if (playerState == PLAYER_FULLSCREEN)
+                {
+                    if (llHead.getVisibility() == View.GONE)
+                        llHead.setVisibility(View.VISIBLE);
+                    else
+                        llHead.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -438,12 +462,26 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             }
         });
 
+        llFail.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
         ivvVideo.setOnInfoListener(new IMediaPlayer.OnInfoListener()
         {
             @Override
             public boolean onInfo(IMediaPlayer iMediaPlayer, int i, int i1)
             {
-                System.out.println(iMediaPlayer.getDuration());
+                if (i == IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
+                {
+                    llLoading.setVisibility(View.GONE);
+                }
+                return false;
+            }
+        });
+        ivvVideo.setOnErrorListener(new IMediaPlayer.OnErrorListener()
+        {
+            @Override
+            public boolean onError(IMediaPlayer iMediaPlayer, int i, int i1)
+            {
+                llFail.setVisibility(View.VISIBLE);
                 return false;
             }
         });
@@ -479,6 +517,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             ivvVideo.enterBackground();
         }
         IjkMediaPlayer.native_profileEnd();
+
+        isBackGround = true;
     }
 
     @Override
@@ -493,7 +533,18 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @OnClick(R.id.iv_back)
     public void back(View view)
     {
-        finish();
+        if (playerState == PLAYER_FULLSCREEN)
+        {
+            NiceUtil.showActionBar(this);
+            NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            setFullScreenLayout(View.VISIBLE);
+            playerState = PLAYER_NOT_FULL;
+        }
+        else
+        {
+            finish();
+        }
+        menu.dismiss();
     }
 
 
@@ -544,11 +595,32 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
     }
 
+    @OnClick(R.id.ll_more)
+    public void more(View view)
+    {
+        if (menu == null)
+        {
+            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.view_pop_menu, null);
+            menu = new PopupWindow(linearLayout, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            //menu.setAnimationStyle(R.style.Popupwindow);
+            menu.showAsDropDown(view);
+        }
+        else
+        {
+            if (menu.isShowing())
+                menu.dismiss();
+            else
+                menu.showAsDropDown(view);
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
         if (keyCode == event.KEYCODE_BACK)
         {
+            menu.dismiss();
             if (playerState == PLAYER_FULLSCREEN)
             {
                 NiceUtil.showActionBar(this);
@@ -586,7 +658,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     protected void onResume()
     {
         super.onResume();
-        initVideoView();
+        if (isBackGround)
+        {
+            initVideoView();
+            isBackGround = false;
+        }
     }
 
     @Override
@@ -612,7 +688,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
      */
     private void stopPlay()
     {
-        new CameraStopTask(this,session)
+        if (session == null)
+            return;
+
+        new CameraStopTask(this, session)
         {
             @Override
             protected void onPostExecute(TaskResult result)

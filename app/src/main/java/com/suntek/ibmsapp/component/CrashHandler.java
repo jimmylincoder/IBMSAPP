@@ -272,6 +272,7 @@ public class CrashHandler implements UncaughtExceptionHandler
         FileInputStream fis = null;
         BufferedReader reader = null;
         String s = null;
+        String errorMessage = "";
         try
         {
             fis = new FileInputStream(fileName);
@@ -281,10 +282,10 @@ public class CrashHandler implements UncaughtExceptionHandler
                 s = reader.readLine();
                 if (s == null) break;
                 //由于目前尚未确定以何种方式发送，所以先打出log日志。
+                errorMessage += s;
                 Log.i("info", s.toString());
-
-                sendToServer(s);
             }
+            sendToServer(errorMessage);
         } catch (FileNotFoundException e)
         {
             e.printStackTrace();

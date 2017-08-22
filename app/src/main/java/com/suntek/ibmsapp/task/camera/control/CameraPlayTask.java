@@ -32,7 +32,9 @@ public class CameraPlayTask extends BaseTask
 
     private String endTime;
 
-    public CameraPlayTask(Context context, String deviceId, String ip, String channel,
+    private String parentId;
+
+    public CameraPlayTask(Context context, String deviceId, String parentId, String ip, String channel,
                           String user, String password, String beginTime, String endTime)
     {
         super(context);
@@ -44,6 +46,7 @@ public class CameraPlayTask extends BaseTask
         this.password = password;
         this.beginTime = beginTime;
         this.endTime = endTime;
+        this.parentId = parentId;
 
         cameraControlManager = (CameraControlManager) ComponentEngine.getInstance(CameraControlManager.class);
     }
@@ -53,7 +56,7 @@ public class CameraPlayTask extends BaseTask
     {
         try
         {
-            Map<String, Object> res = cameraControlManager.play(deviceId, ip, channel, user, password, beginTime, endTime);
+            Map<String, Object> res = cameraControlManager.play(deviceId, parentId, ip, channel, user, password, beginTime, endTime);
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {

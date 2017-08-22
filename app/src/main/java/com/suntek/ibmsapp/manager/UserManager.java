@@ -6,6 +6,7 @@ import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.component.core.BaseComponent;
 import com.suntek.ibmsapp.component.http.FHttpException;
 import com.suntek.ibmsapp.model.User;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,9 @@ public class UserManager extends BaseComponent
 {
     @Autowired
     IbmsHttpEngine ibmsHttpEngine;
+
+    @Autowired
+    SaveDataWithSharedHelper sharedHelper;
 
     /**
      * 用户登录
@@ -39,6 +43,8 @@ public class UserManager extends BaseComponent
         {
             Map<String,Object> content = response.getData();
             User user = User.generateByJson(content);
+            sharedHelper.save("userCode",user.getUserCode());
+            sharedHelper.save("userName",user.getUserName());
             return user;
         }
         else
