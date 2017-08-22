@@ -41,7 +41,7 @@ public class UserManager extends BaseComponent
 
         if(response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
-            Map<String,Object> content = response.getData();
+            Map<String,Object> content = (Map<String, Object>) response.getData().get("user");
             User user = User.generateByJson(content);
             sharedHelper.save("userCode",user.getUserCode());
             sharedHelper.save("userName",user.getUserName());

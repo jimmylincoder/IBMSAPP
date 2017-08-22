@@ -315,18 +315,6 @@
             android:layout_height="1dp"
             android:background="@color/CBDBDBD"/>
 
-        <!--<ImageView-->
-            <!--android:id="@+id/iv_snapshot"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:background="@mipmap/bg_device_sleep"-->
-            <!--/>-->
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/CBDBDBD"/>
-
     </LinearLayout>
 
 </LinearLayout>

@@ -95,7 +95,7 @@ public class CameraListFragment extends BaseFragment
             {
                 if (currentPage < totalPage)
                 {
-                    //    getCameraList(++currentPage, false);
+                    getCameraList(++currentPage, false);
                 }
             }
         });
@@ -169,7 +169,14 @@ public class CameraListFragment extends BaseFragment
                     }
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
-                    ptrCameraList.onRefreshComplete();
+                    try{
+                        ptrCameraList.onRefreshComplete();
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+
                 }
                 else
                 {

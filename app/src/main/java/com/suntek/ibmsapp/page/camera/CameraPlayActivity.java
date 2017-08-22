@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.page.camera;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -167,6 +168,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
     private Camera camera;
 
+    private CameraPlayTask cameraPlayTask;
+
     @Override
     public int getLayoutId()
     {
@@ -220,7 +223,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
     private void getCameraAddress(String startTime, String endTime)
     {
-        new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
+       cameraPlayTask =  new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
                 camera.getPassword(), startTime, endTime)
         {
             @Override
@@ -237,12 +240,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 }
                 else
                 {
-                    llLoading.setVisibility(View.GONE);
-                    llFail.setVisibility(View.VISIBLE);
-                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("播放失败，请检查后台摄像头配置");
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
+                    if (llFail != null)
+                        llFail.setVisibility(View.VISIBLE);
                 }
             }
-        }.execute();
+        };
+        cameraPlayTask.execute();
     }
 
     /**
@@ -527,12 +532,20 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         isTimeRun = false;
         timer.cancel();
         stopPlay();
+        //  menu.dismiss();
+        cameraPlayTask.cancel(true);
         super.onDestroy();
     }
 
     @OnClick(R.id.iv_back)
     public void back(View view)
     {
+//        if(menu.isShowing())
+//        {
+//            menu.dismiss();
+//            return;
+//        }
+
         if (playerState == PLAYER_FULLSCREEN)
         {
             NiceUtil.showActionBar(this);
@@ -544,7 +557,6 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         {
             finish();
         }
-        menu.dismiss();
     }
 
 
@@ -600,10 +612,44 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         if (menu == null)
         {
-            LinearLayout linearLayout = (LinearLayout) getLayoutInflater().inflate(R.layout.view_pop_menu, null);
-            menu = new PopupWindow(linearLayout, ViewGroup.LayoutParams.WRAP_CONTENT,
+            View view1 = getLayoutInflater().inflate(R.layout.view_pop_menu, null);
+            menu = new PopupWindow(view1, ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             //menu.setAnimationStyle(R.style.Popupwindow);
+            LinearLayout llDownload = (LinearLayout) view1.findViewById(R.id.ll_download);
+            LinearLayout llInfo = (LinearLayout) view1.findViewById(R.id.ll_info);
+            LinearLayout llDate = (LinearLayout) view1.findViewById(R.id.ll_date);
+            llDownload.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    menu.dismiss();
+                    Intent intent = new Intent(CameraPlayActivity.this, CameraDownloadActivity.class);
+                    startActivity(intent);
+                }
+            });
+
+            llInfo.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    menu.dismiss();
+                    Intent intent = new Intent(CameraPlayActivity.this, CameraInfoActivity.class);
+                    startActivity(intent);
+                }
+            });
+            llDate.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    menu.dismiss();
+                    Intent intent = new Intent(CameraPlayActivity.this, CameraDateActivity.class);
+                    startActivity(intent);
+                }
+            });
             menu.showAsDropDown(view);
         }
         else
@@ -620,7 +666,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     {
         if (keyCode == event.KEYCODE_BACK)
         {
-            menu.dismiss();
+            //menu.dismiss();
+//            if(menu.isShowing())
+//            {
+//                menu.dismiss();
+//                return true;
+//            }
             if (playerState == PLAYER_FULLSCREEN)
             {
                 NiceUtil.showActionBar(this);

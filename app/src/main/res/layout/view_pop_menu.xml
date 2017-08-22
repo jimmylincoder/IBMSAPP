@@ -6,6 +6,7 @@
               android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/ll_download"
         android:orientation="horizontal"
         android:layout_width="110dp"
         android:gravity="center_vertical"
@@ -26,6 +27,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_date"
         android:orientation="horizontal"
         android:layout_width="110dp"
         android:gravity="center_vertical"
@@ -46,6 +48,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/ll_info"
         android:orientation="horizontal"
         android:layout_width="110dp"
         android:gravity="center_vertical"

@@ -41,7 +41,7 @@
                 android:textSize="18dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="关于详情"
+                android:text="录像下载"
                 />
 
         </LinearLayout>
@@ -72,7 +72,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="这是关于详情界面"/>
+            android:text="这是录像下载界面"/>
 
     </LinearLayout>
 
