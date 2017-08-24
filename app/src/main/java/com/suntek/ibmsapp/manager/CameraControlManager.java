@@ -146,6 +146,26 @@ public class CameraControlManager extends BaseComponent
     }
 
     /**
+     * 查询进度
+     *
+     * @param session
+     */
+    public void queryProgress(String session)
+    {
+        Map<String,Object> params = new HashMap<>();
+        params.put("session",session);
+        HttpResponse response = ibmsHttpEngine.request("camera.query_progress",params);
+        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
+    /**
      * 查询录像
      *
      * @param deivceId

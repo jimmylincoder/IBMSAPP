@@ -26,26 +26,26 @@
             />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/ll_date"
-        android:orientation="horizontal"
-        android:layout_width="110dp"
-        android:gravity="center_vertical"
-        android:layout_height="40dp">
+    <!--<LinearLayout-->
+        <!--android:id="@+id/ll_date"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:layout_width="110dp"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:layout_height="40dp">-->
 
-        <ImageView
-            android:layout_marginLeft="10dp"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:background="@mipmap/ic_date"/>
+        <!--<ImageView-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_width="20dp"-->
+            <!--android:layout_height="20dp"-->
+            <!--android:background="@mipmap/ic_date"/>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="日期选择"
-            android:layout_marginLeft="10dp"
-            />
-    </LinearLayout>
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="日期选择"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--/>-->
+    <!--</LinearLayout>-->
 
     <LinearLayout
         android:id="@+id/ll_info"

@@ -76,4 +76,6 @@ dependencies {
     compile 'com.alibaba:fastjson:1.1.45.android'
     compile 'org.bouncycastle:bcprov-jdk16:1.46'
     compile 'commons-io:commons-io:2.4'
+
+    compile 'com.dsw.calendar:library:1.0.0'
 }

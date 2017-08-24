@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
     <FrameLayout
         android:id="@+id/fl_video"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:background="@color/C0C0C0E">
-        
-        
+
+
         <com.tv.danmaku.ijk.media.widget.media.IjkVideoView
             android:id="@+id/video_view"
             android:layout_width="match_parent"
@@ -20,34 +21,35 @@
             android:id="@+id/ll_head"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:orientation="horizontal"
-            android:background="@mipmap/bg_resolution_bottom">
+            android:background="@mipmap/bg_resolution_bottom"
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_weight="1.5"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_weight="1.5">
 
                 <ImageButton
                     android:id="@+id/iv_back"
-                    android:layout_gravity="center_vertical"
                     android:layout_width="25dp"
                     android:layout_height="25dp"
-                    android:background="@drawable/ic_back_player"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
+                    android:background="@drawable/ic_back_player"
                     />
 
             </LinearLayout>
+
             <LinearLayout
-                android:layout_weight="1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:gravity="center">
 
                     <TextView
@@ -55,16 +57,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="停车场_通道33"
-                        android:textSize="15dp"
-                        android:textColor="@color/white"/>
+                        android:textColor="@color/white"
+                        android:textSize="15dp"/>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:gravity="center">
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/tv_type"
@@ -90,17 +92,18 @@
 
 
             </LinearLayout>
+
             <LinearLayout
-                android:layout_weight="1.5"
                 android:layout_width="match_parent"
-                android:gravity="center|right"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_weight="1.5"
+                android:gravity="center|right">
 
                 <LinearLayout
                     android:id="@+id/ll_more"
                     android:layout_width="40dp"
-                    android:gravity="center"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:gravity="center">
 
                     <ImageView
                         android:layout_width="15dp"
@@ -131,9 +134,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
                 android:layout_marginLeft="10dp"
                 android:text="播放失败,请检查摄像头配置"
+                android:textColor="@color/white"
                 />
 
         </LinearLayout>
@@ -163,43 +166,43 @@
         </LinearLayout>
 
         <LinearLayout
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:layout_gravity="bottom"
             android:orientation="horizontal"
-            android:layout_gravity="bottom">
+            android:visibility="gone">
 
             <com.suntek.ibmsapp.widget.DateSelectView
-                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
 
             <com.suntek.ibmsapp.widget.HorizontalPicker
                 android:id="@+id/hp_date_picker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:textSize="18sp"
-                app:itemMargin="5dp"
                 app:itemHeight="40dp"
-                app:itemWidth="40dp">
+                app:itemMargin="5dp"
+                app:itemWidth="40dp"
+                app:textSize="18sp">
 
             </com.suntek.ibmsapp.widget.HorizontalPicker>
         </LinearLayout>
 
     </FrameLayout>
-    
+
     <LinearLayout
         android:id="@+id/ll_oper"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:orientation="horizontal"
         android:background="@color/C2E2720"
+        android:orientation="horizontal"
         >
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center">
 
             <ImageButton
@@ -212,25 +215,25 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center">
 
             <ImageButton
                 android:id="@+id/ib_record"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/ic_pgc_entrance"
                 android:layout_marginRight="10dp"
+                android:background="@drawable/ic_pgc_entrance"
                 />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center">
 
             <ImageButton
@@ -242,25 +245,25 @@
         </LinearLayout>
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center">
 
             <ImageButton
                 android:id="@+id/ib_snapshot"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/ic_snapshot"
                 android:layout_marginLeft="10dp"
+                android:background="@drawable/ic_snapshot"
                 />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:gravity="center">
 
             <ImageButton
@@ -276,9 +279,9 @@
 
     <LinearLayout
         android:id="@+id/ll_time"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:orientation="horizontal"
         android:visibility="gone">
 
         <com.suntek.ibmsapp.widget.TimeSeekBarView
@@ -296,16 +299,16 @@
         >
 
         <LinearLayout
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="50dp">
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="云台控制"
                 android:layout_marginLeft="20dp"
+                android:text="云台控制"
                 />
 
         </LinearLayout>
@@ -314,6 +317,41 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/CBDBDBD"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/iv_play"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@mipmap/ic_play"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/iv_pause"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@mipmap/ic_pause"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 

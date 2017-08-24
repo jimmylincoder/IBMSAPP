@@ -36,6 +36,10 @@ public class Camera implements Serializable
 
     private long playTime;
 
+    private String orgName;
+
+    private String vendorName;
+
     public String getId()
     {
         return id;
@@ -166,6 +170,26 @@ public class Camera implements Serializable
         return parentId;
     }
 
+    public String getOrgName()
+    {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName)
+    {
+        this.orgName = orgName;
+    }
+
+    public String getVendorName()
+    {
+        return vendorName;
+    }
+
+    public void setVendorName(String vendorName)
+    {
+        this.vendorName = vendorName;
+    }
+
     public static Camera generateByJson(Map<String,Object> content)
     {
         Camera camera = new Camera();
@@ -182,6 +206,8 @@ public class Camera implements Serializable
         camera.setDeviceId((String) content.get("device_id"));
         camera.setParentId((String) content.get("parent_id"));
 //        camera.setPlayTime((Integer) content.get("play_time"));
+        camera.setOrgName((String) content.get("org_name"));
+        camera.setVendorName((String) content.get("vendor_name"));
 
         return camera;
     }

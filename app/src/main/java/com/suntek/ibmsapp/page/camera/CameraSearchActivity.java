@@ -111,7 +111,7 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         Intent intent = new Intent(CameraSearchActivity.this, CameraPlayActivity.class);
-        Camera camera = cameraList.get(i - 1);
+        Camera camera = cameraList.get(i);
         Bundle bundle = new Bundle();
         bundle.putSerializable("camera", camera);
         intent.putExtras(bundle);

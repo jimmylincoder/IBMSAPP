@@ -19,11 +19,17 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 
+import com.dsw.calendar.component.MonthView;
+import com.dsw.calendar.views.GridCalendarView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
+import com.suntek.ibmsapp.task.camera.control.CameraPauseTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPlayTask;
+import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
+import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
@@ -149,6 +155,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @BindView(R.id.ll_fail)
     LinearLayout llFail;
 
+    PopupWindow dateChoose;
     PopupWindow menu;
     //当前时间handler
     private Handler timeHandler;
@@ -159,6 +166,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private int playerState = PLAYER_NOT_FULL;
     //定时器
     private Timer timer;
+    //查询进度
+    private Timer queryProgressTimer;
 
     private String session;
 
@@ -223,7 +232,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
     private void getCameraAddress(String startTime, String endTime)
     {
-       cameraPlayTask =  new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
+        if (cameraPlayTask != null)
+            cameraPlayTask.cancel(true);
+        cameraPlayTask = new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
                 camera.getPassword(), startTime, endTime)
         {
             @Override
@@ -235,8 +246,13 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     String address = (String) map.get("address");
                     session = (String) map.get("session");
-                    ivvVideo.setVideoPath(address);
-                    ivvVideo.start();
+                    if (address != null || !"".equals(address))
+                    {
+                        ivvVideo.setVideoPath(address);
+                        ivvVideo.start();
+
+                        startQueryProgress();
+                    }
                 }
                 else
                 {
@@ -288,10 +304,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                         ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("该时间点没有录像");
                     }
                     tvPlayType.setText("回放");
+                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+                    String beginTime = format.format(date);
+                    String endTime = format1.format(date) + " 23:00:00";
+                    reloadVideoView(beginTime, endTime);
                 }
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String beginTime = format.format(date);
-                String endTime = "2017-08-22 23:00:00";
             }
         });
         try
@@ -301,15 +319,15 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             Calendar calendarObj = Calendar.getInstance();
             timeSeekBar.setValue(new Date().getTime());
             Map<String, Object> time1 = new HashMap<>();
-            calendarObj.setTime(format.parse("2017-08-03 13:00:00"));
+            calendarObj.setTime(format.parse("2017-08-23 10:00:00"));
             time1.put("beginTime", calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse("2017-08-03 13:20:00"));
+            calendarObj.setTime(format.parse("2017-08-23 13:20:00"));
             time1.put("endTime", calendarObj.getTimeInMillis() / 1000);
 
             Map<String, Object> time2 = new HashMap<>();
-            calendarObj.setTime(format.parse("2017-08-03 13:30:00"));
+            calendarObj.setTime(format.parse("2017-08-23 13:30:00"));
             time2.put("beginTime", calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse("2017-08-03 13:40:00"));
+            calendarObj.setTime(format.parse("2017-08-23 13:40:00"));
             time2.put("endTime", calendarObj.getTimeInMillis() / 1000);
 
             recordList.add(time1);
@@ -432,7 +450,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         ivvVideo.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        //getCameraAddress("2017-08-22 01:00:00","2017-08-22 13:00:00");
+        //getCameraAddress("2017-08-24 08:00:00","2017-08-24 09:00:00");
         getCameraAddress(null, null);
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
         {
@@ -486,6 +504,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             @Override
             public boolean onError(IMediaPlayer iMediaPlayer, int i, int i1)
             {
+                llLoading.setVisibility(View.GONE);
                 llFail.setVisibility(View.VISIBLE);
                 return false;
             }
@@ -530,7 +549,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     protected void onDestroy()
     {
         isTimeRun = false;
-        timer.cancel();
+        if (timer != null)
+            timer.cancel();
+        if (queryProgressTimer != null)
+            queryProgressTimer.cancel();
         stopPlay();
         //  menu.dismiss();
         cameraPlayTask.cancel(true);
@@ -618,7 +640,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             //menu.setAnimationStyle(R.style.Popupwindow);
             LinearLayout llDownload = (LinearLayout) view1.findViewById(R.id.ll_download);
             LinearLayout llInfo = (LinearLayout) view1.findViewById(R.id.ll_info);
-            LinearLayout llDate = (LinearLayout) view1.findViewById(R.id.ll_date);
+            //LinearLayout llDate = (LinearLayout) view1.findViewById(R.id.ll_date);
             llDownload.setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -637,19 +659,21 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 {
                     menu.dismiss();
                     Intent intent = new Intent(CameraPlayActivity.this, CameraInfoActivity.class);
+                    intent.putExtra("camera", camera);
                     startActivity(intent);
                 }
             });
-            llDate.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    menu.dismiss();
-                    Intent intent = new Intent(CameraPlayActivity.this, CameraDateActivity.class);
-                    startActivity(intent);
-                }
-            });
+//            llDate.setOnClickListener(new View.OnClickListener()
+//            {
+//                @Override
+//                public void onClick(View v)
+//                {
+//                    menu.dismiss();
+//                    Intent intent = new Intent(CameraPlayActivity.this, CameraDateActivity.class);
+//                    startActivity(intent);
+//                }
+//            });
+            menu.setOutsideTouchable(true);
             menu.showAsDropDown(view);
         }
         else
@@ -749,6 +773,146 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             {
                 super.onPostExecute(result);
                 if (result.getError() != null)
+                {
+
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * 重新加载videoview
+     *
+     * @param startTime
+     * @param endTime
+     */
+    private void reloadVideoView(String startTime, String endTime)
+    {
+        ivvVideo.stopPlayback();
+        ivvVideo.release(true);
+        ivvVideo.stopBackgroundPlay();
+        IjkMediaPlayer.native_profileEnd();
+        if (!cameraPlayTask.isCancelled())
+            cameraPlayTask.cancel(true);
+        stopPlay();
+        initVideoView();
+        if (llFail.getVisibility() == View.VISIBLE)
+            llFail.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
+        getCameraAddress(startTime, endTime);
+    }
+
+    private void pause()
+    {
+        if (session == null)
+            return;
+        new CameraPauseTask(this, session)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("暂停成功");
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    private void resume()
+    {
+        if (session == null)
+            return;
+        new CameraResumeTask(this, session)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("恢复播放成功");
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    @OnClick(R.id.iv_pause)
+    public void pause(View view)
+    {
+        pause();
+    }
+
+    @OnClick(R.id.iv_play)
+    public void resume(View view)
+    {
+        resume();
+    }
+
+    @OnClick(R.id.tv_nowtime)
+    public void date(View view)
+    {
+        if (dateChoose == null)
+        {
+            View view1 = getLayoutInflater().inflate(R.layout.view_popup_daee, null);
+            dateChoose = new PopupWindow(view1, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            dateChoose.setOutsideTouchable(true);
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            GridCalendarView gcv = (GridCalendarView) view1.findViewById(R.id.gcv_date);
+            gcv.setDateClick(new MonthView.IDateClick()
+            {
+                @Override
+                public void onClickOnDate(int year, int month, int day)
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(year + " " + month + " " + day);
+                    dateChoose.dismiss();
+                }
+            });
+        }
+        else
+        {
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+        }
+    }
+
+    private void startQueryProgress()
+    {
+        if (queryProgressTimer == null)
+        {
+            queryProgressTimer = new Timer();
+            queryProgressTimer.schedule(new TimerTask()
+            {
+                @Override
+                public void run()
+                {
+                    queryProgress();
+                }
+            }, 5000, 8000);
+        }
+    }
+
+    private void queryProgress()
+    {
+        if (session == null)
+            return;
+
+        new CameraQueryProgressTask(this, session)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
                 {
 
                 }
