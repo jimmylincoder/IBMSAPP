@@ -24,6 +24,8 @@ public class CameraQueryRecordTask extends BaseTask
 
     private String deviceId;
 
+    private String parentId;
+
     private String ip;
 
     private String channel;
@@ -36,12 +38,13 @@ public class CameraQueryRecordTask extends BaseTask
 
     private String endTime;
 
-    public CameraQueryRecordTask(Context context, String deviceId, String ip, String channel,
+    public CameraQueryRecordTask(Context context, String deviceId, String parentId, String ip, String channel,
                                  String user, String password, String beginTime, String endTime)
     {
         super(context);
 
         this.deviceId = deviceId;
+        this.parentId = parentId;
         this.ip = ip;
         this.channel = channel;
         this.user = user;
@@ -57,7 +60,7 @@ public class CameraQueryRecordTask extends BaseTask
     {
         try
         {
-            List<RecordItem> res = cameraControlManager.queryRecord(deviceId, ip, channel, user, password, beginTime, endTime);
+            List<RecordItem> res = cameraControlManager.queryRecord(deviceId, parentId, ip, channel, user, password, beginTime, endTime);
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {

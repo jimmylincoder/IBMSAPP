@@ -168,7 +168,8 @@ public class CameraControlManager extends BaseComponent
     /**
      * 查询录像
      *
-     * @param deivceId
+     * @param deviceId
+     * @param parentId
      * @param ip
      * @param channel
      * @param user
@@ -177,12 +178,13 @@ public class CameraControlManager extends BaseComponent
      * @param endTime
      * @return
      */
-    public List<RecordItem> queryRecord(String deivceId, String ip, String channel,
+    public List<RecordItem> queryRecord(String deviceId,String parentId, String ip, String channel,
                                         String user, String password,
                                         String beginTime, String endTime)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("device_id", deivceId);
+        params.put("device_id", deviceId);
+        params.put("parent_id",parentId);
         params.put("device_ip", ip);
         params.put("channel", channel);
         params.put("user", user);

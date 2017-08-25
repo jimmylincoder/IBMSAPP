@@ -24,11 +24,13 @@ import com.dsw.calendar.views.GridCalendarView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPauseTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPlayTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
+import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
 import com.suntek.ibmsapp.util.FileUtil;
@@ -154,9 +156,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     LinearLayout llLoading;
     @BindView(R.id.ll_fail)
     LinearLayout llFail;
-
-    PopupWindow dateChoose;
-    PopupWindow menu;
+    //时间选择
+    private PopupWindow dateChoose;
+    //菜单
+    private PopupWindow menu;
+    //当前日期 yyyy-MM-dd
+    private String chooseDate;
     //当前时间handler
     private Handler timeHandler;
     private boolean mBackPressed;
@@ -164,20 +169,22 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private boolean isTimeRun = true;
     //全屏状态
     private int playerState = PLAYER_NOT_FULL;
-    //定时器
-    private Timer timer;
+    //时间轴定时器
+    private Timer seekBarTimer;
     //查询进度
     private Timer queryProgressTimer;
-
+    //当前视频会话
     private String session;
-
+    //是否隐藏
     private boolean isBackGround = false;
-
-    private List<Map<String, Object>> recordList;
-
+    //录像列表
+    private List<RecordItem> recordList;
+    //当前摄像头
     private Camera camera;
-
+    //请求播放线程
     private CameraPlayTask cameraPlayTask;
+    //存储录像对应时间段
+    private Map<String, Object> recordMap;
 
     @Override
     public int getLayoutId()
@@ -248,7 +255,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     session = (String) map.get("session");
                     if (address != null || !"".equals(address))
                     {
-                        ivvVideo.setVideoPath(address);
+                        try
+                        {
+                            ivvVideo.setVideoPath(address);
+                        } catch (Exception e)
+                        {
+                            e.printStackTrace();
+                            ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(e.getStackTrace().toString());
+                        }
                         ivvVideo.start();
 
                         startQueryProgress();
@@ -305,9 +319,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     }
                     tvPlayType.setText("回放");
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String beginTime = format.format(date);
-                    String endTime = format1.format(date) + " 23:00:00";
+                    String endTime = format1.format(new Date().getTime() - 1000 * 60 * 10);
                     reloadVideoView(beginTime, endTime);
                 }
             }
@@ -316,29 +330,42 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         {
             recordList = new ArrayList<>();
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+            chooseDate = format1.format(new Date());
             Calendar calendarObj = Calendar.getInstance();
             timeSeekBar.setValue(new Date().getTime());
-            Map<String, Object> time1 = new HashMap<>();
-            calendarObj.setTime(format.parse("2017-08-23 10:00:00"));
-            time1.put("beginTime", calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse("2017-08-23 13:20:00"));
-            time1.put("endTime", calendarObj.getTimeInMillis() / 1000);
+            RecordItem time1 = new RecordItem();
+            calendarObj.setTime(format.parse(chooseDate + " 09:00:00"));
+            time1.setStartTime(calendarObj.getTimeInMillis() / 1000);
+            calendarObj.setTime(format.parse(chooseDate + " 10:20:00"));
+            time1.setEndTime(calendarObj.getTimeInMillis() / 1000);
 
-            Map<String, Object> time2 = new HashMap<>();
-            calendarObj.setTime(format.parse("2017-08-23 13:30:00"));
-            time2.put("beginTime", calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse("2017-08-23 13:40:00"));
-            time2.put("endTime", calendarObj.getTimeInMillis() / 1000);
+            RecordItem time2 = new RecordItem();
+            calendarObj.setTime(format.parse(chooseDate + " 11:30:00"));
+            time2.setStartTime(calendarObj.getTimeInMillis() / 1000);
+            calendarObj.setTime(format.parse(chooseDate + " 13:40:00"));
+            time2.setEndTime(calendarObj.getTimeInMillis() / 1000);
 
             recordList.add(time1);
             recordList.add(time2);
             timeSeekBar.setRecordList(recordList);
+            startSeekBarTimer();
         } catch (ParseException e)
         {
             e.printStackTrace();
         }
-        timer = new Timer();
-        timer.schedule(new TimerTask()
+    }
+
+    /**
+     * 启动时间轴定时器
+     */
+    private void startSeekBarTimer()
+    {
+        if (seekBarTimer == null)
+        {
+            seekBarTimer = new Timer();
+        }
+        seekBarTimer.schedule(new TimerTask()
         {
             @Override
             public void run()
@@ -366,10 +393,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private boolean isInRecord(Date date)
     {
         boolean isContain = false;
-        for (Map<String, Object> map : recordList)
+        for (RecordItem map : recordList)
         {
-            long beginTime = (long) map.get("beginTime");
-            long endTime = (long) map.get("endTime");
+            long beginTime = map.getStartTime();
+            long endTime = map.getEndTime();
             long nowTime = date.getTime() / 1000;
             if (nowTime > beginTime && nowTime < endTime)
             {
@@ -388,23 +415,23 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
      */
     private Date getLastRecordTime(Date date)
     {
-        List<Map<String, Object>> lastNowTime = new ArrayList<>();
+        List<RecordItem> lastNowTime = new ArrayList<>();
         long nowTime = date.getTime() / 1000;
         long theLastedTime = 0;
         long theLast = 0;
-        for (Map<String, Object> map : recordList)
+        for (RecordItem map : recordList)
         {
-            long endTime = (long) map.get("endTime");
+            long endTime = map.getEndTime();
             if (nowTime > endTime)
             {
                 lastNowTime.add(map);
             }
         }
 
-        for (Map<String, Object> map : lastNowTime)
+        for (RecordItem map : lastNowTime)
         {
-            long endTime = (long) map.get("endTime");
-            long beginTime = (long) map.get("beginTime");
+            long endTime = map.getEndTime();
+            long beginTime = map.getStartTime();
             if (theLast != 0)
             {
                 long temp = nowTime - endTime;
@@ -450,7 +477,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         ivvVideo.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        //getCameraAddress("2017-08-24 08:00:00","2017-08-24 09:00:00");
+        //getCameraAddress("2017-08-24 16:00:00","2017-08-24 17:00:00");
         getCameraAddress(null, null);
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
         {
@@ -549,8 +576,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     protected void onDestroy()
     {
         isTimeRun = false;
-        if (timer != null)
-            timer.cancel();
+        if (seekBarTimer != null)
+            seekBarTimer.cancel();
         if (queryProgressTimer != null)
             queryProgressTimer.cancel();
         stopPlay();
@@ -774,14 +801,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 super.onPostExecute(result);
                 if (result.getError() != null)
                 {
-
+                    session = null;
                 }
             }
         }.execute();
     }
 
     /**
-     * 重新加载videoview
+     * 重新加载videoview进入历史回放
      *
      * @param startTime
      * @param endTime
@@ -874,7 +901,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 @Override
                 public void onClickOnDate(int year, int month, int day)
                 {
-                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(year + " " + month + " " + day);
+                    //   ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(year + " " + month + " " + day);
+                    chooseDate = year + "-" + "-" + month + "-" + day;
+                    //TODO 加载至该天有录像的地方  重新加载顶部时间
                     dateChoose.dismiss();
                 }
             });
@@ -918,5 +947,69 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 }
             }
         }.execute();
+    }
+
+    /**
+     * 初始化历史录像，获取最近一个月录像
+     */
+    private void initRecord()
+    {
+        //当前时间
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String nowDate = format.format(new Date());
+        String beginTime = format.format(nowDate + " 00:00:00");
+
+        //当前时间加一个月
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.MONTH, 1);
+        Date date = cal.getTime();
+        String endTime = format.format(date) + " 23:59:59";
+
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
+                camera.getUserName(), camera.getPassword(), beginTime, endTime)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
+                    for(RecordItem recordItem : recordItems)
+                    {
+                        String bt = format1.format(recordItem.getStartTime());
+                        //String et = format1.format(recordItem.getEndTime());
+                        String[] strs = bt.split(" ");
+                        String date = strs[0];
+                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(date);
+                        if(recordItems1 == null)
+                        {
+                            recordItems1 = new ArrayList<RecordItem>();
+                        }
+                        recordItems1.add(recordItem);
+                        recordMap.put(date,recordItems1);
+                    }
+
+                    //TODO 渲染时间轴
+
+                    //TODO 渲染日期选择
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * 渲染时间轴录像
+     *
+     * @param date
+     */
+    private void initTimeSeekRecord(String date)
+    {
+        List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(date);
     }
 }
