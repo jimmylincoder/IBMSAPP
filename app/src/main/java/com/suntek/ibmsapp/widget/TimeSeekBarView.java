@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -283,6 +284,7 @@ public class TimeSeekBarView extends View
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         nowTimeValue = new TimeAlgorithm(sdFormatter.format(nowTime));
         nowDate = dateFormat.format(new Date(miliSec));
+        Log.e("NowDate", "NwDate:" + nowDate );
         //当前界面的时间长度
         int sec = Math.round(viewWidth / (2 * INTERVAL_LENGTH * screenDensity));
 
@@ -626,7 +628,7 @@ public class TimeSeekBarView extends View
         if (!isInRecord(new Date(setTime)) && setTime < new Date().getTime() - 1 * 1000
                 && nowTimeValue.getSec(nowDate) != 0)
         {
-            //         setTime = getLastRecordTime(new Date(setTime)).getTime();
+            setTime = getLastRecordTime(new Date(setTime)).getTime();
         }
         setValue(setTime);
         postInvalidate();
@@ -635,6 +637,8 @@ public class TimeSeekBarView extends View
     private boolean isInRecord(Date date)
     {
         boolean isContain = false;
+        if (recordList == null)
+            return false;
         for (RecordItem map : recordList)
         {
             long beginTime = map.getStartTime();
@@ -651,6 +655,8 @@ public class TimeSeekBarView extends View
 
     private Date getLastRecordTime(Date date)
     {
+        if (recordList == null)
+            return new Date();
         List<RecordItem> lastNowTime = new ArrayList<>();
         long nowTime = date.getTime() / 1000;
         long theLastedTime = 0;

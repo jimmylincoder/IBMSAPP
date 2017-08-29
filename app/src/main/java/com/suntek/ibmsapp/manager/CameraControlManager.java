@@ -194,7 +194,7 @@ public class CameraControlManager extends BaseComponent
         if (endTime != null || !"".equals(endTime))
             params.put("end_time", endTime);
 
-        HttpResponse response = ibmsHttpEngine.request("camera.play", params);
+        HttpResponse response = ibmsHttpEngine.request("camera.query_record", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
             List<Map<String,Object>> maps = (List<Map<String, Object>>) response.getData().get("records");

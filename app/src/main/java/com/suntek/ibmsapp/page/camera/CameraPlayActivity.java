@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 
 import com.dsw.calendar.component.MonthView;
+import com.dsw.calendar.entity.CalendarInfo;
 import com.dsw.calendar.views.GridCalendarView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
@@ -51,6 +52,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -177,14 +179,15 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private String session;
     //是否隐藏
     private boolean isBackGround = false;
-    //录像列表
-    private List<RecordItem> recordList;
     //当前摄像头
     private Camera camera;
     //请求播放线程
     private CameraPlayTask cameraPlayTask;
     //存储录像对应时间段
-    private Map<String, Object> recordMap;
+    private Map<String, Object> recordMap = new HashMap<>();
+    //是否为录像状态
+    private boolean isRecorder = false;
+    GridCalendarView gcv;
 
     @Override
     public int getLayoutId()
@@ -201,6 +204,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         initTimeView();
         loadData();
         initTimeSeekBarView();
+        initRecord();
 
         List<HorizontalPicker.PickerItem> textItems = new ArrayList<>();
         for (int i = 1; i <= 25; i++)
@@ -261,7 +265,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                         } catch (Exception e)
                         {
                             e.printStackTrace();
-                            ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(e.getStackTrace().toString());
+                            ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(e.getMessage());
                         }
                         ivvVideo.start();
 
@@ -307,6 +311,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 if (date.getTime() > new Date().getTime())
                 {
                     timeSeekBar.setValue(new Date().getTime());
+                    isRecorder = false;
+                    reloadVideoView(null, null);
                     tvPlayType.setText("直播");
                 }
                 else
@@ -318,6 +324,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                         ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("该时间点没有录像");
                     }
                     tvPlayType.setText("回放");
+                    cancelSeekBarTimer();
+                    isRecorder = true;
                     SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String beginTime = format.format(date);
@@ -326,34 +334,34 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 }
             }
         });
-        try
-        {
-            recordList = new ArrayList<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
-            chooseDate = format1.format(new Date());
-            Calendar calendarObj = Calendar.getInstance();
-            timeSeekBar.setValue(new Date().getTime());
-            RecordItem time1 = new RecordItem();
-            calendarObj.setTime(format.parse(chooseDate + " 09:00:00"));
-            time1.setStartTime(calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse(chooseDate + " 10:20:00"));
-            time1.setEndTime(calendarObj.getTimeInMillis() / 1000);
+//        try
+//        {
+//            recordList = new ArrayList<>();
+//            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+        chooseDate = format1.format(new Date());
+//            Calendar calendarObj = Calendar.getInstance();
+//            timeSeekBar.setValue(new Date().getTime());
+//            RecordItem time1 = new RecordItem();
+//            calendarObj.setTime(format.parse(chooseDate + " 01:00:00"));
+//            time1.setStartTime(calendarObj.getTimeInMillis() / 1000);
+//            calendarObj.setTime(format.parse(chooseDate + " 01:01:00"));
+//            time1.setEndTime(calendarObj.getTimeInMillis() / 1000);
 
-            RecordItem time2 = new RecordItem();
-            calendarObj.setTime(format.parse(chooseDate + " 11:30:00"));
-            time2.setStartTime(calendarObj.getTimeInMillis() / 1000);
-            calendarObj.setTime(format.parse(chooseDate + " 13:40:00"));
-            time2.setEndTime(calendarObj.getTimeInMillis() / 1000);
+//            RecordItem time2 = new RecordItem();
+//            calendarObj.setTime(format.parse(chooseDate + " 11:30:00"));
+//            time2.setStartTime(calendarObj.getTimeInMillis() / 1000);
+//            calendarObj.setTime(format.parse(chooseDate + " 13:40:00"));
+//            time2.setEndTime(calendarObj.getTimeInMillis() / 1000);
 
-            recordList.add(time1);
-            recordList.add(time2);
-            timeSeekBar.setRecordList(recordList);
-            startSeekBarTimer();
-        } catch (ParseException e)
-        {
-            e.printStackTrace();
-        }
+//            recordList.add(time1);
+        //           recordList.add(time2);
+//            timeSeekBar.setRecordList(recordList);
+        startSeekBarTimer();
+//        } catch (ParseException e)
+//        {
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -386,6 +394,19 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     }
 
     /**
+     * 取消时间轴时间线程
+     */
+    private void cancelSeekBarTimer()
+    {
+        if (seekBarTimer != null)
+        {
+            seekBarTimer.cancel();
+            seekBarTimer.purge();
+            seekBarTimer = null;
+        }
+    }
+
+    /**
      * 判断是否已在录像内
      *
      * @return
@@ -393,11 +414,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private boolean isInRecord(Date date)
     {
         boolean isContain = false;
+        List<RecordItem> recordList = (List<RecordItem>) recordMap.get(chooseDate);
+        if (recordList == null)
+            return false;
         for (RecordItem map : recordList)
         {
             long beginTime = map.getStartTime();
             long endTime = map.getEndTime();
-            long nowTime = date.getTime() / 1000;
+            long nowTime = date.getTime();
             if (nowTime > beginTime && nowTime < endTime)
             {
                 isContain = true;
@@ -419,6 +443,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         long nowTime = date.getTime() / 1000;
         long theLastedTime = 0;
         long theLast = 0;
+        List<RecordItem> recordList = (List<RecordItem>) recordMap.get(chooseDate);
         for (RecordItem map : recordList)
         {
             long endTime = map.getEndTime();
@@ -522,6 +547,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 if (i == IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
                 {
                     llLoading.setVisibility(View.GONE);
+                    if (seekBarTimer == null)
+                        startSeekBarTimer();
                 }
                 return false;
             }
@@ -895,14 +922,37 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             dateChoose.setOutsideTouchable(true);
             dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
-            GridCalendarView gcv = (GridCalendarView) view1.findViewById(R.id.gcv_date);
+            gcv = (GridCalendarView) view1.findViewById(R.id.gcv_date);
+            initDateChoose();
             gcv.setDateClick(new MonthView.IDateClick()
             {
                 @Override
                 public void onClickOnDate(int year, int month, int day)
                 {
                     //   ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage(year + " " + month + " " + day);
-                    chooseDate = year + "-" + "-" + month + "-" + day;
+                    String monthStr = month < 10 ? "0" + month : month + "";
+                    String dayString = day < 10 ? "0" + day : day + "";
+
+                    chooseDate = year + "-" + monthStr + "-" + dayString;
+                    if (recordMap != null)
+                    {
+                        List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(chooseDate);
+                        if (recordItems == null)
+                        {
+                            ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("该时间无录像");
+                        }
+                        else
+                        {
+                            initTimeSeekRecord(chooseDate);
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                            RecordItem recordItem = getEarliestTime(recordItems);
+                            cancelSeekBarTimer();
+                            timeSeekBar.setValue(recordItem.getStartTime());
+                            String beginTime = format.format(new Date(recordItem.getStartTime()));
+                            String endTime = format.format(new Date(recordItem.getEndTime()));
+                            reloadVideoView(beginTime, endTime);
+                        }
+                    }
                     //TODO 加载至该天有录像的地方  重新加载顶部时间
                     dateChoose.dismiss();
                 }
@@ -958,13 +1008,14 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String nowDate = format.format(new Date());
-        String beginTime = format.format(nowDate + " 00:00:00");
+        String endTime = nowDate + " 23:59:59";
+
 
         //当前时间加一个月
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, 1);
+        cal.add(Calendar.MONTH, -1);
         Date date = cal.getTime();
-        String endTime = format.format(date) + " 23:59:59";
+        String beginTime = format.format(date) + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
                 camera.getUserName(), camera.getPassword(), beginTime, endTime)
@@ -976,24 +1027,25 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 if (result.getError() == null)
                 {
                     List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
-                    for(RecordItem recordItem : recordItems)
+                    for (RecordItem recordItem : recordItems)
                     {
                         String bt = format1.format(recordItem.getStartTime());
                         //String et = format1.format(recordItem.getEndTime());
                         String[] strs = bt.split(" ");
                         String date = strs[0];
                         List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(date);
-                        if(recordItems1 == null)
+                        if (recordItems1 == null)
                         {
                             recordItems1 = new ArrayList<RecordItem>();
                         }
                         recordItems1.add(recordItem);
-                        recordMap.put(date,recordItems1);
+                        recordMap.put(date, recordItems1);
                     }
 
                     //TODO 渲染时间轴
-
-                    //TODO 渲染日期选择
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    String date = simpleDateFormat.format(new Date());
+                    initTimeSeekRecord(date);
                 }
                 else
                 {
@@ -1011,5 +1063,63 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private void initTimeSeekRecord(String date)
     {
         List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(date);
+        if (recordItems == null)
+            return;
+        List<RecordItem> changeRecordItems = new ArrayList<>();
+        for (RecordItem recordItem : recordItems)
+        {
+            RecordItem recordItem1 = new RecordItem();
+            recordItem1.setStartTime(recordItem.getStartTime() / 1000);
+            recordItem1.setEndTime(recordItem.getEndTime() / 1000);
+            changeRecordItems.add(recordItem1);
+        }
+        timeSeekBar.setRecordList(changeRecordItems);
+    }
+
+    /**
+     * 初始化录像选择
+     */
+    private void initDateChoose()
+    {
+        List<CalendarInfo> calendarInfos = new ArrayList<>();
+        if (recordMap != null)
+        {
+            for (Map.Entry<String, Object> entry : recordMap.entrySet())
+            {
+                String date = entry.getKey();
+                String[] strs = date.split("-");
+                int year = Integer.parseInt(strs[0]);
+                int month = Integer.parseInt(strs[1]);
+                int day = Integer.parseInt(strs[2]);
+
+                CalendarInfo calendarInfo = new CalendarInfo(year, month, day, "有录像");
+                calendarInfos.add(calendarInfo);
+            }
+        }
+        gcv.setCalendarInfos(calendarInfos);
+    }
+
+    /**
+     * 获取录像最早时间录像
+     *
+     * @param recordItems
+     */
+    private RecordItem getEarliestTime(List<RecordItem> recordItems)
+    {
+        RecordItem recordItemTemp = new RecordItem();
+        recordItemTemp.setStartTime(0);
+        for (RecordItem recordItem : recordItems)
+        {
+            long bt = recordItem.getStartTime();
+            if (recordItemTemp.getStartTime() == 0)
+                recordItemTemp = recordItem;
+
+            if (bt < recordItemTemp.getStartTime())
+            {
+                recordItemTemp = recordItem;
+            }
+        }
+
+        return recordItemTemp;
     }
 }
