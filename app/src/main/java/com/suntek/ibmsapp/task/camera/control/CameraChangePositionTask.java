@@ -18,11 +18,14 @@ public class CameraChangePositionTask extends BaseTask
 
     private String session;
 
-    public CameraChangePositionTask(Context context, String session)
+    private String position;
+
+    public CameraChangePositionTask(Context context, String session,String position)
     {
         super(context);
 
         this.session = session;
+        this.position = position;
         cameraControlManager = (CameraControlManager) ComponentEngine.getInstance(CameraControlManager.class);
     }
 
@@ -31,7 +34,7 @@ public class CameraChangePositionTask extends BaseTask
     {
         try
         {
-            cameraControlManager.changePosition(session);
+            cameraControlManager.changePosition(session,position);
             return new BaseTask.TaskResult("", null);
         } catch (FHttpException e)
         {

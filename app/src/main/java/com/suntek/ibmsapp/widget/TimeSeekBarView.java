@@ -284,7 +284,6 @@ public class TimeSeekBarView extends View
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         nowTimeValue = new TimeAlgorithm(sdFormatter.format(nowTime));
         nowDate = dateFormat.format(new Date(miliSec));
-        Log.e("NowDate", "NwDate:" + nowDate );
         //当前界面的时间长度
         int sec = Math.round(viewWidth / (2 * INTERVAL_LENGTH * screenDensity));
 

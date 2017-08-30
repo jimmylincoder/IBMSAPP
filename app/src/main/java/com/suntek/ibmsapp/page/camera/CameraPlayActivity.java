@@ -28,6 +28,7 @@ import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
+import com.suntek.ibmsapp.task.camera.control.CameraChangePositionTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPauseTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPlayTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
@@ -187,7 +188,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     private Map<String, Object> recordMap = new HashMap<>();
     //是否为录像状态
     private boolean isRecorder = false;
+    //日历选择
     GridCalendarView gcv;
+    //记录录像开始时间
+    private long recordBeginTime;
+
 
     @Override
     public int getLayoutId()
@@ -323,45 +328,37 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                         //  timeSeekBar.setValue(getLastRecordTime(date).getTime());
                         ToastHelper.getInstance(CameraPlayActivity.this).shortShowMessage("该时间点没有录像");
                     }
-                    tvPlayType.setText("回放");
-                    cancelSeekBarTimer();
-                    isRecorder = true;
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String beginTime = format.format(date);
-                    String endTime = format1.format(new Date().getTime() - 1000 * 60 * 10);
-                    reloadVideoView(beginTime, endTime);
+                    else
+                    {
+                        tvPlayType.setText("回放");
+                        // cancelSeekBarTimer();
+
+//                        isRecorder = true;
+//                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                        String beginTime = format.format(date);
+//                        String endTime = format1.format(new Date().getTime() - 1000 * 60 * 10);
+//                        reloadVideoView(beginTime, endTime);
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        String beginTime = "2017-08-30 15:00:00";
+                        try
+                        {
+                            Date bt = format.parse(beginTime);
+                            long position = (date.getTime() - bt.getTime())/1000;
+                            changePosition(position);
+                        } catch (ParseException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                    }
                 }
             }
         });
-//        try
-//        {
-//            recordList = new ArrayList<>();
-//            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
         chooseDate = format1.format(new Date());
-//            Calendar calendarObj = Calendar.getInstance();
-//            timeSeekBar.setValue(new Date().getTime());
-//            RecordItem time1 = new RecordItem();
-//            calendarObj.setTime(format.parse(chooseDate + " 01:00:00"));
-//            time1.setStartTime(calendarObj.getTimeInMillis() / 1000);
-//            calendarObj.setTime(format.parse(chooseDate + " 01:01:00"));
-//            time1.setEndTime(calendarObj.getTimeInMillis() / 1000);
-
-//            RecordItem time2 = new RecordItem();
-//            calendarObj.setTime(format.parse(chooseDate + " 11:30:00"));
-//            time2.setStartTime(calendarObj.getTimeInMillis() / 1000);
-//            calendarObj.setTime(format.parse(chooseDate + " 13:40:00"));
-//            time2.setEndTime(calendarObj.getTimeInMillis() / 1000);
-
-//            recordList.add(time1);
-        //           recordList.add(time2);
-//            timeSeekBar.setRecordList(recordList);
         startSeekBarTimer();
-//        } catch (ParseException e)
-//        {
-//            e.printStackTrace();
-//        }
+
     }
 
     /**
@@ -502,8 +499,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         IjkMediaPlayer.loadLibrariesOnce(null);
         IjkMediaPlayer.native_profileBegin("libijkplayer.so");
         ivvVideo.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        //getCameraAddress("2017-08-24 16:00:00","2017-08-24 17:00:00");
-        getCameraAddress(null, null);
+        getCameraAddress("2017-08-30 15:00:00", "2017-08-30 23:59:59");
+        //getCameraAddress(null, null);
         ivvVideo.setOnVideoTouchListener(new OnVideoTouchListener()
         {
             @Override
@@ -1121,5 +1118,26 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
 
         return recordItemTemp;
+    }
+
+
+    /**
+     * 改变位置
+     *
+     * @param position
+     */
+    private void changePosition(long position)
+    {
+        if (session == null)
+            return;
+
+        new CameraChangePositionTask(this, session, Long.toString(position))
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+            }
+        }.execute();
     }
 }
