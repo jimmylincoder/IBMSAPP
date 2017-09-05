@@ -130,10 +130,11 @@ public class CameraControlManager extends BaseComponent
     /**
      * 改变播放位置
      */
-    public void changePosition(String session)
+    public void changePosition(String session,String position)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("session",session);
+        params.put("position",position);
         HttpResponse response = ibmsHttpEngine.request("camera.change_position", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
