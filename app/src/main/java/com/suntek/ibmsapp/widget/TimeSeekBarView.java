@@ -627,7 +627,7 @@ public class TimeSeekBarView extends View
         if (!isInRecord(new Date(setTime)) && setTime < new Date().getTime() - 1 * 1000
                 && nowTimeValue.getSec(nowDate) != 0)
         {
-            setTime = getLastRecordTime(new Date(setTime)).getTime();
+    //        setTime = getLastRecordTime(new Date(setTime)).getTime();
         }
         setValue(setTime);
         postInvalidate();
