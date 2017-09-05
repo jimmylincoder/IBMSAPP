@@ -30,6 +30,8 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private CameraHistoryFragment cameraHistoryFragment;
     private MeFragment meFragment;
 
+    private FragmentTransaction transaction;
+
     @Override
     public int getLayoutId()
     {
@@ -70,38 +72,79 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     public void onTabSelected(int position)
     {
         FragmentManager fm = this.getFragmentManager();
-        FragmentTransaction transation = fm.beginTransaction();
+        transaction = fm.beginTransaction();
+        hideFragment(transaction);
         switch (position)
         {
             case 0:
                 if(cameraListFragment == null)
                 {
                     cameraListFragment = new CameraListFragment();
+                    transaction.add(R.id.fl_content,cameraListFragment);
                 }
-                transation.replace(R.id.fl_content,cameraListFragment);
+                else
+                {
+                    transaction.show(cameraListFragment);
+                }
+                //此方法会导致fragment销灭
+                //transaction.replace(R.id.fl_content,cameraListFragment);
                 break;
 
             case 1:
                 if(cameraHistoryFragment == null)
                 {
                     cameraHistoryFragment = new CameraHistoryFragment();
+                    transaction.add(R.id.fl_content,cameraHistoryFragment);
                 }
-                transation.replace(R.id.fl_content,cameraHistoryFragment);
+                else
+                {
+                    transaction.show(cameraHistoryFragment);
+                }
+                //transaction.replace(R.id.fl_content,cameraHistoryFragment);
                 break;
 
             case 2:
                 if(meFragment == null)
                 {
                     meFragment = new MeFragment();
+                    transaction.add(R.id.fl_content,meFragment);
                 }
-                transation.replace(R.id.fl_content,meFragment);
+                else
+                {
+                    transaction.show(meFragment);
+                }
+                //transaction.replace(R.id.fl_content,meFragment);
                 break;
             default:
                 break;
         }
 
-        transation.commit();
+        transaction.commit();
     }
+
+    /**
+     * 隐藏其他fragment,如果不隐藏将一直累加
+     *
+     * @param transaction
+     */
+    private void hideFragment(FragmentTransaction transaction)
+    {
+        if (cameraListFragment != null)
+        {
+            transaction.hide(cameraListFragment);
+        }
+
+        if (cameraHistoryFragment != null)
+        {
+            transaction.hide(cameraHistoryFragment);
+        }
+
+        if (meFragment != null)
+        {
+            transaction.hide(meFragment);
+        }
+    }
+
 
     @Override
     public void onTabUnselected(int position)

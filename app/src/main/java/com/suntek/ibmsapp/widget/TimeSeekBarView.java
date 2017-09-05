@@ -11,11 +11,14 @@ import android.support.v4.view.ViewPager;
 import android.text.Layout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Scroller;
+
+import com.suntek.ibmsapp.model.RecordItem;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -87,7 +90,7 @@ public class TimeSeekBarView extends View
     private boolean isEnabled;
 
     //录像时间段
-    private List<Map<String, Object>> recordList;
+    private List<RecordItem> recordList;
 
     /**
      * 滑动时时间变化监听器
@@ -171,10 +174,10 @@ public class TimeSeekBarView extends View
         RectF r;
         if (startTime < endTime)
         {
-            for (Map<String, Object> record : recordList)
+            for (RecordItem record : recordList)
             {
-                long recordBeginTime = (long) record.get("beginTime");
-                long recordEndTime = (long) record.get("endTime");
+                long recordBeginTime = record.getStartTime();
+                long recordEndTime = record.getEndTime();
                 linePaint.setColor(Color.parseColor("#673320"));
                 r = new RectF((recordBeginTime - startTime) * INTERVAL_LENGTH
                         * screenDensity, 0, (recordEndTime - startTime)
@@ -189,10 +192,10 @@ public class TimeSeekBarView extends View
         }
         else
         {
-            for (Map<String, Object> record : recordList)
+            for (RecordItem record : recordList)
             {
-                long recordBeginTime = (long) record.get("beginTime");
-                long recordEndTime = (long) record.get("endTime");
+                long recordBeginTime = record.getStartTime();
+                long recordEndTime = record.getEndTime();
                 if (recordEndTime >= startTime)
                 {
                     linePaint.setColor(Color.parseColor("#673320"));
@@ -588,7 +591,7 @@ public class TimeSeekBarView extends View
      *
      * @param recordList
      */
-    public void setRecordList(List<Map<String, Object>> recordList)
+    public void setRecordList(List<RecordItem> recordList)
     {
         this.recordList = recordList;
         postInvalidate();
@@ -624,7 +627,7 @@ public class TimeSeekBarView extends View
         if (!isInRecord(new Date(setTime)) && setTime < new Date().getTime() - 1 * 1000
                 && nowTimeValue.getSec(nowDate) != 0)
         {
-            setTime = getLastRecordTime(new Date(setTime)).getTime();
+    //        setTime = getLastRecordTime(new Date(setTime)).getTime();
         }
         setValue(setTime);
         postInvalidate();
@@ -633,10 +636,12 @@ public class TimeSeekBarView extends View
     private boolean isInRecord(Date date)
     {
         boolean isContain = false;
-        for (Map<String, Object> map : recordList)
+        if (recordList == null)
+            return false;
+        for (RecordItem map : recordList)
         {
-            long beginTime = (long) map.get("beginTime");
-            long endTime = (long) map.get("endTime");
+            long beginTime = map.getStartTime();
+            long endTime = map.getEndTime();
             long nowTime = date.getTime() / 1000;
             if (nowTime > beginTime && nowTime < endTime)
             {
@@ -649,23 +654,25 @@ public class TimeSeekBarView extends View
 
     private Date getLastRecordTime(Date date)
     {
-        List<Map<String, Object>> lastNowTime = new ArrayList<>();
+        if (recordList == null)
+            return new Date();
+        List<RecordItem> lastNowTime = new ArrayList<>();
         long nowTime = date.getTime() / 1000;
         long theLastedTime = 0;
         long theLast = 0;
-        for (Map<String, Object> map : recordList)
+        for (RecordItem map : recordList)
         {
-            long beginTime = (long) map.get("beginTime");
+            long beginTime = map.getStartTime();
             if (nowTime < beginTime)
             {
                 lastNowTime.add(map);
             }
         }
 
-        for (Map<String, Object> map : lastNowTime)
+        for (RecordItem map : lastNowTime)
         {
-            long endTime = (long) map.get("endTime");
-            long beginTime = (long) map.get("beginTime");
+            long endTime = map.getEndTime();
+            long beginTime = map.getStartTime();
             if (theLast != 0)
             {
                 long temp = beginTime - nowTime;

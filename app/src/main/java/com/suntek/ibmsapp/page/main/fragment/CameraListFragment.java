@@ -1,9 +1,9 @@
 package com.suntek.ibmsapp.page.main.fragment;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -13,31 +13,22 @@ import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraListAdapter;
-import com.suntek.ibmsapp.component.HttpRequest;
-import com.suntek.ibmsapp.component.HttpResponse;
-import com.suntek.ibmsapp.component.RequestBody;
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
-import com.suntek.ibmsapp.network.RetrofitHelper;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
-import com.suntek.ibmsapp.page.camera.CameraListActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
+import com.suntek.ibmsapp.task.camera.CameraListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * 摄像机列表
@@ -46,7 +37,7 @@ import rx.schedulers.Schedulers;
  */
 public class CameraListFragment extends BaseFragment
 {
-    private List<Map<String,Object>> cameraList;
+    private List<Camera> cameraList;
 
     private CameraListAdapter cameraListAdapter;
 
@@ -62,6 +53,12 @@ public class CameraListFragment extends BaseFragment
     SaveDataWithSharedHelper sharedHelper;
 
     private String areaId;
+
+    //列表总页数
+    private int totalPage;
+
+    //当前页数，默认第1页
+    private int currentPage = 1;
 
     @Override
     public int getLayoutId()
@@ -85,7 +82,21 @@ public class CameraListFragment extends BaseFragment
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
 
                 // Do work to refresh the list here.
-                getCameraList();
+                currentPage = 1;
+                getCameraList(currentPage, true);
+            }
+
+        });
+
+        ptrCameraList.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
+        {
+            @Override
+            public void onLastItemVisible()
+            {
+                if (currentPage < totalPage)
+                {
+                    getCameraList(++currentPage, false);
+                }
             }
         });
 
@@ -94,22 +105,30 @@ public class CameraListFragment extends BaseFragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
-                Map<String,Object> camera = cameraList.get(position - 1);
-                intent.putExtra("cameraId",camera.get("id") + "");
-                intent.putExtra("cameraName",camera.get("name") + "");
+                Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
+                Camera camera = cameraList.get(position - 1);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("camera", (Serializable) camera);
+                bundle.putSerializable("camera", camera);
                 intent.putExtras(bundle);
+                intent.putExtra("cameraId", cameraList.get(position - 1).getId());
+                intent.putExtra("cameraName", cameraList.get(position - 1).getName());
                 startActivity(intent);
             }
         });
 
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View view = inflater.inflate(R.layout.item_list_empty, null);
+        ptrCameraList.setEmptyView(view);
+
         cameraList = new ArrayList<>();
 
-        cameraListAdapter = new CameraListAdapter(getActivity(),cameraList);
+        cameraListAdapter = new CameraListAdapter(getActivity(), cameraList);
         actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
+
+        areaId = sharedHelper.getString("choose_org_code");
+
+        getCameraList(currentPage, true);
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -126,51 +145,46 @@ public class CameraListFragment extends BaseFragment
         startActivity(intent);
     }
 
-    private void getCameraList()
+    private void getCameraList(int page, boolean isRefresh)
     {
-        HttpRequest request = null;
-        try
+        new CameraListTask(getActivity(), areaId, page)
         {
-            request = new RequestBody()
-                    .putParams("page","1",false,"")
-                    .putParams("area_id",areaId,false,"")
-                    .build();
-        }catch (Exception e)
-        {
-            ToastHelper.getInstance(getActivity()).shortShowMessage(e.getMessage());
-        }
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    Page<List<Camera>> cameraPage = (Page<List<Camera>>) result.getResultData();
+                    List<Camera> newCameraList = cameraPage.getData();
+                    totalPage = cameraPage.getTotalPage();
 
-        RetrofitHelper.getCameraApi()
-                .list(request)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse>()
-                {
-                    @Override
-                    public void call(HttpResponse listHttpResponse)
+                    if (isRefresh)
                     {
-                        if(listHttpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
-                        {
-                            cameraList = (List) listHttpResponse.getData().get("camera_list");
-                            cameraList.addAll(cameraList);
-                            cameraListAdapter.setCameraList(cameraList);
-                            cameraListAdapter.notifyDataSetChanged();
-                        }
-                        else
-                        {
-                            ToastHelper.getInstance(getActivity()).shortShowMessage(listHttpResponse.getErrorMessage());
-                        }
+                        cameraList = newCameraList;
+                    }
+                    else
+                    {
+                        cameraList.addAll(newCameraList);
+                    }
+                    cameraListAdapter.setCameraList(cameraList);
+                    cameraListAdapter.notifyDataSetChanged();
+                    try{
                         ptrCameraList.onRefreshComplete();
                     }
-                }, new Action1<Throwable>()
-                {
-                    @Override
-                    public void call(Throwable throwable)
+                    catch (Exception e)
                     {
-                        ptrCameraList.onRefreshComplete();
+                        e.printStackTrace();
                     }
-                });
+
+                }
+                else
+                {
+                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
+
+                }
+            }
+        }.execute();
     }
 
     @Override
@@ -178,7 +192,12 @@ public class CameraListFragment extends BaseFragment
     {
         super.onResume();
         tvArea.setText(sharedHelper.getString("choose_name"));
-        areaId = sharedHelper.getString("choose_org_code");
-        getCameraList();
+        String chooseAreaId = sharedHelper.getString("choose_org_code");
+        if (!areaId.equals(chooseAreaId))
+        {
+            currentPage = 1;
+            areaId = chooseAreaId;
+            getCameraList(currentPage, true);
+        }
     }
 }

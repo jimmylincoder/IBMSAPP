@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.model.Camera;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,9 @@ public class CameraSearchAdapter extends BaseAdapter
 {
     private Context context;
 
-    private List<Map<String,Object>> cameraList;
+    private List<Camera> cameraList;
 
-    public CameraSearchAdapter(Context context,List<Map<String,Object>> cameraList)
+    public CameraSearchAdapter(Context context,List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -65,7 +66,7 @@ public class CameraSearchAdapter extends BaseAdapter
             holder = new CameraSearchAdapter.ViewHolder(view);
             view.setTag(holder);
         }
-        holder.tvCameraName.setText(cameraList.get(i).get("name") + "");
+        holder.tvCameraName.setText(cameraList.get(i).getName());
         return view;
     }
 
@@ -83,12 +84,12 @@ public class CameraSearchAdapter extends BaseAdapter
         }
     }
 
-    public List<Map<String, Object>> getCameraList()
+    public List<Camera> getCameraList()
     {
         return cameraList;
     }
 
-    public void setCameraList(List<Map<String, Object>> cameraList)
+    public void setCameraList(List<Camera> cameraList)
     {
         this.cameraList = cameraList;
     }

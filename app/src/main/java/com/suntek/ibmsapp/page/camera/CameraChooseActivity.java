@@ -8,25 +8,20 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.AreaListAdapter;
-import com.suntek.ibmsapp.component.HttpRequest;
-import com.suntek.ibmsapp.component.HttpResponse;
-import com.suntek.ibmsapp.component.RequestBody;
+
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.core.Autowired;
-import com.suntek.ibmsapp.network.RetrofitHelper;
+import com.suntek.ibmsapp.model.Area;
+import com.suntek.ibmsapp.task.area.AreaListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+
 
 /**
  * 摄像机选择
@@ -40,7 +35,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private AreaListAdapter areaListAdapter;
 
-    private List<Map<String, Object>> areas;
+    private List<Area> areas;
 
     @Autowired
     SaveDataWithSharedHelper sharedHelper;
@@ -66,60 +61,43 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     {
         tvNowArea.setText(sharedHelper.getString("choose_name"));
         areas = new ArrayList<>();
-        Map<String,Object> all = new HashMap<>();
-        all.put("id","1");
-        all.put("org_code","01");
-        all.put("name","华侨城中心小区");
-        areas.add(all);
+        Area area = new Area();
+        area.setId("1");
+        area.setOgrCode("01");
+        area.setName("华侨城中心小区");
+        areas.add(area);
     }
 
     private void initAreaListView(String parentId)
     {
-        HttpRequest request = null;
-        try
+        new AreaListTask(this, parentId)
         {
-            request = new RequestBody().putParams("parent_id", parentId, false, null).build();
-        } catch (Exception e)
-        {
-            ToastHelper.getInstance(this).shortShowMessage(e.getMessage());
-        }
-        RetrofitHelper.getAreaPai()
-                .list(request)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse>()
-                {
-                    @Override
-                    public void call(HttpResponse httpResponse)
-                    {
-                        if (httpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
-                        {
-                            List<Map<String,Object>> areaList = (List) httpResponse.getData().get("area_list");
-                            if (!areaList.isEmpty())
-                            {
-                                areas.addAll(areaList);
-                                areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
-                                lvArea.setAdapter(areaListAdapter);
-                            }
-                            else
-                            {
-                                finish();
-                            }
-                        }
-                        else
-                        {
-                            ToastHelper.getInstance(CameraChooseActivity.this).shortShowMessage(httpResponse.getErrorMessage());
-                        }
-                    }
-                }, new Action1<Throwable>()
-                {
-                    @Override
-                    public void call(Throwable throwable)
-                    {
 
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    List<Area> newAreas = (List<Area>) result.getResultData();
+                    if (!newAreas.isEmpty())
+                    {
+                        areas.addAll(newAreas);
+                        areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
+                        lvArea.setAdapter(areaListAdapter);
                     }
-                });
+                    else
+                    {
+                        finish();
+                    }
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraChooseActivity.this).shortShowMessage(result.getError().getMessage());
+
+                }
+            }
+        }.execute();
     }
 
     @Override
@@ -143,21 +121,22 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        String orgCode = (String) areas.get(i).get("org_code");
-        String id = (String) areas.get(i).get("id");
-        String name = (String) areas.get(i).get("name");
+        String orgCode = areas.get(i).getOgrCode();
+        String id = areas.get(i).getId();
+        String name = areas.get(i).getName();
         sharedHelper.save("choose_org_code", orgCode);
         sharedHelper.save("choose_name", name);
-        if("01".equals(orgCode))
+        if ("01".equals(orgCode))
         {
             finish();
-        }else
+        }
+        else
         {
             try
             {
                 areas.clear();
                 initAreaListView(id);
-            }catch (Exception e)
+            } catch (Exception e)
             {
                 e.printStackTrace();
             }

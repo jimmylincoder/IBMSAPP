@@ -1,12 +1,12 @@
 package com.suntek.ibmsapp.component.base;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.Window;
+import android.support.v7.app.AppCompatActivity;
 
 import com.suntek.ibmsapp.component.core.ComponentEngine;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -18,7 +18,7 @@ import butterknife.Unbinder;
  * @author jimmy
  */
 
-public abstract class BaseActivity extends RxAppCompatActivity
+public abstract class BaseActivity extends AppCompatActivity
 {
     private Unbinder bind;
 
