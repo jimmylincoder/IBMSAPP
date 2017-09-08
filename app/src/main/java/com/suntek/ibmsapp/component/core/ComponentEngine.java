@@ -58,12 +58,11 @@ public class ComponentEngine implements Serializable
             Enumeration<String> n=df.entries();
             while(n.hasMoreElements()){
                 String className=n.nextElement().toString();
-                if(className.indexOf("com.flinkinfo.aar")!=-1)
+                if(className.indexOf("com.suntek.ibmsapp.component.httpclient")!=-1)
                 {
                     Class clazz = Class.forName(className); //b
 
                     Object object=ComponentEngine.getInstance(clazz);
-
                 }
             }
         } catch (Exception e)

@@ -1,17 +1,24 @@
 package com.suntek.ibmsapp.model;
 
+import java.io.Serializable;
+import java.util.Map;
+
 /**
  * 摄像机
  *
  * @author jimmy
  */
-public class Camera
+public class Camera implements Serializable
 {
     private String id;
 
     private String name;
 
     private String type;
+
+    private String deviceId;
+
+    private String parentId;
 
     private String place;
 
@@ -26,6 +33,12 @@ public class Camera
     private String userName;
 
     private String password;
+
+    private long playTime;
+
+    private String orgName;
+
+    private String vendorName;
 
     public String getId()
     {
@@ -126,4 +139,78 @@ public class Camera
     {
         this.password = password;
     }
+
+    public void setPlayTime(long playTime)
+    {
+        this.playTime = playTime;
+    }
+
+    public long getPlayTime()
+    {
+        return playTime;
+    }
+
+    public void setDeviceId(String deviceId)
+    {
+        this.deviceId = deviceId;
+    }
+
+    public String getDeviceId()
+    {
+        return deviceId;
+    }
+
+    public void setParentId(String parentId)
+    {
+        this.parentId = parentId;
+    }
+
+    public String getParentId()
+    {
+        return parentId;
+    }
+
+    public String getOrgName()
+    {
+        return orgName;
+    }
+
+    public void setOrgName(String orgName)
+    {
+        this.orgName = orgName;
+    }
+
+    public String getVendorName()
+    {
+        return vendorName;
+    }
+
+    public void setVendorName(String vendorName)
+    {
+        this.vendorName = vendorName;
+    }
+
+    public static Camera generateByJson(Map<String,Object> content)
+    {
+        Camera camera = new Camera();
+        camera.setId((String) content.get("id"));
+        camera.setName((String) content.get("name"));
+        camera.setType((String) content.get("type"));
+        camera.setPlace((String) content.get("place"));
+        camera.setChannel((String) content.get("channel"));
+        camera.setOrgCode((String) content.get("org_code"));
+        camera.setIp((String) content.get("ip"));
+        camera.setPort((String) content.get("port"));
+        camera.setUserName((String) content.get("user_name"));
+        camera.setPassword((String) content.get("password"));
+        camera.setDeviceId((String) content.get("device_id"));
+        camera.setParentId((String) content.get("parent_id"));
+//        camera.setPlayTime((Integer) content.get("play_time"));
+        camera.setOrgName((String) content.get("org_name"));
+        camera.setVendorName((String) content.get("vendor_name"));
+
+        return camera;
+    }
+
+
 }

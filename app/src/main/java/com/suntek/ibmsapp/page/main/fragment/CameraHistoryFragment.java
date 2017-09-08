@@ -1,49 +1,46 @@
 package com.suntek.ibmsapp.page.main.fragment;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
-import com.suntek.ibmsapp.component.HttpRequest;
-import com.suntek.ibmsapp.component.HttpResponse;
-import com.suntek.ibmsapp.component.RequestBody;
+
+import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
-import com.suntek.ibmsapp.network.RetrofitHelper;
+import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
-import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
+import com.suntek.ibmsapp.task.camera.CameraHistoryListTask;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+
 
 /**
  * 历史查看视频列表
  *
  * @author jimmy
  */
-public class CameraHistoryFragment extends BaseFragment implements AdapterView.OnItemClickListener,PullToRefreshBase.OnRefreshListener
+public class CameraHistoryFragment extends BaseFragment implements AdapterView.OnItemClickListener, PullToRefreshBase.OnRefreshListener
 {
     @BindView(R.id.ptr_history)
     PullToRefreshListView ptrHistory;
 
     private CameraSearchAdapter cameraSearchAdapter;
 
-    private List<Map<String,Object>> cameraList;
+    private List<Camera> cameraList;
+
+    private int totalPage;
+
+    private int currentPage = 1;
 
     @Override
     public int getLayoutId()
@@ -55,19 +52,33 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     public void initViews(Bundle savedInstanceState)
     {
         cameraList = new ArrayList<>();
-        cameraSearchAdapter = new CameraSearchAdapter(getActivity(),cameraList);
+        cameraSearchAdapter = new CameraSearchAdapter(getActivity(), cameraList);
         ptrHistory.setAdapter(cameraSearchAdapter);
         ptrHistory.setOnItemClickListener(this);
-        getCameraHistory();
+        ptrHistory.setOnRefreshListener(this);
+        ptrHistory.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
+        {
+            @Override
+            public void onLastItemVisible()
+            {
+                if (currentPage < totalPage)
+                {
+                    getCameraHistory(++currentPage, false);
+                }
+            }
+        });
+
+        getCameraHistory(currentPage, true);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        Intent intent = new Intent(getActivity(),CameraPlayActivity.class);
-        Map<String,Object> camera = cameraList.get(i - 1);
-        intent.putExtra("cameraId",camera.get("id") + "");
-        intent.putExtra("cameraName",camera.get("name") + "");
+        Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
+        Camera camera = cameraList.get(i - 1);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("camera",camera);
+        intent.putExtras(bundle);
         startActivity(intent);
     }
 
@@ -79,47 +90,42 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
 
         // Update the LastUpdatedLabel
         refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
-        getCameraHistory();
+        currentPage = 1;
+        getCameraHistory(currentPage, true);
     }
 
-    private void getCameraHistory()
+    private void getCameraHistory(int page, boolean isRefresh)
     {
-        HttpRequest request = null;
-        try
+        new CameraHistoryListTask(getActivity(), page)
         {
-            request = new RequestBody()
-                    .putParams("page","1",false,"")
-                    .build();
-        } catch (Exception e)
-        {
-            ToastHelper.getInstance(getActivity()).shortShowMessage(e.getMessage());
-        }
-        RetrofitHelper.getCameraApi()
-                .history(request)
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<HttpResponse>()
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
                 {
-                    @Override
-                    public void call(HttpResponse httpResponse)
+                    Page<List<Camera>> cameraPage = (Page<List<Camera>>) result.getResultData();
+                    List<Camera> newCameraList = cameraPage.getData();
+                    totalPage = cameraPage.getTotalPage();
+                    if (isRefresh)
                     {
-                        if (httpResponse.getCode() == HttpResponse.STATUS_SUCCESS)
-                        {
-                            cameraList = (List) httpResponse.getData().get("camera_list");
-                            cameraSearchAdapter.setCameraList(cameraList);
-                            cameraSearchAdapter.notifyDataSetChanged();
-                            ptrHistory.onRefreshComplete();
-                        }
+                        cameraList = newCameraList;
                     }
-                }, new Action1<Throwable>()
+                    else
+                    {
+                        cameraList.addAll(newCameraList);
+                    }
+                    cameraSearchAdapter.setCameraList(cameraList);
+                    cameraSearchAdapter.notifyDataSetChanged();
+                    ptrHistory.onRefreshComplete();
+                }
+                else
                 {
-                    @Override
-                    public void call(Throwable throwable)
-                    {
-                        ptrHistory.onRefreshComplete();
-                    }
-                });
+                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
+
+                }
+            }
+        }.execute();
     }
 
 

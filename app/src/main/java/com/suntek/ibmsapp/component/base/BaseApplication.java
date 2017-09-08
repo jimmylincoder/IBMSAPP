@@ -36,6 +36,8 @@ public abstract class BaseApplication extends Application
     public void onCreate()
     {
         super.onCreate();
+        application = this;
+        BaseActivity.context = this;
         ComponentEngine.init(this);
         ComponentEngine.initialLoad(this);
     }

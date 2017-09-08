@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.model.Area;
 
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,9 @@ public class AreaListAdapter extends BaseAdapter
 {
     private Context context;
 
-    private List<Map<String,Object>> cameraList;
+    private List<Area> cameraList;
 
-    public AreaListAdapter(Context context,List<Map<String,Object>> cameraList)
+    public AreaListAdapter(Context context,List<Area> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -66,7 +67,7 @@ public class AreaListAdapter extends BaseAdapter
             view.setTag(holder);
         }
 
-        holder.tvAreaName.setText(cameraList.get(i).get("name") + "");
+        holder.tvAreaName.setText(cameraList.get(i).getName());
         return view;
     }
 

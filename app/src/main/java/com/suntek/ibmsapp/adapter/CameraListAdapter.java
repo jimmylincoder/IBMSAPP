@@ -27,11 +27,11 @@ public class CameraListAdapter extends BaseAdapter
 {
     private Context context;
 
-    private List<Map<String,Object>> cameraList;
+    private List<Camera> cameraList;
 
     private ViewHolder viewHolder;
 
-    public CameraListAdapter(Context context,List<Map<String,Object>> cameraList)
+    public CameraListAdapter(Context context,List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -70,7 +70,7 @@ public class CameraListAdapter extends BaseAdapter
             holder = new CameraListAdapter.ViewHolder(convertView);
             convertView.setTag(holder);        }
 
-        holder.tvName.setText((String) cameraList.get(position).get("name"));
+        holder.tvName.setText((String) cameraList.get(position).getName());
         return convertView;
     }
 
@@ -90,12 +90,12 @@ public class CameraListAdapter extends BaseAdapter
         }
     }
 
-    public List<Map<String,Object>> getCameraList()
+    public List<Camera> getCameraList()
     {
         return cameraList;
     }
 
-    public void setCameraList(List<Map<String,Object>> cameraList)
+    public void setCameraList(List<Camera> cameraList)
     {
         this.cameraList = cameraList;
     }

@@ -1,5 +1,9 @@
 package com.suntek.ibmsapp.component;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.suntek.ibmsapp.component.http.BaseHttpRequest;
+
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -7,23 +11,12 @@ import java.util.Map;
  *
  * @author jimmy
  */
-public class HttpRequest
+public class HttpRequest extends BaseHttpRequest implements Serializable
 {
+    @JSONField(name = "service")
     private String serviceName;
 
-    private String os;
-
     private Map<String,Object> params;
-
-    public String getOs()
-    {
-        return os;
-    }
-
-    public void setOs(String os)
-    {
-        this.os = os;
-    }
 
     public Map<String, Object> getParams()
     {
