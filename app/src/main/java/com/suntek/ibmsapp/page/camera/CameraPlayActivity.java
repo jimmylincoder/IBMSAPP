@@ -778,7 +778,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
         else
         {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 300));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 320));
             flVideo.setLayoutParams(layoutParams);
         }
         llHead.setVisibility(viewType);

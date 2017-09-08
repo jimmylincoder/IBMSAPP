@@ -1,6 +1,6 @@
 package com.suntek.ibmsapp.component.base;
 
-import android.app.Fragment;
+
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -16,7 +16,7 @@ import butterknife.Unbinder;
 /**
  *  fragment基类
  */
-public abstract class BaseFragment extends Fragment
+public abstract class BaseFragment extends android.support.v4.app.Fragment
 {
     private Unbinder bind;
 

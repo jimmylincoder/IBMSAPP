@@ -1,24 +1,26 @@
 package com.suntek.ibmsapp.page.main;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.base.BaseFragmentActivity;
 import com.suntek.ibmsapp.page.main.fragment.CameraHistoryFragment;
 import com.suntek.ibmsapp.page.main.fragment.CameraListFragment;
 import com.suntek.ibmsapp.page.main.fragment.MeFragment;
+import com.suntek.ibmsapp.page.main.fragment.PhotoListFragment;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 
-public class MainActivity extends BaseActivity implements BottomNavigationBar.OnTabSelectedListener
+public class MainActivity extends BaseFragmentActivity implements BottomNavigationBar.OnTabSelectedListener
 {
 
     private ArrayList<Fragment> fragments;
@@ -29,6 +31,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private CameraListFragment cameraListFragment;
     private CameraHistoryFragment cameraHistoryFragment;
     private MeFragment meFragment;
+    private PhotoListFragment photoListFragment;
 
     private FragmentTransaction transaction;
 
@@ -42,11 +45,13 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     public void initViews(Bundle savedInstanceState)
     {
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
-        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_tv_play,"视频").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_history,"历史").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_account,"我的").setActiveColor(R.color.orange))
+        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_tv_play, "视频").setActiveColor(R.color.orange))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_photo, "相册").setActiveColor(R.color.orange))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_history, "历史").setActiveColor(R.color.orange))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_account, "我的").setActiveColor(R.color.orange))
                 .setFirstSelectedPosition(lastSelectedPosition)
-                .initialise();;
+                .initialise();
+        ;
 
 
         bnbTab.setTabSelectedListener(this);
@@ -55,11 +60,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
 
     private void setDefaultFragment()
     {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
 
         cameraListFragment = new CameraListFragment();
-        transaction.replace(R.id.fl_content,cameraListFragment);
+        transaction.replace(R.id.fl_content, cameraListFragment);
         transaction.commit();
     }
 
@@ -71,16 +76,16 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     @Override
     public void onTabSelected(int position)
     {
-        FragmentManager fm = this.getFragmentManager();
+        FragmentManager fm = this.getSupportFragmentManager();
         transaction = fm.beginTransaction();
         hideFragment(transaction);
         switch (position)
         {
             case 0:
-                if(cameraListFragment == null)
+                if (cameraListFragment == null)
                 {
                     cameraListFragment = new CameraListFragment();
-                    transaction.add(R.id.fl_content,cameraListFragment);
+                    transaction.add(R.id.fl_content, cameraListFragment);
                 }
                 else
                 {
@@ -89,12 +94,22 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 //此方法会导致fragment销灭
                 //transaction.replace(R.id.fl_content,cameraListFragment);
                 break;
-
             case 1:
-                if(cameraHistoryFragment == null)
+                if (photoListFragment == null)
+                {
+                    photoListFragment = new PhotoListFragment();
+                    transaction.add(R.id.fl_content, photoListFragment);
+                }
+                else
+                {
+                    transaction.show(photoListFragment);
+                }
+                break;
+            case 2:
+                if (cameraHistoryFragment == null)
                 {
                     cameraHistoryFragment = new CameraHistoryFragment();
-                    transaction.add(R.id.fl_content,cameraHistoryFragment);
+                    transaction.add(R.id.fl_content, cameraHistoryFragment);
                 }
                 else
                 {
@@ -103,11 +118,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 //transaction.replace(R.id.fl_content,cameraHistoryFragment);
                 break;
 
-            case 2:
-                if(meFragment == null)
+            case 3:
+                if (meFragment == null)
                 {
                     meFragment = new MeFragment();
-                    transaction.add(R.id.fl_content,meFragment);
+                    transaction.add(R.id.fl_content, meFragment);
                 }
                 else
                 {
@@ -142,6 +157,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         if (meFragment != null)
         {
             transaction.hide(meFragment);
+        }
+
+        if (photoListFragment != null)
+        {
+            transaction.hide(photoListFragment);
         }
     }
 
