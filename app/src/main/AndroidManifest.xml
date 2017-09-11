@@ -60,6 +60,10 @@
 
         <activity android:name=".page.camera.CameraDateActivity"
                   android:screenOrientation="portrait"/>
+
+        <activity android:name=".page.photo.PhotoDetailActivity"
+                  android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

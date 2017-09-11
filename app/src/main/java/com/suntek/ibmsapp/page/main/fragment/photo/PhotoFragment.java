@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.page.main.fragment.photo;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
@@ -24,7 +25,7 @@ import java.util.Map;
 import butterknife.BindView;
 
 /**
- *  相册界面
+ * 相册界面
  *
  * @author jimmy
  */
@@ -38,6 +39,8 @@ public class PhotoFragment extends BaseFragment
 
     private PhotoListAdapter photoListAdapter;
 
+    private List<Photo> photos = new ArrayList<>();
+
     @Override
     public int getLayoutId()
     {
@@ -47,18 +50,48 @@ public class PhotoFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        initData();
+        initListView();
+    }
+
+    /**
+     * 初始化列表数据
+     */
+    private void initListView()
+    {
+        photoListAdapter = new PhotoListAdapter(getActivity(), photos);
+        lvPhoto.setAdapter(photoListAdapter);
+        for (int i = 0; i < photoListAdapter.getGroupCount(); i++)
+        {
+            lvPhoto.expandGroup(i);
+        }
+
+        lvPhoto.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener()
+        {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id)
+            {
+                return true;
+            }
+        });
+    }
+
+    /**
+     * 初始化相册数据
+     */
+    private void initData()
+    {
         File file = new File(picPath);
         try
         {
             File[] files = file.getCanonicalFile().listFiles();
-            List<Photo> photos = new ArrayList<>();
-            Map<String,List<String>> mapTag = new HashMap<>();
+            Map<String, List<String>> mapTag = new HashMap<>();
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            for(File file1 : files)
+            for (File file1 : files)
             {
                 String date = format.format(new Date(file.lastModified()));
                 List<String> paths = mapTag.get(date);
-                if(paths == null)
+                if (paths == null)
                 {
                     paths = new ArrayList<>();
                     paths.add(file1.getAbsolutePath());
@@ -67,43 +100,26 @@ public class PhotoFragment extends BaseFragment
                 {
                     paths.add(file1.getAbsolutePath());
                 }
-                mapTag.put(date,paths);
+                mapTag.put(date, paths);
             }
 
 
             Iterator entries = mapTag.entrySet().iterator();
 
-            while (entries.hasNext()) {
+            while (entries.hasNext())
+            {
 
                 Map.Entry entry = (Map.Entry) entries.next();
 
                 String key = (String) entry.getKey();
 
-                List<String> value = (List<String>)entry.getValue();
+                List<String> value = (List<String>) entry.getValue();
 
                 Photo photo = new Photo();
                 photo.setDate(key);
                 photo.setPhotoPaths(value);
                 photos.add(photo);
             }
-
-            photoListAdapter = new PhotoListAdapter(getActivity(),photos);
-            lvPhoto.setAdapter(photoListAdapter);
-            for(int i = 0;i < photoListAdapter.getGroupCount();i++)
-            {
-                lvPhoto.expandGroup(i);
-            }
-
-            lvPhoto.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener()
-            {
-                @Override
-                public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id)
-                {
-                    return true;
-                }
-            });
-
-
         } catch (IOException e)
         {
             e.printStackTrace();

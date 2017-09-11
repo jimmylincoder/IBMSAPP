@@ -1,20 +1,18 @@
 package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Photo;
+import com.suntek.ibmsapp.page.photo.PhotoDetailActivity;
 import com.suntek.ibmsapp.widget.NoScrollGridView;
-import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +129,9 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                ToastHelper.getInstance(context).shortShowMessage(paths1.get(position));
+                Intent intent = new Intent(context, PhotoDetailActivity.class);
+                intent.putExtra("photoPath",paths1.get(position));
+                context.startActivity(intent);
             }
         });
         photoGridAdapter.notifyDataSetChanged();
