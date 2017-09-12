@@ -1,6 +1,8 @@
 package com.suntek.ibmsapp.page.photo;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 
@@ -10,6 +12,10 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.widget.GestureImageView.GestureImageView;
 import com.suntek.ibmsapp.widget.ToastHelper;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -24,6 +30,7 @@ public class PhotoDetailActivity extends BaseActivity
     @BindView(R.id.giv_detail)
     GestureImageView givPhoto;
 
+    private String photoPath;
 
     @Override
     public int getLayoutId()
@@ -39,10 +46,22 @@ public class PhotoDetailActivity extends BaseActivity
 
     private void initData()
     {
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(context).build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration
+                .Builder(context)
+                .build();
         ImageLoader.getInstance().init(config);
-        String photoPath = getIntent().getStringExtra("photoPath");
-        ImageLoader.getInstance().displayImage("file://" + photoPath, givPhoto);
+        photoPath = getIntent().getStringExtra("photoPath");
+        FileInputStream fis = null;
+        try
+        {
+            fis = new FileInputStream(photoPath);
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        Bitmap bitmap  = BitmapFactory.decodeStream(fis);
+       // ImageLoader.getInstance().displayImage("file://" + photoPath, givPhoto);
+        givPhoto.setImageBitmap(bitmap);
     }
 
     @Override
@@ -61,5 +80,14 @@ public class PhotoDetailActivity extends BaseActivity
     public void delete(View view)
     {
         ToastHelper.getInstance(this).shortShowMessage("删除");
+        File file = new File(photoPath);
+        if (file.exists())
+        {
+            file.delete();
+        }else
+        {
+            ToastHelper.getInstance(this).shortShowMessage("文件不存在");
+        }
+        finish();
     }
 }

@@ -15,10 +15,15 @@ import com.suntek.ibmsapp.page.photo.PhotoDetailActivity;
 import com.suntek.ibmsapp.widget.NoScrollGridView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static android.R.attr.entries;
 
 /**
  * 相册列表adapter
@@ -32,10 +37,15 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
 
     private Context context;
 
+    private boolean isEdit = false;
+
+    private Map<String,Object> adapterMap;
+
     public PhotoListAdapter(Context context, List<Photo> photos)
     {
         this.context = context;
         this.photoList = photos;
+        this.adapterMap = new HashMap<>();
     }
 
 
@@ -122,16 +132,29 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
             if (i < paths.size())
                 paths1.add(paths.get(i));
         }
-        PhotoGridAdapter photoGridAdapter = new PhotoGridAdapter(context, paths1);
+        PhotoGridAdapter photoGridAdapter = (PhotoGridAdapter) adapterMap.get(groupPosition + "_" + childPosition);
+        if(photoGridAdapter == null)
+        {
+            photoGridAdapter = new PhotoGridAdapter(context, paths1);
+            adapterMap.put(groupPosition + "_" + childPosition,photoGridAdapter);
+        }
         holder.nsgPhoto.setAdapter(photoGridAdapter);
+        PhotoGridAdapter finalPhotoGridAdapter = photoGridAdapter;
         holder.nsgPhoto.setOnItemClickListener(new AdapterView.OnItemClickListener()
         {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                Intent intent = new Intent(context, PhotoDetailActivity.class);
-                intent.putExtra("photoPath",paths1.get(position));
-                context.startActivity(intent);
+                if(!isEdit)
+                {
+                    Intent intent = new Intent(context, PhotoDetailActivity.class);
+                    intent.putExtra("photoPath", paths1.get(position));
+                    context.startActivity(intent);
+                }else
+                {
+                    finalPhotoGridAdapter.selectOne(paths1.get(position));
+                    finalPhotoGridAdapter.notifyDataSetChanged();
+                }
             }
         });
         photoGridAdapter.notifyDataSetChanged();
@@ -173,6 +196,54 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
         public ChildViewHolder(View view)
         {
             ButterKnife.bind(this, view);
+        }
+    }
+
+    public void setEdit(boolean edit)
+    {
+        isEdit = edit;
+    }
+
+    public boolean isEdit()
+    {
+        return isEdit;
+    }
+
+    public void clearChoose()
+    {
+        Iterator entries = adapterMap.entrySet().iterator();
+        while (entries.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) entries.next();
+            PhotoGridAdapter photoGridAdapter = (PhotoGridAdapter) entry.getValue();
+            photoGridAdapter.clearSelected();
+        }
+    }
+
+    public List<String> getSelectedPath()
+    {
+        List<String> paths = new ArrayList<>();
+        Iterator entries = adapterMap.entrySet().iterator();
+        while (entries.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) entries.next();
+            PhotoGridAdapter photoGridAdapter = (PhotoGridAdapter) entry.getValue();
+            paths.addAll(photoGridAdapter.getSelected());
+        }
+        return paths;
+    }
+
+    public void selectAll()
+    {
+
+        List<String> paths = new ArrayList<>();
+        Iterator entries = adapterMap.entrySet().iterator();
+        while (entries.hasNext())
+        {
+            Map.Entry entry = (Map.Entry) entries.next();
+            PhotoGridAdapter photoGridAdapter = (PhotoGridAdapter) entry.getValue();
+            photoGridAdapter.selectAll();
+            photoGridAdapter.notifyDataSetChanged();
         }
     }
 }

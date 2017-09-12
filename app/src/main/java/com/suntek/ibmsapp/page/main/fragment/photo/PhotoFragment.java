@@ -86,21 +86,25 @@ public class PhotoFragment extends BaseFragment
         {
             File[] files = file.getCanonicalFile().listFiles();
             Map<String, List<String>> mapTag = new HashMap<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
             for (File file1 : files)
             {
-                String date = format.format(new Date(file.lastModified()));
-                List<String> paths = mapTag.get(date);
-                if (paths == null)
+                if (file1.getName().startsWith("IMG_"))
                 {
-                    paths = new ArrayList<>();
-                    paths.add(file1.getAbsolutePath());
+                    String[] strs = file1.getName().split("_");
+                    String date = strs[1];
+                    List<String> paths = mapTag.get(date);
+                    if (paths == null)
+                    {
+                        paths = new ArrayList<>();
+                        paths.add(file1.getAbsolutePath());
+                    }
+                    else
+                    {
+                        paths.add(file1.getAbsolutePath());
+                    }
+                    mapTag.put(date, paths);
                 }
-                else
-                {
-                    paths.add(file1.getAbsolutePath());
-                }
-                mapTag.put(date, paths);
             }
 
 
@@ -124,5 +128,36 @@ public class PhotoFragment extends BaseFragment
         {
             e.printStackTrace();
         }
+    }
+
+    public void setEdit(boolean isEdit)
+    {
+        photoListAdapter.setEdit(isEdit);
+    }
+
+    public boolean isEdit()
+    {
+        return photoListAdapter.isEdit();
+    }
+
+    public void clearChoose()
+    {
+        photoListAdapter.clearChoose();
+        photoListAdapter.notifyDataSetChanged();
+    }
+
+    public List<String> getSelectedPath()
+    {
+        return photoListAdapter.getSelectedPath();
+    }
+
+    public void update()
+    {
+        photoListAdapter.notifyDataSetChanged();
+    }
+
+    public void selecteAll()
+    {
+        photoListAdapter.selectAll();
     }
 }

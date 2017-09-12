@@ -16,8 +16,12 @@ import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.page.main.fragment.adapter.PhotoFragmentAdapter;
 import com.suntek.ibmsapp.page.main.fragment.photo.PhotoFragment;
 import com.suntek.ibmsapp.page.main.fragment.photo.VideoFragment;
+import com.suntek.ibmsapp.widget.NoScrollGridView;
+import com.suntek.ibmsapp.widget.NoScrollViewPager;
 import com.suntek.ibmsapp.widget.ToastHelper;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +36,7 @@ import butterknife.OnClick;
 public class PhotoListFragment extends BaseFragment
 {
     @BindView(R.id.vp_content)
-    ViewPager vpContent;
+    NoScrollViewPager vpContent;
 
     @BindView(R.id.tv_photo)
     TextView tvPhoto;
@@ -111,6 +115,8 @@ public class PhotoListFragment extends BaseFragment
     public void edit(View view)
     {
         showHeader();
+        vpContent.setNoScroll(true);
+        ((PhotoFragment) fragmentList.get(0)).setEdit(true);
         if (popupMenu == null)
         {
             View view1 = getActivity().getLayoutInflater().inflate(R.layout.view_photo_menu, null);
@@ -123,8 +129,38 @@ public class PhotoListFragment extends BaseFragment
                 @Override
                 public void onClick(View v)
                 {
-                    ToastHelper.getInstance(getActivity()).shortShowMessage("删除");
+                    List<String> paths = ((PhotoFragment) fragmentList.get(0)).getSelectedPath();
+
+                    new UnityDialog(getActivity())
+                            .setTitle("是否确认删除")
+                            .setHint("是否确认删除选中照片")
+                            .setCancel("取消", new UnityDialog.OnCancelDialogListener()
+                            {
+                                @Override
+                                public void cancel(UnityDialog unityDialog)
+                                {
+                                    unityDialog.dismiss();
+                                }
+                            })
+                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                            {
+                                @Override
+                                public void confirm(UnityDialog unityDialog, String content)
+                                {
+                                    for (String path : paths)
+                                    {
+                                        File file = new File(path);
+                                        if (file.exists())
+                                        {
+                                            file.delete();
+                                        }
+                                    }
+                                    ((PhotoFragment) fragmentList.get(0)).update();
+                                    unityDialog.dismiss();
+                                }
+                            }).show();
                 }
+
             });
         }
         else
@@ -166,7 +202,17 @@ public class PhotoListFragment extends BaseFragment
     @OnClick(R.id.tv_cancel)
     public void cancel(View view)
     {
+        ((PhotoFragment) fragmentList.get(0)).setEdit(false);
+        ((PhotoFragment) fragmentList.get(0)).clearChoose();
+        vpContent.setNoScroll(false);
         popupMenu.dismiss();
         showHeader();
+    }
+
+    @OnClick(R.id.tv_all)
+    public void selectAll(View view)
+    {
+        ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        ToastHelper.getInstance(getActivity()).shortShowMessage("全选");
     }
 }

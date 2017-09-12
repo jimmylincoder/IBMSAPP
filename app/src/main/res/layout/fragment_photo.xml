@@ -126,13 +126,13 @@
         android:layout_height="match_parent"
         android:gravity="center">
 
-        <android.support.v4.view.ViewPager
+        <com.suntek.ibmsapp.widget.NoScrollViewPager
             android:id="@+id/vp_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
 
-        </android.support.v4.view.ViewPager>
+        </com.suntek.ibmsapp.widget.NoScrollViewPager>
 
     </LinearLayout>
 

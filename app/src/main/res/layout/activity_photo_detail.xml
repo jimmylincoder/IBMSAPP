@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:background="@color/white"
               android:gravity="center"
               android:orientation="vertical">
 
@@ -57,6 +58,12 @@
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/CEAEAEA"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -64,6 +71,8 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:paddingBottom="50dp"
+            android:paddingTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -76,6 +85,13 @@
 
         </LinearLayout>
 
+
+        <View
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/CEAEAEA"/>
 
         <LinearLayout
             android:layout_width="match_parent"
