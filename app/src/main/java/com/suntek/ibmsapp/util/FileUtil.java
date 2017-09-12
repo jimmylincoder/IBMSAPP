@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static android.R.attr.path;
 
@@ -48,15 +50,16 @@ public class FileUtil
     public static void saveImageToGallery(Context context, Bitmap bmp)
     {
         // 首先保存图片
-        File appDir = new File(Environment.getRootDirectory(), "imbs");
-        if (!appDir.exists())
-        {
-            appDir.mkdir();
-        }
-        String fileName = System.currentTimeMillis() + ".jpg";
-        File file = new File(appDir, fileName);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format1 = new SimpleDateFormat("HHmmss");
+        File dir = new File("/sdcard/DCIM/Camera/ibms/");
+        if (!dir.exists())
+            dir.mkdir();
+        String path = "/sdcard/DCIM/Camera/ibms/" + "IMG_" + format.format(new Date()) + "_" + format1.format(new Date()) + ".jpg";
+        File file = new File(path);
         try
         {
+            file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file);
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
@@ -70,15 +73,15 @@ public class FileUtil
         }
 
         // 其次把文件插入到系统图库
-        try
-        {
-            MediaStore.Images.Media.insertImage(context.getContentResolver(),
-                    file.getAbsolutePath(), fileName, null);
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
+//        try
+//        {
+//            MediaStore.Images.Media.insertImage(context.getContentResolver(),
+//                    file.getAbsolutePath(), fileName, null);
+//        } catch (FileNotFoundException e)
+//        {
+//            e.printStackTrace();
+//        }
         // 最后通知图库更新
-        context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+        //       context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
     }
 }

@@ -8,4 +8,10 @@
         <attr name="itemWidth" format="dimension"/>
         <attr name="itemMargin" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="RockerView">
+        <attr name="areaBackground" format="color|reference" />
+        <attr name="rockerBackground" format="color|reference" />
+        <attr name="rockerRadius" format="dimension" />
+    </declare-styleable>
 </resources>
