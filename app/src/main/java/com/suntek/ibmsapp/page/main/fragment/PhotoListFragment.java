@@ -157,6 +157,7 @@ public class PhotoListFragment extends BaseFragment
                                     }
                                     ((PhotoFragment) fragmentList.get(0)).update();
                                     unityDialog.dismiss();
+                                    showNormal();
                                 }
                             }).show();
                 }
@@ -202,17 +203,21 @@ public class PhotoListFragment extends BaseFragment
     @OnClick(R.id.tv_cancel)
     public void cancel(View view)
     {
-        ((PhotoFragment) fragmentList.get(0)).setEdit(false);
-        ((PhotoFragment) fragmentList.get(0)).clearChoose();
-        vpContent.setNoScroll(false);
-        popupMenu.dismiss();
-        showHeader();
+       showNormal();
     }
 
     @OnClick(R.id.tv_all)
     public void selectAll(View view)
     {
         ((PhotoFragment) fragmentList.get(0)).selecteAll();
-        ToastHelper.getInstance(getActivity()).shortShowMessage("全选");
+    }
+
+    public void showNormal()
+    {
+        ((PhotoFragment) fragmentList.get(0)).setEdit(false);
+        ((PhotoFragment) fragmentList.get(0)).clearChoose();
+        vpContent.setNoScroll(false);
+        popupMenu.dismiss();
+        showHeader();
     }
 }

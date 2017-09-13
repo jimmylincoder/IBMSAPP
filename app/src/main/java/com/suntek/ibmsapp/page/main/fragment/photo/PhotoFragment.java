@@ -32,7 +32,7 @@ import butterknife.BindView;
 public class PhotoFragment extends BaseFragment
 {
     //图片路径
-    private final String picPath = "/sdcard/DCIM/Camera";
+    private final String picPath = "/sdcard/DCIM/Camera/ibms";
 
     @BindView(R.id.elv_photo)
     ExpandableListView lvPhoto;
@@ -50,8 +50,8 @@ public class PhotoFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-        initData();
-        initListView();
+//        initData();
+//        initListView();
     }
 
     /**
@@ -81,6 +81,7 @@ public class PhotoFragment extends BaseFragment
      */
     private void initData()
     {
+        photos.clear();
         File file = new File(picPath);
         try
         {
@@ -153,7 +154,15 @@ public class PhotoFragment extends BaseFragment
 
     public void update()
     {
-        photoListAdapter.notifyDataSetChanged();
+        initData();
+        initListView();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        update();
     }
 
     public void selecteAll()

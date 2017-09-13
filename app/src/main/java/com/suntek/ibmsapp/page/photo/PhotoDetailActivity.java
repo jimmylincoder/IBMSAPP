@@ -1,6 +1,5 @@
 package com.suntek.ibmsapp.page.photo;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,7 +10,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.widget.GestureImageView.GestureImageView;
-import com.suntek.ibmsapp.widget.ToastHelper;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,8 +58,8 @@ public class PhotoDetailActivity extends BaseActivity
         {
             e.printStackTrace();
         }
-        Bitmap bitmap  = BitmapFactory.decodeStream(fis);
-       // ImageLoader.getInstance().displayImage("file://" + photoPath, givPhoto);
+        Bitmap bitmap = BitmapFactory.decodeStream(fis);
+        // ImageLoader.getInstance().displayImage("file://" + photoPath, givPhoto);
         givPhoto.setImageBitmap(bitmap);
     }
 
@@ -79,15 +78,30 @@ public class PhotoDetailActivity extends BaseActivity
     @OnClick(R.id.iv_del)
     public void delete(View view)
     {
-        ToastHelper.getInstance(this).shortShowMessage("删除");
-        File file = new File(photoPath);
-        if (file.exists())
-        {
-            file.delete();
-        }else
-        {
-            ToastHelper.getInstance(this).shortShowMessage("文件不存在");
-        }
-        finish();
+        new UnityDialog(this)
+                .setTitle("是否确认删除")
+                .setHint("是否确认删除该照片")
+                .setCancel("取消", new UnityDialog.OnCancelDialogListener()
+                {
+                    @Override
+                    public void cancel(UnityDialog unityDialog)
+                    {
+                        unityDialog.dismiss();
+                    }
+                })
+                .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                {
+                    @Override
+                    public void confirm(UnityDialog unityDialog, String content)
+                    {
+                        File file = new File(photoPath);
+                        if (file.exists())
+                        {
+                            file.delete();
+                        }
+                        unityDialog.dismiss();
+                        finish();
+                    }
+                }).show();
     }
 }
