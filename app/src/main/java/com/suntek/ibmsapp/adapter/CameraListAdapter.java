@@ -18,9 +18,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- *
  * 摄像头列表adapter
- *
  * @author jimmy
  */
 public class CameraListAdapter extends BaseAdapter
