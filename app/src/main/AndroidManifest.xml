@@ -2,19 +2,30 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.suntek.ibmsapp">
 
+    <!--多屏幕机制-->
+    <!--android:anyDensity="true"     是否支持多种不同密度-->
+    <!--android:largeScreens="true"   是否支持大屏-->
+    <!--android:normalScreens="true"  是否支持中屏-->
+    <!--android:smallScreens="true"   是否支持小屏-->
+    <!--android:resizeable  指明应用程序是否根据不同的屏幕尺寸改变大小。 默认值是 true-->
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
         android:normalScreens="false"
         android:resizeable="true"
-        android:smallScreens="true" />
+        android:smallScreens="true"/>
 
-
+    <!--网络请求权限-->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!--获取网络状态-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!--写权限-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!--读权限-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!--获取手机信息-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
 
     <application
         android:name=".app.IBMSApp"
@@ -23,9 +34,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".page.login.UserLoginActivity"
-            android:theme="@style/MainViewTheme"
-            android:screenOrientation="portrait">
+        <!--欢迎界面-->
+        <activity
+            android:name=".page.welcome.WelcomeActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainViewTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -33,36 +46,58 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".page.main.MainActivity"
-                  android:theme="@style/MainViewTheme"
-                  android:screenOrientation="portrait"
-                  android:launchMode="singleTask"/>
+        <!--登录界面-->
+        <activity
+            android:name=".page.login.UserLoginActivity"
+            android:screenOrientation="portrait"/>
 
+        <!--主界面-->
+        <activity
+            android:name=".page.main.MainActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/MainViewTheme"/>
+
+        <!--视频播放界面-->
         <activity
             android:name=".page.camera.CameraPlayActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize"/>
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <!--区域选择-->
         <activity
             android:name=".page.camera.CameraChooseActivity"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.camera.CameraSearchActivity"
-                  android:screenOrientation="portrait"/>
+        <!--摄像机搜索-->
+        <activity
+            android:name=".page.camera.CameraSearchActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.about.AboutActivity"
-                  android:screenOrientation="portrait"/>
+        <!--关于详情-->
+        <activity
+            android:name=".page.about.AboutActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.camera.CameraInfoActivity"
-                  android:screenOrientation="portrait"/>
+        <!--摄像机信息-->
+        <activity
+            android:name=".page.camera.CameraInfoActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.camera.CameraDownloadActivity"
-                  android:screenOrientation="portrait"/>
+        <!--录像下载-->
+        <activity
+            android:name=".page.camera.CameraDownloadActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.camera.CameraDateActivity"
-                  android:screenOrientation="portrait"/>
+        <!--日期选择界面，暂不用到-->
+        <activity
+            android:name=".page.camera.CameraDateActivity"
+            android:screenOrientation="portrait"/>
 
-        <activity android:name=".page.photo.PhotoDetailActivity"
-                  android:screenOrientation="portrait"/>
+        <!--相册详情-->
+        <activity
+            android:name=".page.photo.PhotoDetailActivity"
+            android:screenOrientation="portrait"/>
 
     </application>
 

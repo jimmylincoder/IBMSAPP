@@ -19,7 +19,6 @@ import butterknife.ButterKnife;
 
 /**
  * 摄像头搜索列表
- *
  * @author jimmy
  */
 public class CameraSearchAdapter extends BaseAdapter
