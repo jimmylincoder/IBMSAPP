@@ -1,6 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+//buildscript中的声明是gradle脚本自身需要使用的资源
 buildscript {
+
     repositories {
         jcenter()
     }
