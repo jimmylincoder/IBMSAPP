@@ -24,7 +24,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="5dp"
-                android:background="@mipmap/ic_gun_camera"/>
+                android:background="@mipmap/ic_camera_gun"/>
 
         </LinearLayout>
 
