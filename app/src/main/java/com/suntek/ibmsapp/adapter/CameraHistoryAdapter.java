@@ -17,17 +17,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 摄像机搜索adapter
- *
+ * 摄像头搜索列表
  * @author jimmy
  */
-public class CameraSearchAdapter extends BaseAdapter
+public class CameraHistoryAdapter extends BaseAdapter
 {
     private Context context;
 
     private List<Camera> cameraList;
 
-    public CameraSearchAdapter(Context context, List<Camera> cameraList)
+    public CameraHistoryAdapter(Context context, List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -55,13 +54,13 @@ public class CameraSearchAdapter extends BaseAdapter
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         CameraHistoryAdapter.ViewHolder holder;
-        if (view != null)
+        if(view != null)
         {
             holder = (CameraHistoryAdapter.ViewHolder) view.getTag();
         }
         else
         {
-            view = LayoutInflater.from(context).inflate(R.layout.item_camera_search, null);
+            view = LayoutInflater.from(context).inflate(R.layout.item_camera_history,null);
             holder = new CameraHistoryAdapter.ViewHolder(view);
             view.setTag(holder);
         }
@@ -79,7 +78,7 @@ public class CameraSearchAdapter extends BaseAdapter
 
         public ViewHolder(View view)
         {
-            ButterKnife.bind(this, view);
+            ButterKnife.bind(this,view);
         }
     }
 

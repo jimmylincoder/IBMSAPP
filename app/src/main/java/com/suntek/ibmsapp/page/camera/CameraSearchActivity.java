@@ -2,6 +2,8 @@ package com.suntek.ibmsapp.page.camera;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -9,8 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
+import com.suntek.ibmsapp.adapter.CameraHistoryAdapter;
 
+import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
@@ -58,6 +61,27 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
         cameraSearchAdapter = new CameraSearchAdapter(this, cameraList);
         lvSearchResult.setAdapter(cameraSearchAdapter);
         lvSearchResult.setOnItemClickListener(this);
+
+        etKeyword.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                search(s.toString());
+            }
+        });
     }
 
     @Override
@@ -66,16 +90,14 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
 
     }
 
-    @OnClick(R.id.ll_back)
+    @OnClick(R.id.ll_btn_cancel)
     public void back(View view)
     {
         finish();
     }
 
-    @OnClick(R.id.ll_btn_search)
-    public void search(View view)
+    public void search(String keyword)
     {
-        String keyword = etKeyword.getText() + "";
         new CameraSearchTask(this, keyword, 1)
         {
             @Override
