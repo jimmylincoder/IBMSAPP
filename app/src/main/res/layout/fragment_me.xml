@@ -7,13 +7,14 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:background="@color/white"
+        android:background="@mipmap/bg_top"
         android:layout_width="match_parent"
         android:gravity="center"
         android:layout_height="50dp">
 
         <TextView
             android:textSize="18dp"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="我"/>

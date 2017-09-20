@@ -7,29 +7,28 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="60dp"
+        android:background="@color/col_cdcdcd"
         android:orientation="horizontal">
 
         <LinearLayout
+            android:id="@+id/ll_del"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@mipmap/bg_delete"
+            android:gravity="center"
+            android:orientation="horizontal">
 
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center|right">
-
-            <ImageView
-                android:id="@+id/iv_del"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginRight="10dp"
-                android:background="@mipmap/ic_delete"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除"
+                android:textColor="@color/white"
+                android:textSize="18sp"/>
 
         </LinearLayout>
 

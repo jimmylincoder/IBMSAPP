@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
@@ -45,10 +46,14 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
     public void initViews(Bundle savedInstanceState)
     {
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
-        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_tv_play, "视频").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_photo, "相册").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_history, "历史").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_account, "我的").setActiveColor(R.color.orange))
+        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_video_active, "视频")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_video)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_file_active, "相册")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_file)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_history_active, "历史")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_history)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_account_active, "我的")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_account)))
                 .setFirstSelectedPosition(lastSelectedPosition)
                 .initialise();
         ;

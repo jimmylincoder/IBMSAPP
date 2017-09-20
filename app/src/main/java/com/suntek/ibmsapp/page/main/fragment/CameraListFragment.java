@@ -200,4 +200,11 @@ public class CameraListFragment extends BaseFragment
             getCameraList(currentPage, true);
         }
     }
+
+    @OnClick(R.id.ll_search_area)
+    public void search(View view)
+    {
+        Intent intent = new Intent(getActivity(), CameraSearchActivity.class);
+        startActivity(intent);
+    }
 }
