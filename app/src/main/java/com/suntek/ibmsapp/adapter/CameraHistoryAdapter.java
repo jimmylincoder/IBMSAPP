@@ -70,8 +70,8 @@ public class CameraHistoryAdapter extends BaseAdapter
 
     static class ViewHolder
     {
-        @BindView(R.id.iv_camera_type)
-        ImageView ivCameraType;
+       // @BindView(R.id.iv_camera_type)
+       // ImageView ivCameraType;
 
         @BindView(R.id.tv_camera_name)
         TextView tvCameraName;

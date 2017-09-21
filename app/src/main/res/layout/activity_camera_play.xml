@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:kongqw="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              xmlns:kongqw="http://schemas.android.com/tools"
               android:orientation="vertical">
 
     <FrameLayout
@@ -22,7 +22,7 @@
             android:id="@+id/ll_head"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@mipmap/bg_resolution_bottom"
+            android:background="@mipmap/bg_top"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -282,13 +282,32 @@
         android:id="@+id/ll_time"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:orientation="horizontal"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:paddingBottom="1dp"
+        android:paddingTop="1dp"
         android:visibility="gone">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/col_8c8c8c"/>
 
         <com.suntek.ibmsapp.widget.TimeSeekBarView
             android:id="@+id/ta_time"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            app:backgroundColor="@color/col_d3d3d3"
+            app:lineColor="@color/col_8c8c8c"
+            app:middleLineColor="@color/col_f7de0a"
+            app:recordColor="@color/col_b8b8b8"
+            app:style="1"
+            app:timeTextColor="@color/col_272727"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/col_8c8c8c"/>
 
     </LinearLayout>
 
@@ -305,8 +324,8 @@
         android:id="@+id/ll_message"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         >
 
         <LinearLayout
@@ -379,7 +398,7 @@
                 android:layout_alignParentBottom="true"
                 kongqw:areaBackground="@drawable/default_area_bg"
                 kongqw:rockerBackground="@drawable/default_rocker_bg"
-                kongqw:rockerRadius="30dp" />
+                kongqw:rockerRadius="30dp"/>
 
 
         </LinearLayout>

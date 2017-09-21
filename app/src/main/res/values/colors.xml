@@ -100,5 +100,11 @@
     <color name="col_cdcdcd">#cdcdcd</color>
     <color name="col_ebebeb">#ebebeb</color>
     <color name="col_ecebf3">#ecebf3</color>
+    <color name="col_d3d3d3">#d3d3d3</color>
+    <color name="col_302922">#302922</color>
+    <color name="col_8c8c8c">#8c8c8c</color>
+    <color name="col_f7de0a">#f7de0a</color>
+    <color name="col_b8b8b8">#b8b8b8</color>
+    <color name="col_272727">#272727</color>
 
 </resources>
