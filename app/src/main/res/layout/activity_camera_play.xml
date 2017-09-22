@@ -196,7 +196,7 @@
         android:id="@+id/ll_oper"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:background="@color/C2E2720"
+        android:background="@color/col_d6d6d6"
         android:orientation="horizontal"
         >
 
@@ -391,14 +391,135 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <com.suntek.ibmsapp.widget.RockerView
-                android:id="@+id/rockerView_left"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_alignParentBottom="true"
-                kongqw:areaBackground="@drawable/default_area_bg"
-                kongqw:rockerBackground="@drawable/default_rocker_bg"
-                kongqw:rockerRadius="30dp"/>
+            <FrameLayout
+                android:layout_width="220dp"
+                android:layout_height="220dp">
+
+                <LinearLayout
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.suntek.ibmsapp.widget.RockerView
+                            android:id="@+id/rockerView_left"
+                            android:layout_width="160dp"
+                            android:layout_height="160dp"
+                            android:layout_alignParentBottom="true"
+                            android:layout_gravity="center"
+                            app:areaBackground="@mipmap/bg_cloud_control"
+                            app:rockerBackground="@color/col_32a4fc"
+                            app:rockerRadius="20dp"/>
+
+                        <LinearLayout
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="top"
+                                android:layout_weight="1"
+                                android:orientation="horizontal">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="top|left">
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="@mipmap/ic_left_up"/>
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="top|right">
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="@mipmap/ic_up_right"/>
+
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:orientation="horizontal">
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom|left">
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="@mipmap/ic_bottom_left"/>
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:gravity="bottom|right">
+
+                                    <ImageView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="@mipmap/ic_botton_right"/>
+
+                                </LinearLayout>
+
+
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </FrameLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:background="@mipmap/ic_cloud_up"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:background="@mipmap/ic_cloud_down"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|center_vertical"
+                    android:background="@mipmap/ic_cloud_right"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical"
+                    android:background="@mipmap/ic_cloud_left"/>
+
+            </FrameLayout>
 
 
         </LinearLayout>

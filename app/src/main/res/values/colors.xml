@@ -106,5 +106,12 @@
     <color name="col_f7de0a">#f7de0a</color>
     <color name="col_b8b8b8">#b8b8b8</color>
     <color name="col_272727">#272727</color>
+    <color name="col_d6d6d6">#d6d6d6</color>
+    <color name="col_efefef">#efefef</color>
+    <color name="col_333333">#333333</color>
+    <color name="col_e6e6e6">#e6e6e6</color>
+    <color name="col_fd0300">#fd0300</color>
+    <color name="col_3bb6ff">#3bb6ff</color>
+    <color name="col_32a4fc">#32a4fc</color>
 
 </resources>

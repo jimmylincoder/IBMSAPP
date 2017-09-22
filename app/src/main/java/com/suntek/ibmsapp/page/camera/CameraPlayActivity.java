@@ -921,10 +921,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         if (dateChoose == null)
         {
             View view1 = getLayoutInflater().inflate(R.layout.view_popup_daee, null);
-            dateChoose = new PopupWindow(view1, ViewGroup.LayoutParams.WRAP_CONTENT,
+            dateChoose = new PopupWindow(view1, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             dateChoose.setOutsideTouchable(true);
-            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
             gcv = (GridCalendarView) view1.findViewById(R.id.gcv_date);
             initDateChoose();
             gcv.setDateClick(new MonthView.IDateClick()
@@ -964,7 +964,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
         else
         {
-            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
         }
     }
 
