@@ -50,6 +50,12 @@ public class PhotoListFragment extends BaseFragment
     @BindView(R.id.ll_choose)
     LinearLayout llChoose;
 
+    @BindView(R.id.iv_photo_choose)
+    ImageView ivPhotoChoose;
+
+    @BindView(R.id.iv_video_choose)
+    ImageView ivVideoChoose;
+
     private List<Fragment> fragmentList = new ArrayList<>();
 
     private PhotoFragmentAdapter photoFragmentAdapter;
@@ -123,8 +129,8 @@ public class PhotoListFragment extends BaseFragment
             popupMenu = new PopupWindow(view1, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             popupMenu.showAtLocation(getActivity().getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
-            ImageView ivDelete = (ImageView) view1.findViewById(R.id.iv_del);
-            ivDelete.setOnClickListener(new View.OnClickListener()
+            LinearLayout llDelete = (LinearLayout) view1.findViewById(R.id.ll_del);
+            llDelete.setOnClickListener(new View.OnClickListener()
             {
                 @Override
                 public void onClick(View v)
@@ -189,21 +195,21 @@ public class PhotoListFragment extends BaseFragment
         if (position == 0)
         {
             vpContent.setCurrentItem(position);
-            tvPhoto.setTextColor(getResources().getColor(R.color.green));
-            tvVideo.setTextColor(getResources().getColor(R.color.black_80));
+            ivPhotoChoose.setVisibility(View.VISIBLE);
+            ivVideoChoose.setVisibility(View.GONE);
         }
         if (position == 1)
         {
             vpContent.setCurrentItem(position);
-            tvVideo.setTextColor(getResources().getColor(R.color.green));
-            tvPhoto.setTextColor(getResources().getColor(R.color.black_80));
+            ivPhotoChoose.setVisibility(View.GONE);
+            ivVideoChoose.setVisibility(View.VISIBLE);
         }
     }
 
     @OnClick(R.id.tv_cancel)
     public void cancel(View view)
     {
-       showNormal();
+        showNormal();
     }
 
     @OnClick(R.id.tv_all)

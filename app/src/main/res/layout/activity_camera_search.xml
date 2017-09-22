@@ -1,48 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@color/white">
+              android:background="@color/white"
+              android:orientation="vertical">
 
     <LinearLayout
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:orientation="horizontal">
 
-       <LinearLayout
-           android:id="@+id/ll_back"
-           android:layout_weight="2.8"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:orientation="horizontal"
-           android:gravity="center_vertical">
-
-           <ImageView
-               android:layout_marginLeft="10dp"
-               android:layout_width="20dp"
-               android:layout_height="20dp"
-               android:background="@mipmap/ic_return"/>
-
-           <TextView
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:text="返回"/>
-
-       </LinearLayout>
-
         <LinearLayout
-            android:layout_weight="1"
+            android:id="@+id/ll_back"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="5dp"
-            android:orientation="horizontal">
+            android:layout_weight="2.8"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginLeft="10dp"
+                android:background="@mipmap/ic_return"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="返回"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="5dp">
 
             <LinearLayout
                 android:id="@+id/ll_search"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="40dp"
                 android:background="@drawable/button_shape_corner"
                 android:gravity="center_vertical">
 
@@ -54,61 +54,56 @@
 
                 <EditText
                     android:id="@+id/et_keyword"
-                    android:hint="搜索摄像头"
-                    android:textSize="14dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:hint="搜索摄像头"
+                    android:textSize="14dp"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/ll_btn_search"
-            android:layout_weight="3"
+            android:id="@+id/ll_btn_cancel"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="right|center_vertical">
+            android:layout_weight="8"
+            android:gravity="right|center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:text="搜索"/>
+                android:text="取消"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <View
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="match_parent"
-        android:background="@color/CEAEAEA"
-        android:layout_height="1dp"/>
 
     <LinearLayout
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/col_ecebf3"
         android:orientation="vertical">
 
         <ListView
             android:id="@+id/lv_search_result"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:dividerHeight="0dp">
 
         </ListView>
 
         <LinearLayout
             android:id="@+id/ll_message"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="40dp"
+            android:gravity="center"
             android:orientation="vertical"
-            android:gravity="center">
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -119,5 +114,5 @@
         </LinearLayout>
 
     </LinearLayout>
-    
+
 </LinearLayout>

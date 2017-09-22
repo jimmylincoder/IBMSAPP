@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#f1f0f6"
-                android:orientation="vertical">
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:background="#f1f0f6"
+              android:orientation="vertical">
 
     <FrameLayout
         android:id="@+id/fl_content"
@@ -15,6 +16,8 @@
         android:id="@+id/bnb_tab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:bnbBackgroundColor="@color/white"
+        app:bnbActiveColor="@color/col_1aa7f0"
         android:layout_gravity="bottom" />
 
 </LinearLayout>

@@ -33,7 +33,7 @@ public class WelcomeActivity extends BaseActivity
             {
                 try
                 {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                     Intent intent  = new Intent(WelcomeActivity.this,UserLoginActivity.class);
                     startActivity(intent);
                     finish();

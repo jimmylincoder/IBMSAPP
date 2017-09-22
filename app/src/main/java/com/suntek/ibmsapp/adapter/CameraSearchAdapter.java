@@ -12,13 +12,13 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
 
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 摄像头搜索列表
+ * 摄像机搜索adapter
+ *
  * @author jimmy
  */
 public class CameraSearchAdapter extends BaseAdapter
@@ -27,7 +27,7 @@ public class CameraSearchAdapter extends BaseAdapter
 
     private List<Camera> cameraList;
 
-    public CameraSearchAdapter(Context context,List<Camera> cameraList)
+    public CameraSearchAdapter(Context context, List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -54,15 +54,15 @@ public class CameraSearchAdapter extends BaseAdapter
     @Override
     public View getView(int i, View view, ViewGroup viewGroup)
     {
-        CameraSearchAdapter.ViewHolder holder;
-        if(view != null)
+        CameraHistoryAdapter.ViewHolder holder;
+        if (view != null)
         {
-            holder = (CameraSearchAdapter.ViewHolder) view.getTag();
+            holder = (CameraHistoryAdapter.ViewHolder) view.getTag();
         }
         else
         {
-            view = LayoutInflater.from(context).inflate(R.layout.item_camera_search,null);
-            holder = new CameraSearchAdapter.ViewHolder(view);
+            view = LayoutInflater.from(context).inflate(R.layout.item_camera_search, null);
+            holder = new CameraHistoryAdapter.ViewHolder(view);
             view.setTag(holder);
         }
         holder.tvCameraName.setText(cameraList.get(i).getName());
@@ -79,7 +79,7 @@ public class CameraSearchAdapter extends BaseAdapter
 
         public ViewHolder(View view)
         {
-            ButterKnife.bind(this,view);
+            ButterKnife.bind(this, view);
         }
     }
 
