@@ -11,11 +11,15 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.PhotoListAdapter;
 import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.model.Photo;
+import com.suntek.ibmsapp.util.DateUtil;
+import com.suntek.ibmsapp.util.PermissionRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -59,6 +63,21 @@ public class PhotoFragment extends BaseFragment
      */
     private void initListView()
     {
+        Collections.sort(photos, new Comparator<Photo>()
+        {
+            @Override
+            public int compare(Photo o1, Photo o2)
+            {
+                long date1 = DateUtil.convertToLong(o1.getDate(), "yyyyMMdd");
+                long date2 = DateUtil.convertToLong(o2.getDate(), "yyyyMMdd");
+                if (date1 < date2)
+                    return 1;
+                else if (date1 == date2)
+                    return 0;
+                else
+                    return -1;
+            }
+        });
         photoListAdapter = new PhotoListAdapter(getActivity(), photos);
         lvPhoto.setAdapter(photoListAdapter);
         for (int i = 0; i < photoListAdapter.getGroupCount(); i++)
@@ -81,13 +100,17 @@ public class PhotoFragment extends BaseFragment
      */
     private void initData()
     {
+        PermissionRequest.verifyStoragePermissions(getActivity());
         photos.clear();
         File file = new File(picPath);
+        if (!file.exists())
+            file.mkdir();
         try
         {
             File[] files = file.getCanonicalFile().listFiles();
             Map<String, List<String>> mapTag = new HashMap<>();
-            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            if (files == null)
+                return;
             for (File file1 : files)
             {
                 if (file1.getName().startsWith("IMG_"))

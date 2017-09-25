@@ -12,9 +12,13 @@ import android.widget.TextView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Photo;
 import com.suntek.ibmsapp.page.photo.PhotoDetailActivity;
+import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.widget.NoScrollGridView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +43,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
 
     private boolean isEdit = false;
 
-    private Map<String,Object> adapterMap;
+    private Map<String, Object> adapterMap;
 
     public PhotoListAdapter(Context context, List<Photo> photos)
     {
@@ -107,7 +111,24 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
             holder = new PhotoListAdapter.GroupViewHolder(convertView);
             convertView.setTag(holder);
         }
-        holder.tvDate.setText(photoList.get(groupPosition).getDate());
+
+        String date = DateUtil.convertByFormat(new Date(), "yyyyMMdd");
+        String groupDate = photoList.get(groupPosition).getDate();
+        String dateYear = groupDate.substring(0,4);
+        Calendar now = Calendar.getInstance();
+        int year = now.get(Calendar.YEAR);
+        if (date.equals(groupDate))
+        {
+            holder.tvDate.setText("今天");
+        }
+        else if(dateYear.equals(year + ""))
+        {
+            holder.tvDate.setText(groupDate.substring(4,6) + "/" + groupDate.substring(6,8));
+        }else
+        {
+            holder.tvDate.setText(photoList.get(groupPosition).getDate());
+
+        }
         return convertView;
     }
 
@@ -133,10 +154,10 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
                 paths1.add(paths.get(i));
         }
         PhotoGridAdapter photoGridAdapter = (PhotoGridAdapter) adapterMap.get(groupPosition + "_" + childPosition);
-        if(photoGridAdapter == null)
+        if (photoGridAdapter == null)
         {
             photoGridAdapter = new PhotoGridAdapter(context, paths1);
-            adapterMap.put(groupPosition + "_" + childPosition,photoGridAdapter);
+            adapterMap.put(groupPosition + "_" + childPosition, photoGridAdapter);
         }
         holder.nsgPhoto.setAdapter(photoGridAdapter);
         PhotoGridAdapter finalPhotoGridAdapter = photoGridAdapter;
@@ -145,12 +166,13 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if(!isEdit)
+                if (!isEdit)
                 {
                     Intent intent = new Intent(context, PhotoDetailActivity.class);
                     intent.putExtra("photoPath", paths1.get(position));
                     context.startActivity(intent);
-                }else
+                }
+                else
                 {
                     finalPhotoGridAdapter.selectOne(paths1.get(position));
                     finalPhotoGridAdapter.notifyDataSetChanged();

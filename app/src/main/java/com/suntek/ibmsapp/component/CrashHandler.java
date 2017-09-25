@@ -90,6 +90,7 @@ public class CrashHandler implements UncaughtExceptionHandler
     @Override
     public void uncaughtException(Thread thread, Throwable ex)
     {
+
         if (!handleException(ex) && mDefaultHandler != null)
         {
             //如果用户没有处理则让系统默认的异常处理器来处理
@@ -108,6 +109,34 @@ public class CrashHandler implements UncaughtExceptionHandler
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(1);
         }
+    }
+
+
+    public String getExceptionMessage(Throwable ex)
+    {
+        StringBuffer sb = new StringBuffer();
+        //设备信息
+        for (Map.Entry<String, String> entry : infos.entrySet())
+        {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            sb.append(key + "=" + value + "\n");
+        }
+
+        //exception信息
+        Writer writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        ex.printStackTrace(printWriter);
+        Throwable cause = ex.getCause();
+        while (cause != null)
+        {
+            cause.printStackTrace(printWriter);
+            cause = cause.getCause();
+        }
+        printWriter.close();
+        String result = writer.toString();
+        sb.append(result);
+        return sb.toString();
     }
 
     /**
@@ -137,8 +166,11 @@ public class CrashHandler implements UncaughtExceptionHandler
             }
         }.start();
         //保存日志文件
-        saveCatchInfo2File(ex);
+        //saveCatchInfo2File(ex);
         //提交服务器
+        String errorMessage = getExceptionMessage(ex);
+        sendToServer(errorMessage);
+
 
         return true;
     }
@@ -150,13 +182,13 @@ public class CrashHandler implements UncaughtExceptionHandler
      */
     private void sendToServer(String message)
     {
-        new CrashLogTask(mContext,message)
+        new CrashLogTask(mContext, message)
         {
             @Override
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
-                if(!(result.getError() == null))
+                if (!(result.getError() == null))
                 {
                     ToastHelper.getInstance(mContext).shortShowMessage(result.getError().getMessage());
                 }

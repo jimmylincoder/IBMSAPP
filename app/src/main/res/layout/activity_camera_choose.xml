@@ -62,23 +62,26 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/CEAEAEA"
-        android:gravity="center_vertical"
+        android:layout_height="50dp"
+        android:background="@color/col_f0eff5"
+        android:gravity="bottom"
         android:orientation="horizontal"
+        android:paddingBottom="10dp"
         android:paddingLeft="5dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="当前选择区域"/>
+            android:layout_marginLeft="10dp"
+            android:text="当前选择区域"
+            android:textSize="14sp"/>
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_now_choose"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="40dp"
         android:layout_marginBottom="5dp"
         android:layout_marginTop="5dp"
         android:gravity="center_vertical"
@@ -89,14 +92,17 @@
             android:id="@+id/tv_now_area"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="停车场"/>
+            android:layout_marginLeft="10dp"
+            android:text="停车场"
+            android:textColor="@color/col_202020"
+            android:textSize="15sp"/>
 
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@color/CEAEAEA"
+        android:layout_height="50dp"
+        android:background="@color/col_f0eff5"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingLeft="5dp">
@@ -104,7 +110,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="区域列表"/>
+            android:layout_marginLeft="10dp"
+            android:text="区域列表"
+            android:textSize="14sp"/>
 
     </LinearLayout>
 

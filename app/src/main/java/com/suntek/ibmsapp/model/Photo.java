@@ -1,5 +1,9 @@
 package com.suntek.ibmsapp.model;
 
+import android.support.annotation.NonNull;
+
+import com.suntek.ibmsapp.util.DateUtil;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -8,7 +12,7 @@ import java.util.List;
  *
  * @author jimmy
  */
-public class Photo implements Serializable
+public class Photo
 {
     private String date;
 
@@ -33,4 +37,5 @@ public class Photo implements Serializable
     {
         this.photoPaths = photoPaths;
     }
+
 }
