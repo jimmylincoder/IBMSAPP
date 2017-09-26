@@ -54,18 +54,43 @@ public class CameraSearchAdapter extends BaseAdapter
     @Override
     public View getView(int i, View view, ViewGroup viewGroup)
     {
-        CameraHistoryAdapter.ViewHolder holder;
+        CameraSearchAdapter.ViewHolder holder;
         if (view != null)
         {
-            holder = (CameraHistoryAdapter.ViewHolder) view.getTag();
+            holder = (CameraSearchAdapter.ViewHolder) view.getTag();
         }
         else
         {
             view = LayoutInflater.from(context).inflate(R.layout.item_camera_search, null);
-            holder = new CameraHistoryAdapter.ViewHolder(view);
+            holder = new CameraSearchAdapter.ViewHolder(view);
             view.setTag(holder);
         }
         holder.tvCameraName.setText(cameraList.get(i).getName());
+        String type = cameraList.get(i).getType();
+        String status = cameraList.get(i).getIsUsed();
+        // 1-球机  2-半球  3-固定枪机  4-遥控枪机
+        if ("1".equals(type) || "2".equals(type))
+        {
+            if ("1".equals(status))
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_ball_camera);
+            }
+            else
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_bad_ball);
+            }
+        }
+        else
+        {
+            if ("1".equals(status))
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_camera_gun);
+            }
+            else
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_bad_gun);
+            }
+        }
         return view;
     }
 

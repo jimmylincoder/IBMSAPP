@@ -70,6 +70,17 @@ public class CameraHistoryAdapter extends BaseAdapter
         holder.tvCameraName.setText(cameraList.get(i).getName());
         holder.tvPlayTime.setText(DateUtil.convertYYYY_MM_DD_HH_MM_SS(
                 new Date(cameraList.get(i).getPlayTime())));
+        String status = cameraList.get(i).getIsUsed();
+        if ("1".equals(status))
+        {
+            holder.tvOnlineStatus.setText("在线");
+            holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_1aa7f0));
+        }
+        else
+        {
+            holder.tvOnlineStatus.setText("离线");
+            holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
+        }
         return view;
     }
 
@@ -80,6 +91,9 @@ public class CameraHistoryAdapter extends BaseAdapter
 
         @BindView(R.id.tv_camera_name)
         TextView tvCameraName;
+
+        @BindView(R.id.tv_online_status)
+        TextView tvOnlineStatus;
 
         public ViewHolder(View view)
         {

@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
+import android.widget.Toast;
 
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
@@ -36,6 +38,9 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
 
     private FragmentTransaction transaction;
 
+    //退出时的时间
+    private long mExitTime;
+
     @Override
     public int getLayoutId()
     {
@@ -47,7 +52,7 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
     {
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
         bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_video_active, "视频")
-                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_video)))
+                .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_video)))
                 .addItem(new BottomNavigationItem(R.mipmap.ic_file_active, "相册")
                         .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_file)))
                 .addItem(new BottomNavigationItem(R.mipmap.ic_history_active, "历史")
@@ -181,5 +186,31 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
     public void onTabReselected(int position)
     {
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0)
+        {
+
+            exit();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void exit()
+    {
+        if ((System.currentTimeMillis() - mExitTime) > 2000)
+        {
+            Toast.makeText(MainActivity.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            mExitTime = System.currentTimeMillis();
+        }
+        else
+        {
+            finish();
+            System.exit(0);
+        }
     }
 }

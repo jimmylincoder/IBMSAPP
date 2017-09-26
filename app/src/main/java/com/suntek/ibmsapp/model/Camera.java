@@ -16,7 +16,10 @@ public class Camera implements Serializable
 
     private String name;
 
+    // 1-球机  2-半球  3-固定枪机  4-遥控枪机
     private String type;
+
+    private String isUsed;
 
     private String deviceId;
 
@@ -192,6 +195,16 @@ public class Camera implements Serializable
         this.vendorName = vendorName;
     }
 
+    public void setIsUsed(String isUsed)
+    {
+        this.isUsed = isUsed;
+    }
+
+    public String getIsUsed()
+    {
+        return isUsed;
+    }
+
     public static Camera generateByJson(Map<String,Object> content)
     {
         Camera camera = new Camera();
@@ -212,6 +225,7 @@ public class Camera implements Serializable
         camera.setPlayTime(playTime.longValue());
         camera.setOrgName((String) content.get("org_name"));
         camera.setVendorName((String) content.get("vendor_name"));
+        camera.setIsUsed((String) content.get("is_used"));
 
         return camera;
     }

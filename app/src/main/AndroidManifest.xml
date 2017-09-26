@@ -101,6 +101,11 @@
             android:name=".page.photo.PhotoDetailActivity"
             android:screenOrientation="portrait"/>
 
+        <!--相册列表-->
+        <activity
+            android:name=".page.photo.PhotoListActivity"
+            android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

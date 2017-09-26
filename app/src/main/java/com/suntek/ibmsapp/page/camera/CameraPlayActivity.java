@@ -31,6 +31,7 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
+import com.suntek.ibmsapp.page.photo.PhotoListActivity;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.task.camera.control.CameraChangePositionTask;
@@ -973,7 +974,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @OnClick(R.id.iv_take_pic)
     public void jumpPhotoList(View view)
     {
-        ToastHelper.getInstance(this).shortShowMessage("跳到相册");
+        Intent intent = new Intent(CameraPlayActivity.this, PhotoListActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.tv_nowtime)
