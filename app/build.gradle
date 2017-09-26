@@ -109,4 +109,7 @@ dependencies {
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     //下拉刷新
     compile(name: "pulltorefresh-release", ext: 'aar')
+
+    compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
+
 }

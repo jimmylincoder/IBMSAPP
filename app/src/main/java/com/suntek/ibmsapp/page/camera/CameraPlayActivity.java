@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.camera;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -24,6 +25,9 @@ import android.widget.TextView;
 import com.dsw.calendar.component.MonthView;
 import com.dsw.calendar.entity.CalendarInfo;
 import com.dsw.calendar.views.GridCalendarView;
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.ConnectionQuality;
+import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -125,7 +129,8 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  *
  * @author jimmy
  */
-public class CameraPlayActivity extends BaseActivity implements Runnable
+public class CameraPlayActivity extends BaseActivity implements Runnable,
+        ConnectionClassManager.ConnectionClassStateChangeListener
 {
     //全屏
     private final int PLAYER_FULLSCREEN = 0;
@@ -162,8 +167,6 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     TextView tvCameraName;
     @BindView(R.id.tv_type)
     TextView tvPlayType;
-    @BindView(R.id.hp_date_picker)
-    HorizontalPicker hpDatePicker;
     @BindView(R.id.ll_loading)
     LinearLayout llLoading;
     @BindView(R.id.ll_fail)
@@ -172,6 +175,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     ImageView ivTakePic;
     @BindView(R.id.ll_take_pic)
     LinearLayout llTakePic;
+    @BindView(R.id.tv_net_state)
+    TextView tvNetState;
+    @BindView(R.id.tv_net_speed)
+    TextView tvNetSpeed;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -206,8 +213,12 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     //记录录像开始时间
     private long recordBeginTime;
     private long changePosition;
-
-    private ImageLoader imageLoader;
+    // 最后缓存的字节数
+    private long lastTotalRxBytes = 0;
+    // 当前缓存时间
+    private long lastTimeStamp = 0;
+    //网络检测线程
+    private Timer netSpeedTimer;
 
     @Override
     public int getLayoutId()
@@ -227,25 +238,65 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         loadData();
         initTimeSeekBarView();
         initRecord();
+        DeviceBandwidthSampler.getInstance().startSampling();
+        netSpeed();
 
-        //图片加载初始化
-        DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
-                .cacheInMemory(true).cacheOnDisc(true).displayer(new SquareBitmapDisplay()).build();
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(context)
-                .defaultDisplayImageOptions(options)
-                .build();
+    }
 
-        imageLoader = ImageLoader.getInstance();
-        imageLoader.init(config);
-
-        List<HorizontalPicker.PickerItem> textItems = new ArrayList<>();
-        for (int i = 1; i <= 25; i++)
+    /**
+     * 网速
+     */
+    private void netSpeed()
+    {
+        if (netSpeedTimer == null)
+            netSpeedTimer = new Timer();
+        netSpeedTimer.schedule(new TimerTask()
         {
-            textItems.add(new HorizontalPicker.TextItem("S" + i));
-        }
-        hpDatePicker.setItems(textItems, 1);
-
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        long nowTotalRxBytes = TrafficStats.getUidRxBytes(getApplicationInfo().uid)
+                                == TrafficStats.UNSUPPORTED ? 0 : (TrafficStats.getTotalRxBytes() / 1024);
+                        long nowTimeStamp = System.currentTimeMillis(); // 当前时间
+                        // kb/s
+                        long speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / (nowTimeStamp == lastTimeStamp ? nowTimeStamp : nowTimeStamp
+                                - lastTimeStamp));// 毫秒转换
+                        lastTimeStamp = nowTimeStamp;
+                        lastTotalRxBytes = nowTotalRxBytes;
+                        final ConnectionQuality connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
+                        String netState = "";
+                        final double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                        switch (connectionQuality)
+                        {
+                            case POOR:
+                                netState = "差强人意";
+                                tvNetState.setTextColor(getResources().getColor(R.color.red));
+                                break;
+                            case MODERATE:
+                                netState = "马马虎虎";
+                                tvNetState.setTextColor(getResources().getColor(R.color.white));
+                                break;
+                            case GOOD:
+                                netState = "不错哟";
+                                tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                break;
+                            case EXCELLENT:
+                                netState = "无人匹敌";
+                                tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                break;
+                        }
+                        tvNetState.setText(netState);
+                        tvNetSpeed.setText(speed + " kb/s");
+                        Log.e(CameraPlayActivity.class.getName(), "当前网络质量:" + connectionQuality + "\n当前网速:" + speed);
+                    }
+                });
+            }
+        }, 1000, 1000);
     }
 
     @Override
@@ -628,6 +679,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         isTimeRun = false;
         if (seekBarTimer != null)
             seekBarTimer.cancel();
+        if (netSpeedTimer != null)
+            netSpeedTimer.cancel();
         if (queryProgressTimer != null)
             queryProgressTimer.cancel();
         stopPlay();
@@ -847,11 +900,19 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     protected void onResume()
     {
         super.onResume();
+        ConnectionClassManager.getInstance().register(this);
         if (isBackGround)
         {
             //initVideoView();
             isBackGround = false;
         }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        ConnectionClassManager.getInstance().remove(this);
     }
 
     @Override
@@ -1140,7 +1201,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             recordItem1.setEndTime(recordItem.getEndTime() / 1000);
             changeRecordItems.add(recordItem1);
         }
-        timeSeekBar.setRecordList(changeRecordItems);
+        if (timeSeekBar != null)
+            timeSeekBar.setRecordList(changeRecordItems);
     }
 
     /**
@@ -1221,5 +1283,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 super.onPostExecute(result);
             }
         }.execute();
+    }
+
+    @Override
+    public void onBandwidthStateChange(ConnectionQuality bandwidthState)
+    {
+        Log.e(CameraPlayActivity.class.getName(), "网速：" + bandwidthState.toString());
     }
 }
