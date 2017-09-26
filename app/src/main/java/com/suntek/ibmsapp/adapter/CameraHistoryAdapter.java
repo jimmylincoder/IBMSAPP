@@ -10,7 +10,9 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.util.DateUtil;
 
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -18,6 +20,7 @@ import butterknife.ButterKnife;
 
 /**
  * 摄像头搜索列表
+ *
  * @author jimmy
  */
 public class CameraHistoryAdapter extends BaseAdapter
@@ -54,31 +57,33 @@ public class CameraHistoryAdapter extends BaseAdapter
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         CameraHistoryAdapter.ViewHolder holder;
-        if(view != null)
+        if (view != null)
         {
             holder = (CameraHistoryAdapter.ViewHolder) view.getTag();
         }
         else
         {
-            view = LayoutInflater.from(context).inflate(R.layout.item_camera_history,null);
+            view = LayoutInflater.from(context).inflate(R.layout.item_camera_history, null);
             holder = new CameraHistoryAdapter.ViewHolder(view);
             view.setTag(holder);
         }
         holder.tvCameraName.setText(cameraList.get(i).getName());
+        holder.tvPlayTime.setText(DateUtil.convertYYYY_MM_DD_HH_MM_SS(
+                new Date(cameraList.get(i).getPlayTime())));
         return view;
     }
 
     static class ViewHolder
     {
-       // @BindView(R.id.iv_camera_type)
-       // ImageView ivCameraType;
+        @BindView(R.id.tv_play_time)
+        TextView tvPlayTime;
 
         @BindView(R.id.tv_camera_name)
         TextView tvCameraName;
 
         public ViewHolder(View view)
         {
-            ButterKnife.bind(this,view);
+            ButterKnife.bind(this, view);
         }
     }
 

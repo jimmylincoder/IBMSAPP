@@ -1,5 +1,7 @@
 package com.suntek.ibmsapp.model;
 
+import android.content.Intent;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -205,7 +207,9 @@ public class Camera implements Serializable
         camera.setPassword((String) content.get("password"));
         camera.setDeviceId((String) content.get("device_id"));
         camera.setParentId((String) content.get("parent_id"));
-//        camera.setPlayTime((Integer) content.get("play_time"));
+        //camera.setPlayTime((Integer) content.get("play_time"));
+        Number playTime = (Number) content.get("play_time");
+        camera.setPlayTime(playTime.longValue());
         camera.setOrgName((String) content.get("org_name"));
         camera.setVendorName((String) content.get("vendor_name"));
 

@@ -77,7 +77,7 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
         Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
         Camera camera = cameraList.get(i - 1);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("camera",camera);
+        bundle.putSerializable("camera", camera);
         intent.putExtras(bundle);
         startActivity(intent);
     }
@@ -117,7 +117,8 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
                     }
                     cameraHistoryAdapter.setCameraList(cameraList);
                     cameraHistoryAdapter.notifyDataSetChanged();
-                    ptrHistory.onRefreshComplete();
+                    if (ptrHistory != null)
+                        ptrHistory.onRefreshComplete();
                 }
                 else
                 {
