@@ -12,13 +12,12 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
 
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 摄像头搜索列表
+ * 摄像机搜索adapter
  *
  * @author jimmy
  */
@@ -28,7 +27,7 @@ public class CameraSearchAdapter extends BaseAdapter
 
     private List<Camera> cameraList;
 
-    public CameraSearchAdapter(Context context,List<Camera> cameraList)
+    public CameraSearchAdapter(Context context, List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
@@ -56,17 +55,42 @@ public class CameraSearchAdapter extends BaseAdapter
     public View getView(int i, View view, ViewGroup viewGroup)
     {
         CameraSearchAdapter.ViewHolder holder;
-        if(view != null)
+        if (view != null)
         {
             holder = (CameraSearchAdapter.ViewHolder) view.getTag();
         }
         else
         {
-            view = LayoutInflater.from(context).inflate(R.layout.item_camera_search,null);
+            view = LayoutInflater.from(context).inflate(R.layout.item_camera_search, null);
             holder = new CameraSearchAdapter.ViewHolder(view);
             view.setTag(holder);
         }
         holder.tvCameraName.setText(cameraList.get(i).getName());
+        String type = cameraList.get(i).getType();
+        String status = cameraList.get(i).getIsUsed();
+        // 1-球机  2-半球  3-固定枪机  4-遥控枪机
+        if ("1".equals(type) || "2".equals(type))
+        {
+            if ("1".equals(status))
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_ball_camera);
+            }
+            else
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_bad_ball);
+            }
+        }
+        else
+        {
+            if ("1".equals(status))
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_camera_gun);
+            }
+            else
+            {
+                holder.ivCameraType.setBackgroundResource(R.mipmap.ic_bad_gun);
+            }
+        }
         return view;
     }
 
@@ -80,7 +104,7 @@ public class CameraSearchAdapter extends BaseAdapter
 
         public ViewHolder(View view)
         {
-            ButterKnife.bind(this,view);
+            ButterKnife.bind(this, view);
         }
     }
 

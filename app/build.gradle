@@ -1,47 +1,78 @@
+//配置android插件
 apply plugin: 'com.android.application'
 
+//注:minSdkVersion<=targetSdkVersion<=compileSdkVersion
+
+//配置了用于 android 构建的所有参数。这是Android DSL的入口
 android {
+    //作用：用哪个 Android SDK 版本编译你的应用  强烈推荐总是使用最新的 SDK 进行编译（默认就是最新的）
     compileSdkVersion 24
+    //android构建工具的版本,在SDK Manager中安装选择版本，buildToolsVersion的版本需要>=CompileSdkVersion;
+    //高版本的build-tools 可以构建低版本编译的android程序
     buildToolsVersion "25.0.0"
+
+    //默认配置
     defaultConfig {
+        //声明app的包名，是app的标识符,多渠道打包
         applicationId "com.suntek.ibmsapp"
+        //最小的SDK版本
         minSdkVersion 21
+        // targetSdkVersion 是 Android 提供向前兼容的主要依据，在应用的 targetSdkVersion 没有更新之前系统
+        // 不会应用最新的行为变化
         targetSdkVersion 24
+        //对消费者不可见，仅用于应用市场、程序内部识别版本，判断新旧等用途
         versionCode 1
+        //展示给消费者，消费者会通过它认知自己安装的版本
         versionName "1.0"
+        //单元测试
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //多dex打包
         multiDexEnabled true
+        //jack编泽器
         jackOptions {
             enabled true
         }
     }
+
+    //构建类型 Gradle组件默认提供给了“debug”“release”两个默认配置，此处用于配置是否需要混淆、是否可调试等
     buildTypes {
+        //开启混淆
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    //Java 的版本配置，以便使用对应版本的一些新特性
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    //配置本地libs仓库
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+
     useLibrary 'org.apache.http.legacy'
 }
 
+//添加依赖
 dependencies {
-
     //默认配置
     compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     //noinspection GradleCompatible
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:24.2.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     //---------------------------------------------------------------
-
     //    # required, enough for most devices.
     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.2'
     compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.2'
@@ -50,32 +81,35 @@ dependencies {
     //    compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.6.1'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.2'
     //    compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.6.1'
-
     //    # ExoPlayer as IMediaPlayer: optional, experimental
     compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.2'
-
     compile 'com.github.ctiao:DanmakuFlameMaster:0.5.6'
     compile 'org.jsoup:jsoup:1.8.3'
     //-----------------------------------------------------------------
-
     //网络请求 依赖库
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
     //-----------------------------------------------------------------
-
     //注解 依赖库
     compile 'com.jakewharton:butterknife:8.6.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.6.0'
-    //下拉刷新
-    compile project(':pulltorefresh')
     //泄露检测
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
     testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+
+    //底部tab控件
     compile 'com.ashokvarma.android:bottom-navigation-bar:1.2.0'
+    //fastjson
     compile 'com.alibaba:fastjson:1.1.45.android'
     compile 'org.bouncycastle:bcprov-jdk16:1.46'
     compile 'commons-io:commons-io:2.4'
-
     compile 'com.dsw.calendar:library:1.0.0'
+    //图片加载器
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    //下拉刷新
+    compile(name: "pulltorefresh-release", ext: 'aar')
+
+    compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
+
 }

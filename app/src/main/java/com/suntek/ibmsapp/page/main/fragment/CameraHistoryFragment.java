@@ -9,7 +9,7 @@ import android.widget.AdapterView;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.adapter.CameraSearchAdapter;
+import com.suntek.ibmsapp.adapter.CameraHistoryAdapter;
 
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
@@ -34,7 +34,7 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     @BindView(R.id.ptr_history)
     PullToRefreshListView ptrHistory;
 
-    private CameraSearchAdapter cameraSearchAdapter;
+    private CameraHistoryAdapter cameraHistoryAdapter;
 
     private List<Camera> cameraList;
 
@@ -52,8 +52,8 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     public void initViews(Bundle savedInstanceState)
     {
         cameraList = new ArrayList<>();
-        cameraSearchAdapter = new CameraSearchAdapter(getActivity(), cameraList);
-        ptrHistory.setAdapter(cameraSearchAdapter);
+        cameraHistoryAdapter = new CameraHistoryAdapter(getActivity(), cameraList);
+        ptrHistory.setAdapter(cameraHistoryAdapter);
         ptrHistory.setOnItemClickListener(this);
         ptrHistory.setOnRefreshListener(this);
         ptrHistory.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
@@ -77,7 +77,7 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
         Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
         Camera camera = cameraList.get(i - 1);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("camera",camera);
+        bundle.putSerializable("camera", camera);
         intent.putExtras(bundle);
         startActivity(intent);
     }
@@ -115,9 +115,10 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
                     {
                         cameraList.addAll(newCameraList);
                     }
-                    cameraSearchAdapter.setCameraList(cameraList);
-                    cameraSearchAdapter.notifyDataSetChanged();
-                    ptrHistory.onRefreshComplete();
+                    cameraHistoryAdapter.setCameraList(cameraList);
+                    cameraHistoryAdapter.notifyDataSetChanged();
+                    if (ptrHistory != null)
+                        ptrHistory.onRefreshComplete();
                 }
                 else
                 {

@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.login;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.suntek.ibmsapp.R;
@@ -46,6 +47,10 @@ public class UserLoginActivity extends BaseActivity
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        //设置全屏
+        WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+        localLayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
+
         etAccount.setText("admin");
         etPassword.setText("suntek");
         initArea();

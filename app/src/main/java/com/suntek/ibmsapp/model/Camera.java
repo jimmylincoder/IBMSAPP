@@ -1,5 +1,7 @@
 package com.suntek.ibmsapp.model;
 
+import android.content.Intent;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -14,7 +16,10 @@ public class Camera implements Serializable
 
     private String name;
 
+    // 1-球机  2-半球  3-固定枪机  4-遥控枪机
     private String type;
+
+    private String isUsed;
 
     private String deviceId;
 
@@ -39,6 +44,8 @@ public class Camera implements Serializable
     private String orgName;
 
     private String vendorName;
+
+    private String photoBase64;
 
     public String getId()
     {
@@ -190,7 +197,27 @@ public class Camera implements Serializable
         this.vendorName = vendorName;
     }
 
-    public static Camera generateByJson(Map<String,Object> content)
+    public void setIsUsed(String isUsed)
+    {
+        this.isUsed = isUsed;
+    }
+
+    public String getIsUsed()
+    {
+        return isUsed;
+    }
+
+    public void setPhotoBase64(String photoBase64)
+    {
+        this.photoBase64 = photoBase64;
+    }
+
+    public String getPhotoBase64()
+    {
+        return photoBase64;
+    }
+
+    public static Camera generateByJson(Map<String, Object> content)
     {
         Camera camera = new Camera();
         camera.setId((String) content.get("id"));
@@ -205,9 +232,13 @@ public class Camera implements Serializable
         camera.setPassword((String) content.get("password"));
         camera.setDeviceId((String) content.get("device_id"));
         camera.setParentId((String) content.get("parent_id"));
-//        camera.setPlayTime((Integer) content.get("play_time"));
+        //camera.setPlayTime((Integer) content.get("play_time"));
+        Number playTime = (Number) content.get("play_time");
+        camera.setPlayTime(playTime.longValue());
         camera.setOrgName((String) content.get("org_name"));
         camera.setVendorName((String) content.get("vendor_name"));
+        camera.setIsUsed((String) content.get("is_used"));
+        camera.setPhotoBase64((String) content.get("photo_base64"));
 
         return camera;
     }

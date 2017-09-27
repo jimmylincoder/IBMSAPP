@@ -1,24 +1,29 @@
 package com.suntek.ibmsapp.page.main;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
+import android.view.KeyEvent;
+import android.widget.Toast;
 
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.base.BaseFragmentActivity;
 import com.suntek.ibmsapp.page.main.fragment.CameraHistoryFragment;
 import com.suntek.ibmsapp.page.main.fragment.CameraListFragment;
 import com.suntek.ibmsapp.page.main.fragment.MeFragment;
+import com.suntek.ibmsapp.page.main.fragment.PhotoListFragment;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 
-public class MainActivity extends BaseActivity implements BottomNavigationBar.OnTabSelectedListener
+public class MainActivity extends BaseFragmentActivity implements BottomNavigationBar.OnTabSelectedListener
 {
 
     private ArrayList<Fragment> fragments;
@@ -29,8 +34,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     private CameraListFragment cameraListFragment;
     private CameraHistoryFragment cameraHistoryFragment;
     private MeFragment meFragment;
+    private PhotoListFragment photoListFragment;
 
     private FragmentTransaction transaction;
+
+    //退出时的时间
+    private long mExitTime;
 
     @Override
     public int getLayoutId()
@@ -42,11 +51,17 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     public void initViews(Bundle savedInstanceState)
     {
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
-        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_tv_play,"视频").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_history,"历史").setActiveColor(R.color.orange))
-                .addItem(new BottomNavigationItem(R.mipmap.ic_account,"我的").setActiveColor(R.color.orange))
+        bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_video_active, "视频")
+                .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_video)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_file_active, "相册")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_file)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_history_active, "历史")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_history)))
+                .addItem(new BottomNavigationItem(R.mipmap.ic_account_active, "我的")
+                        .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_account)))
                 .setFirstSelectedPosition(lastSelectedPosition)
-                .initialise();;
+                .initialise();
+        ;
 
 
         bnbTab.setTabSelectedListener(this);
@@ -55,11 +70,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
 
     private void setDefaultFragment()
     {
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
 
         cameraListFragment = new CameraListFragment();
-        transaction.replace(R.id.fl_content,cameraListFragment);
+        transaction.replace(R.id.fl_content, cameraListFragment);
         transaction.commit();
     }
 
@@ -71,16 +86,16 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     @Override
     public void onTabSelected(int position)
     {
-        FragmentManager fm = this.getFragmentManager();
+        FragmentManager fm = this.getSupportFragmentManager();
         transaction = fm.beginTransaction();
         hideFragment(transaction);
         switch (position)
         {
             case 0:
-                if(cameraListFragment == null)
+                if (cameraListFragment == null)
                 {
                     cameraListFragment = new CameraListFragment();
-                    transaction.add(R.id.fl_content,cameraListFragment);
+                    transaction.add(R.id.fl_content, cameraListFragment);
                 }
                 else
                 {
@@ -89,12 +104,22 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 //此方法会导致fragment销灭
                 //transaction.replace(R.id.fl_content,cameraListFragment);
                 break;
-
             case 1:
-                if(cameraHistoryFragment == null)
+                if (photoListFragment == null)
+                {
+                    photoListFragment = new PhotoListFragment();
+                    transaction.add(R.id.fl_content, photoListFragment);
+                }
+                else
+                {
+                    transaction.show(photoListFragment);
+                }
+                break;
+            case 2:
+                if (cameraHistoryFragment == null)
                 {
                     cameraHistoryFragment = new CameraHistoryFragment();
-                    transaction.add(R.id.fl_content,cameraHistoryFragment);
+                    transaction.add(R.id.fl_content, cameraHistoryFragment);
                 }
                 else
                 {
@@ -103,11 +128,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
                 //transaction.replace(R.id.fl_content,cameraHistoryFragment);
                 break;
 
-            case 2:
-                if(meFragment == null)
+            case 3:
+                if (meFragment == null)
                 {
                     meFragment = new MeFragment();
-                    transaction.add(R.id.fl_content,meFragment);
+                    transaction.add(R.id.fl_content, meFragment);
                 }
                 else
                 {
@@ -143,6 +168,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
         {
             transaction.hide(meFragment);
         }
+
+        if (photoListFragment != null)
+        {
+            transaction.hide(photoListFragment);
+        }
     }
 
 
@@ -156,5 +186,31 @@ public class MainActivity extends BaseActivity implements BottomNavigationBar.On
     public void onTabReselected(int position)
     {
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0)
+        {
+
+            exit();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void exit()
+    {
+        if ((System.currentTimeMillis() - mExitTime) > 2000)
+        {
+            Toast.makeText(MainActivity.this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            mExitTime = System.currentTimeMillis();
+        }
+        else
+        {
+            finish();
+            System.exit(0);
+        }
     }
 }

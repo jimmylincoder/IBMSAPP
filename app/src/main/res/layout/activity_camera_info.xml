@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@color/white"
+        android:background="@mipmap/bg_top"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -27,7 +27,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="返回"/>
+                android:text="返回"
+                android:textColor="@color/white"/>
 
         </LinearLayout>
 
@@ -42,6 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="摄像机信息"
+                android:textColor="@color/white"
                 android:textSize="18dp"
                 />
 
@@ -94,26 +96,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_name"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="停车场_通道号33"/>
+                    android:text="停车场_通道号33"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:paddingRight="10dp"
-            android:paddingLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -140,26 +142,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_channel"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="33"/>
+                    android:text="33"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -186,26 +188,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_ip"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="172.16.16.111"/>
+                    android:text="172.16.16.111"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -232,26 +234,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_port"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="8080"/>
+                    android:text="8080"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -278,26 +280,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_area"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="华侨城中心小区"/>
+                    android:text="华侨城中心小区"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -324,26 +326,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_vendor"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="海康"/>
+                    android:text="海康"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -370,26 +372,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center|right"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center|right">
 
                 <TextView
                     android:id="@+id/tv_type"
-                    android:textColor="@color/gray_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
-                    android:text="球机"/>
+                    android:text="球机"
+                    android:textColor="@color/gray_20"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
         <View
-            android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="match_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
 
 
     </LinearLayout>

@@ -18,9 +18,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- *  区域列表
- *
- *  @author jimmy
+ * 区域列表
+ * @author jimmy
  */
 public class AreaListAdapter extends BaseAdapter
 {

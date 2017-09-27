@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:background="@color/white"
         android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@mipmap/bg_top"
         android:gravity="center"
-        android:layout_height="50dp">
+        android:orientation="horizontal">
 
         <TextView
-            android:textSize="18dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="播放记录"/>
+            android:text="播放记录"
+            android:textColor="@color/white"
+            android:textSize="18dp"/>
     </LinearLayout>
 
     <View
@@ -27,7 +28,9 @@
     <com.handmark.pulltorefresh.library.PullToRefreshListView
         android:id="@+id/ptr_history"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+
+        android:dividerHeight="4dp">
 
     </com.handmark.pulltorefresh.library.PullToRefreshListView>
 

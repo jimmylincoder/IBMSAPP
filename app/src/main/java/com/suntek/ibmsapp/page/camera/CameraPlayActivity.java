@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.camera;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -23,10 +25,17 @@ import android.widget.TextView;
 import com.dsw.calendar.component.MonthView;
 import com.dsw.calendar.entity.CalendarInfo;
 import com.dsw.calendar.views.GridCalendarView;
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.ConnectionQuality;
+import com.facebook.network.connectionclass.DeviceBandwidthSampler;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
+import com.suntek.ibmsapp.page.photo.PhotoListActivity;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.task.camera.control.CameraChangePositionTask;
@@ -36,10 +45,13 @@ import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
+import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
+import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.HorizontalPicker;
+import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
@@ -117,7 +129,8 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  *
  * @author jimmy
  */
-public class CameraPlayActivity extends BaseActivity implements Runnable
+public class CameraPlayActivity extends BaseActivity implements Runnable,
+        ConnectionClassManager.ConnectionClassStateChangeListener
 {
     //全屏
     private final int PLAYER_FULLSCREEN = 0;
@@ -154,12 +167,22 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     TextView tvCameraName;
     @BindView(R.id.tv_type)
     TextView tvPlayType;
-    @BindView(R.id.hp_date_picker)
-    HorizontalPicker hpDatePicker;
     @BindView(R.id.ll_loading)
     LinearLayout llLoading;
     @BindView(R.id.ll_fail)
     LinearLayout llFail;
+    @BindView(R.id.iv_take_pic)
+    ImageView ivTakePic;
+    @BindView(R.id.ll_take_pic)
+    LinearLayout llTakePic;
+    @BindView(R.id.tv_net_state)
+    TextView tvNetState;
+    @BindView(R.id.tv_net_speed)
+    TextView tvNetSpeed;
+    @BindView(R.id.ll_change_time)
+    LinearLayout llChangeTime;
+    @BindView(R.id.tv_change_time)
+    TextView tvChangeTime;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -194,6 +217,13 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     //记录录像开始时间
     private long recordBeginTime;
     private long changePosition;
+    // 最后缓存的字节数
+    private long lastTotalRxBytes = 0;
+    // 当前缓存时间
+    private long lastTimeStamp = 0;
+    //网络检测线程
+    private Timer netSpeedTimer;
+    private boolean isChangeTimeStart;
 
     @Override
     public int getLayoutId()
@@ -213,14 +243,64 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         loadData();
         initTimeSeekBarView();
         initRecord();
+        DeviceBandwidthSampler.getInstance().startSampling();
+        netSpeed();
 
-        List<HorizontalPicker.PickerItem> textItems = new ArrayList<>();
-        for (int i = 1; i <= 25; i++)
+    }
+
+    /**
+     * 网速
+     */
+    private void netSpeed()
+    {
+        if (netSpeedTimer == null)
+            netSpeedTimer = new Timer();
+        netSpeedTimer.schedule(new TimerTask()
         {
-            textItems.add(new HorizontalPicker.TextItem("S" + i));
-        }
-        hpDatePicker.setItems(textItems, 1);
-
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        long nowTotalRxBytes = TrafficStats.getUidRxBytes(getApplicationInfo().uid)
+                                == TrafficStats.UNSUPPORTED ? 0 : (TrafficStats.getTotalRxBytes() / 1024);
+                        long nowTimeStamp = System.currentTimeMillis(); // 当前时间
+                        // kb/s
+                        long speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / (nowTimeStamp == lastTimeStamp ? nowTimeStamp : nowTimeStamp
+                                - lastTimeStamp));// 毫秒转换
+                        lastTimeStamp = nowTimeStamp;
+                        lastTotalRxBytes = nowTotalRxBytes;
+                        final ConnectionQuality connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
+                        String netState = "";
+                        final double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+                        switch (connectionQuality)
+                        {
+                            case POOR:
+                                netState = "差强人意";
+                                tvNetState.setTextColor(getResources().getColor(R.color.red));
+                                break;
+                            case MODERATE:
+                                netState = "马马虎虎";
+                                tvNetState.setTextColor(getResources().getColor(R.color.white));
+                                break;
+                            case GOOD:
+                                netState = "不错哟";
+                                tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                break;
+                            case EXCELLENT:
+                                netState = "无人匹敌";
+                                tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                break;
+                        }
+                        tvNetState.setText(netState);
+                        tvNetSpeed.setText(speed + " kb/s");
+                    }
+                });
+            }
+        }, 1000, 1000);
     }
 
     @Override
@@ -303,22 +383,37 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             public void onValueChange(Date date)
             {
                 //TODO 当移动时间轴变化时将其显示在视频中心
+                //如果已经开始移动就显示
+                if (isChangeTimeStart)
+                {
+                    llChangeTime.setVisibility(View.VISIBLE);
+                    tvChangeTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                    tvNowTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                }
             }
 
             @Override
             public void onStartValueChange(Date date)
             {
-
+                //开始移动
+                isChangeTimeStart = true;
             }
 
             @Override
             public void onStopValueChange(Date date)
             {
+                if (isChangeTimeStart)
+                {
+                    llChangeTime.setVisibility(View.GONE);
+                    tvNowTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                    isChangeTimeStart = false;
+                }
                 //TODO 移动到最终位置后，如果该位置没有录像的话，就移向前面有录像的一段，如果时间大于当前时间的话，则播放实时视频
                 //如果大于当前时间则反回当前时间
                 if (date.getTime() > new Date().getTime())
                 {
                     timeSeekBar.setValue(new Date().getTime());
+                    tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
                     isRecorder = false;
                     reloadVideoView(null, null);
                     tvPlayType.setText("直播");
@@ -341,15 +436,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                         {
                             //设备为录像，并加载当天起始录像点到23:59:59,然后移位置到当前
                             isRecorder = true;
-                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                            //String beginTime = format.format(date);
-                            //String endTime = format1.format(new Date().getTime() - 1000 * 60 * 10);
                             String beginTime = chooseDate + " 00:00:00";
                             String endTime = chooseDate + " 23:59:59";
                             reloadVideoView(beginTime, endTime);
 
-                            changePosition = (date.getTime() - dayBegin.getTime())/1000;
+                            changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
                         }
                         else
                         {
@@ -361,8 +452,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 }
             }
         });
-        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
-        chooseDate = format1.format(new Date());
+        chooseDate = DateUtil.convertYYYY_MM_DD(new Date());
         startSeekBarTimer();
 
     }
@@ -484,13 +574,21 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
      */
     private void initTimeView()
     {
+        tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
         timeHandler = new Handler()
         {
             @Override
             public void handleMessage(Message msg)
             {
                 if (tvNowTime != null)
-                    tvNowTime.setText((String) msg.obj);
+                {
+                    String date = tvNowTime.getText().toString();
+                    //Calendar calendar = Calendar.getInstance();
+                    String year = chooseDate.substring(0, 4);
+                    long time = DateUtil.convertToLong(year + "/" + date, "yyyy/MM/dd HH:mm:ss");
+                    Date newDate = new Date(time + 1000);
+                    tvNowTime.setText(DateUtil.convertByFormat(newDate, "MM/dd HH:mm:ss"));
+                }
             }
         };
         //时间线程
@@ -550,7 +648,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                     llLoading.setVisibility(View.GONE);
                     if (seekBarTimer == null && !isRecorder)
                         startSeekBarTimer();
-                    if(isRecorder)
+                    if (isRecorder)
                         changePosition(changePosition);
                 }
                 return false;
@@ -589,15 +687,15 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
 
         if (mBackPressed || !ivvVideo.isBackgroundPlayEnabled())
         {
-            ivvVideo.stopPlayback();
-            ivvVideo.release(true);
-            ivvVideo.stopBackgroundPlay();
+//            ivvVideo.stopPlayback();
+//            ivvVideo.release(true);
+//            ivvVideo.stopBackgroundPlay();
         }
         else
         {
-            ivvVideo.enterBackground();
+//            ivvVideo.enterBackground();
         }
-        IjkMediaPlayer.native_profileEnd();
+//        IjkMediaPlayer.native_profileEnd();
 
         isBackGround = true;
     }
@@ -608,11 +706,25 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         isTimeRun = false;
         if (seekBarTimer != null)
             seekBarTimer.cancel();
+        if (netSpeedTimer != null)
+            netSpeedTimer.cancel();
         if (queryProgressTimer != null)
             queryProgressTimer.cancel();
         stopPlay();
         //  menu.dismiss();
         cameraPlayTask.cancel(true);
+
+        if (mBackPressed || !ivvVideo.isBackgroundPlayEnabled())
+        {
+            ivvVideo.stopPlayback();
+            ivvVideo.release(true);
+            ivvVideo.stopBackgroundPlay();
+        }
+        else
+        {
+            ivvVideo.enterBackground();
+        }
+        IjkMediaPlayer.native_profileEnd();
         super.onDestroy();
     }
 
@@ -642,11 +754,36 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     @OnClick(R.id.ib_snapshot)
     public void takePic(View view)
     {
+        PermissionRequest.verifyStoragePermissions(this);
         File localFile = new File(PIC_PATH);
         localFile.mkdirs();
         try
         {
             Bitmap bitmap = ivvVideo.takePicture();
+            llTakePic.setVisibility(View.VISIBLE);
+            ivTakePic.setImageBitmap(bitmap);
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        Thread.sleep(3000);
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                llTakePic.setVisibility(View.GONE);
+                            }
+                        });
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
             FileUtil.saveImageToGallery(this, bitmap);
             ToastHelper.getInstance(this).shortShowMessage("截图成功");
         } catch (Exception e)
@@ -778,7 +915,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
         else
         {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 300));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 320));
             flVideo.setLayoutParams(layoutParams);
         }
         llHead.setVisibility(viewType);
@@ -790,11 +927,19 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
     protected void onResume()
     {
         super.onResume();
+        ConnectionClassManager.getInstance().register(this);
         if (isBackGround)
         {
-            initVideoView();
+            //initVideoView();
             isBackGround = false;
         }
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        ConnectionClassManager.getInstance().remove(this);
     }
 
     @Override
@@ -804,8 +949,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         {
             while (isTimeRun)
             {
-                SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss");
-                String str = sdf.format(new Date());
+                String str = DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss");
                 timeHandler.sendMessage(timeHandler.obtainMessage(100, str));
                 Thread.sleep(1000);
             }
@@ -915,16 +1059,23 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         resume();
     }
 
+    @OnClick(R.id.iv_take_pic)
+    public void jumpPhotoList(View view)
+    {
+        Intent intent = new Intent(CameraPlayActivity.this, PhotoListActivity.class);
+        startActivity(intent);
+    }
+
     @OnClick(R.id.tv_nowtime)
     public void date(View view)
     {
         if (dateChoose == null)
         {
             View view1 = getLayoutInflater().inflate(R.layout.view_popup_daee, null);
-            dateChoose = new PopupWindow(view1, ViewGroup.LayoutParams.WRAP_CONTENT,
+            dateChoose = new PopupWindow(view1, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             dateChoose.setOutsideTouchable(true);
-            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
             gcv = (GridCalendarView) view1.findViewById(R.id.gcv_date);
             initDateChoose();
             gcv.setDateClick(new MonthView.IDateClick()
@@ -952,6 +1103,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                             RecordItem recordItem = getEarliestTime(recordItems);
                             cancelSeekBarTimer();
                             timeSeekBar.setValue(recordItem.getStartTime());
+                            tvNowTime.setText(DateUtil.convertByFormat(recordItem.getStartTime(), "MM/dd HH:mm:ss"));
                             String beginTime = format.format(new Date(recordItem.getStartTime()));
                             String endTime = chooseDate + " 23:59:59";
                             reloadVideoView(beginTime, endTime);
@@ -964,7 +1116,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
         }
         else
         {
-            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.CENTER, 0, 0);
+            dateChoose.showAtLocation(getWindow().getDecorView(), Gravity.BOTTOM, 0, 0);
         }
     }
 
@@ -1077,7 +1229,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
             recordItem1.setEndTime(recordItem.getEndTime() / 1000);
             changeRecordItems.add(recordItem1);
         }
-        timeSeekBar.setRecordList(changeRecordItems);
+        if (timeSeekBar != null)
+            timeSeekBar.setRecordList(changeRecordItems);
     }
 
     /**
@@ -1158,5 +1311,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable
                 super.onPostExecute(result);
             }
         }.execute();
+    }
+
+    @Override
+    public void onBandwidthStateChange(ConnectionQuality bandwidthState)
+    {
+        Log.e(CameraPlayActivity.class.getName(), "网速：" + bandwidthState.toString());
     }
 }

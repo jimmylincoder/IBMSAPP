@@ -8,4 +8,19 @@
         <attr name="itemWidth" format="dimension"/>
         <attr name="itemMargin" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="RockerView">
+        <attr name="areaBackground" format="color|reference"/>
+        <attr name="rockerBackground" format="color|reference"/>
+        <attr name="rockerRadius" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="TimeSeekBarView">
+        <attr name="lineColor" format="color|reference"/>
+        <attr name="middleLineColor" format="color|reference"/>
+        <attr name="backgroundColor" format="color|reference"/>
+        <attr name="timeTextColor" format="color|reference"/>
+        <attr name="recordColor" format="color|reference"/>
+        <attr name="style" format="integer"/>
+    </declare-styleable>
 </resources>
