@@ -45,6 +45,8 @@ public class Camera implements Serializable
 
     private String vendorName;
 
+    private String photoBase64;
+
     public String getId()
     {
         return id;
@@ -205,7 +207,17 @@ public class Camera implements Serializable
         return isUsed;
     }
 
-    public static Camera generateByJson(Map<String,Object> content)
+    public void setPhotoBase64(String photoBase64)
+    {
+        this.photoBase64 = photoBase64;
+    }
+
+    public String getPhotoBase64()
+    {
+        return photoBase64;
+    }
+
+    public static Camera generateByJson(Map<String, Object> content)
     {
         Camera camera = new Camera();
         camera.setId((String) content.get("id"));
@@ -226,6 +238,7 @@ public class Camera implements Serializable
         camera.setOrgName((String) content.get("org_name"));
         camera.setVendorName((String) content.get("vendor_name"));
         camera.setIsUsed((String) content.get("is_used"));
+        camera.setPhotoBase64((String) content.get("photo_base64"));
 
         return camera;
     }

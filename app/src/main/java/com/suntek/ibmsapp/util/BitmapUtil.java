@@ -1,6 +1,9 @@
 package com.suntek.ibmsapp.util;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.util.Base64;
 
 /**
  * Bitmap工具类
@@ -59,5 +62,37 @@ public class BitmapUtil
         return result;
     }
 
+
+    /**
+     * base64转为bitmap
+     *
+     * @param base64Data
+     * @return
+     */
+    public static Bitmap base64ToBitmap(String base64Data)
+    {
+        byte[] bytes = Base64.decode(base64Data, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    }
+
+    /**
+     * @param
+     * @param bitmap 对象
+     * @param w      要缩放的宽度
+     * @param h      要缩放的高度
+     * @return newBmp 新 Bitmap对象
+     */
+    public static Bitmap zoomBitmap(Bitmap bitmap, int w, int h)
+    {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Matrix matrix = new Matrix();
+        float scaleWidth = ((float) w / width);
+        float scaleHeight = ((float) h / height);
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap newBmp = Bitmap.createBitmap(bitmap, 0, 0, width, height,
+                matrix, true);
+        return newBmp;
+    }
 
 }

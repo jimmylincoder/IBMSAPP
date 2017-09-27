@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.DateUtil;
 
 import java.util.Date;
@@ -28,6 +30,10 @@ public class CameraHistoryAdapter extends BaseAdapter
     private Context context;
 
     private List<Camera> cameraList;
+
+    private int ivPreviewWidth = 200;
+
+    private int ivPreviewHeight = 110;
 
     public CameraHistoryAdapter(Context context, List<Camera> cameraList)
     {
@@ -81,11 +87,31 @@ public class CameraHistoryAdapter extends BaseAdapter
             holder.tvOnlineStatus.setText("离线");
             holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
         }
+
+        String photoBase64 = cameraList.get(i).getPhotoBase64();
+        String id = cameraList.get(i).getId();
+        holder.ivPreview.setTag(id);
+        if (photoBase64 != null)
+        {
+            if (holder.ivPreview.getTag() != null && holder.ivPreview.getTag().equals(id))
+            {
+                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
+                holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
+                        ivPreviewWidth, ivPreviewHeight));
+            }
+        }
+        else
+        {
+            holder.ivPreview.setImageBitmap(null);
+        }
         return view;
     }
 
     static class ViewHolder
     {
+        @BindView(R.id.iv_preview)
+        ImageView ivPreview;
+
         @BindView(R.id.tv_play_time)
         TextView tvPlayTime;
 

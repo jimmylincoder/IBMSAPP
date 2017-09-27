@@ -179,6 +179,10 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     TextView tvNetState;
     @BindView(R.id.tv_net_speed)
     TextView tvNetSpeed;
+    @BindView(R.id.ll_change_time)
+    LinearLayout llChangeTime;
+    @BindView(R.id.tv_change_time)
+    TextView tvChangeTime;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -219,6 +223,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     private long lastTimeStamp = 0;
     //网络检测线程
     private Timer netSpeedTimer;
+    private boolean isChangeTimeStart;
 
     @Override
     public int getLayoutId()
@@ -292,7 +297,6 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                         }
                         tvNetState.setText(netState);
                         tvNetSpeed.setText(speed + " kb/s");
-                        Log.e(CameraPlayActivity.class.getName(), "当前网络质量:" + connectionQuality + "\n当前网速:" + speed);
                     }
                 });
             }
@@ -379,22 +383,37 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
             public void onValueChange(Date date)
             {
                 //TODO 当移动时间轴变化时将其显示在视频中心
+                //如果已经开始移动就显示
+                if (isChangeTimeStart)
+                {
+                    llChangeTime.setVisibility(View.VISIBLE);
+                    tvChangeTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                    tvNowTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                }
             }
 
             @Override
             public void onStartValueChange(Date date)
             {
-
+                //开始移动
+                isChangeTimeStart = true;
             }
 
             @Override
             public void onStopValueChange(Date date)
             {
+                if (isChangeTimeStart)
+                {
+                    llChangeTime.setVisibility(View.GONE);
+                    tvNowTime.setText(DateUtil.convertByFormat(date, "MM/dd HH:mm:ss"));
+                    isChangeTimeStart = false;
+                }
                 //TODO 移动到最终位置后，如果该位置没有录像的话，就移向前面有录像的一段，如果时间大于当前时间的话，则播放实时视频
                 //如果大于当前时间则反回当前时间
                 if (date.getTime() > new Date().getTime())
                 {
                     timeSeekBar.setValue(new Date().getTime());
+                    tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
                     isRecorder = false;
                     reloadVideoView(null, null);
                     tvPlayType.setText("直播");
@@ -555,13 +574,21 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
      */
     private void initTimeView()
     {
+        tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
         timeHandler = new Handler()
         {
             @Override
             public void handleMessage(Message msg)
             {
                 if (tvNowTime != null)
-                    tvNowTime.setText((String) msg.obj);
+                {
+                    String date = tvNowTime.getText().toString();
+                    //Calendar calendar = Calendar.getInstance();
+                    String year = chooseDate.substring(0, 4);
+                    long time = DateUtil.convertToLong(year + "/" + date, "yyyy/MM/dd HH:mm:ss");
+                    Date newDate = new Date(time + 1000);
+                    tvNowTime.setText(DateUtil.convertByFormat(newDate, "MM/dd HH:mm:ss"));
+                }
             }
         };
         //时间线程
@@ -1076,6 +1103,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                             RecordItem recordItem = getEarliestTime(recordItems);
                             cancelSeekBarTimer();
                             timeSeekBar.setValue(recordItem.getStartTime());
+                            tvNowTime.setText(DateUtil.convertByFormat(recordItem.getStartTime(), "MM/dd HH:mm:ss"));
                             String beginTime = format.format(new Date(recordItem.getStartTime()));
                             String endTime = chooseDate + " 23:59:59";
                             reloadVideoView(beginTime, endTime);

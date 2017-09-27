@@ -1,15 +1,19 @@
 package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.util.BitmapUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,10 @@ public class CameraListAdapter extends BaseAdapter
     private List<Camera> cameraList;
 
     private ViewHolder viewHolder;
+
+    private int ivPreviewWidth = 200;
+
+    private int ivPreviewHeight = 110;
 
     public CameraListAdapter(Context context, List<Camera> cameraList)
     {
@@ -104,6 +112,22 @@ public class CameraListAdapter extends BaseAdapter
                 holder.tvOnlineStatus.setText("离线");
                 holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
             }
+        }
+        String photoBase64 = cameraList.get(position).getPhotoBase64();
+        String id = cameraList.get(position).getId();
+        holder.ivPreView.setTag(id);
+        if (photoBase64 != null)
+        {
+            if (holder.ivPreView.getTag() != null && holder.ivPreView.getTag().equals(id))
+            {
+                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
+                holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
+                        ivPreviewWidth, ivPreviewHeight));
+            }
+        }
+        else
+        {
+            holder.ivPreView.setImageBitmap(null);
         }
         return convertView;
     }
