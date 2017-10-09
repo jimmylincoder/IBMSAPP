@@ -23,13 +23,13 @@ public class CameraControlManager extends BaseComponent
     IbmsHttpEngine ibmsHttpEngine;
 
     /**
-     * 播放视频
+     * 播放视频 GB28181方式
      *
      * @return
      */
-    public Map<String,Object> play(String deivceId, String parentId,String ip, String channel,
-                       String user, String password,
-                       String beginTime, String endTime)
+    public Map<String, Object> playByGb28181(String deivceId, String parentId, String ip, String channel,
+                                             String user, String password,
+                                             String beginTime, String endTime)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("device_id", deivceId);
@@ -37,13 +37,13 @@ public class CameraControlManager extends BaseComponent
         params.put("channel", channel);
         params.put("user", user);
         params.put("password", password);
-        params.put("parent_id",parentId);
+        params.put("parent_id", parentId);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);
         if (endTime != null || !"".equals(endTime))
             params.put("end_time", endTime);
 
-        HttpResponse response = ibmsHttpEngine.request("camera.play", params);
+        HttpResponse response = ibmsHttpEngine.request("camera.play_gb28181", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
             return response.getData();
@@ -55,12 +55,46 @@ public class CameraControlManager extends BaseComponent
     }
 
     /**
+     * 播放视频 海康sdk方式
+     *
+     * @return
+     */
+    public Map<String, Object> playByHK(String mediaChannel, String streamType, String ip, String port,
+                                        String channel, String user, String password,
+                                        String beginTime, String endTime)
+    {
+        Map<String, Object> params = new HashMap<>();
+        params.put("media_channel", mediaChannel);
+        params.put("port", port);
+        params.put("device_ip", ip);
+        params.put("channel", channel);
+        params.put("user", user);
+        params.put("password", password);
+        params.put("stream_type", streamType);
+        if (beginTime != null || !"".equals(beginTime))
+            params.put("begin_time", beginTime);
+        if (endTime != null || !"".equals(endTime))
+            params.put("end_time", endTime);
+
+        HttpResponse response = ibmsHttpEngine.request("camera.play_hk", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+            return response.getData();
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
+
+    /**
      * 停止播放视频
      */
     public void stopPlay(String session)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("session",session);
+        params.put("session", session);
         HttpResponse response = ibmsHttpEngine.request("camera.stop", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
@@ -78,7 +112,7 @@ public class CameraControlManager extends BaseComponent
     public void pausePlay(String session)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("session",session);
+        params.put("session", session);
         HttpResponse response = ibmsHttpEngine.request("camera.pause", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
@@ -96,7 +130,7 @@ public class CameraControlManager extends BaseComponent
     public void resumePlay(String session)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("session",session);
+        params.put("session", session);
         HttpResponse response = ibmsHttpEngine.request("camera.resume", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
@@ -111,11 +145,11 @@ public class CameraControlManager extends BaseComponent
     /**
      * 恢复播放视频
      */
-    public void changeSpeed(String session,String speed)
+    public void changeSpeed(String session, String speed)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("session",session);
-        params.put("speed",speed);
+        params.put("session", session);
+        params.put("speed", speed);
         HttpResponse response = ibmsHttpEngine.request("camera.resume", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
@@ -130,11 +164,11 @@ public class CameraControlManager extends BaseComponent
     /**
      * 改变播放位置
      */
-    public void changePosition(String session,String position)
+    public void changePosition(String session, String position)
     {
         Map<String, Object> params = new HashMap<>();
-        params.put("session",session);
-        params.put("position",position);
+        params.put("session", session);
+        params.put("position", position);
         HttpResponse response = ibmsHttpEngine.request("camera.change_position", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
@@ -153,10 +187,10 @@ public class CameraControlManager extends BaseComponent
      */
     public void queryProgress(String session)
     {
-        Map<String,Object> params = new HashMap<>();
-        params.put("session",session);
-        HttpResponse response = ibmsHttpEngine.request("camera.query_progress",params);
-        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        Map<String, Object> params = new HashMap<>();
+        params.put("session", session);
+        HttpResponse response = ibmsHttpEngine.request("camera.query_progress", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
 
         }
@@ -179,13 +213,13 @@ public class CameraControlManager extends BaseComponent
      * @param endTime
      * @return
      */
-    public List<RecordItem> queryRecord(String deviceId,String parentId, String ip, String channel,
+    public List<RecordItem> queryRecord(String deviceId, String parentId, String ip, String channel,
                                         String user, String password,
                                         String beginTime, String endTime)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("device_id", deviceId);
-        params.put("parent_id",parentId);
+        params.put("parent_id", parentId);
         params.put("device_ip", ip);
         params.put("channel", channel);
         params.put("user", user);
@@ -198,9 +232,9 @@ public class CameraControlManager extends BaseComponent
         HttpResponse response = ibmsHttpEngine.request("camera.query_record", params);
         if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
-            List<Map<String,Object>> maps = (List<Map<String, Object>>) response.getData().get("records");
+            List<Map<String, Object>> maps = (List<Map<String, Object>>) response.getData().get("records");
             List<RecordItem> recordItems = new ArrayList<>();
-            for(Map<String,Object> map : maps)
+            for (Map<String, Object> map : maps)
             {
                 RecordItem recordItem = new RecordItem();
                 recordItem.setDeviceId((String) map.get("device_id"));

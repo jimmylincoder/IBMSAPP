@@ -19,6 +19,7 @@ import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
+import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.task.camera.CameraListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
@@ -105,7 +106,7 @@ public class CameraListFragment extends BaseFragment
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
+                Intent intent = new Intent(getActivity(), CameraPlayHKActivity.class);
                 Camera camera = cameraList.get(position - 1);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("camera", camera);
