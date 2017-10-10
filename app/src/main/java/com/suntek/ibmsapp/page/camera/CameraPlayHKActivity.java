@@ -63,6 +63,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -258,7 +259,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         initTimeView();
         loadData();
         initTimeSeekBarView();
-        //initRecord();
+        initRecord();
         DeviceBandwidthSampler.getInstance().startSampling();
         netSpeed();
 
@@ -274,10 +275,10 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 try
                 {
                     client = new Socket("172.16.16.178", 9000);
-                    // if (client.isConnected())
-                    // keepLive();
-                    // else
-                    //     return;
+                    if (client.isConnected())
+                        keepLive();
+                    else
+                        return;
                     // 步骤1：创建输入流对象InputStream
                     InputStream is = client.getInputStream();
                     boolean isStart = false;
@@ -344,24 +345,30 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                 }
                                 byte[] videoData = outputStream.toByteArray();
 
+                                File file = new File("/sdcard/test.mp4");
+                                if(!file.exists())
+                                    file.createNewFile();
+                                FileOutputStream fileOutputStream = new FileOutputStream("/sdcard/test.mp4",true);
                                 // 头一个字节为数据的类型  1为系统头 2为视频流
                                 if (videoData[0] == 1)
                                 {
                                     //初始化播放器
                                     byte[] head = Arrays.copyOfRange(videoData, 1, videoData.length);
+                                    fileOutputStream.write(head);
                                     String TAG = CameraPlayHKActivity.class.getName();
                                     player = Player.getInstance();
                                     port = player.getPort();
                                     Log.e(TAG, "初始化 port:" + port);
                                     Log.e(TAG, "初始化 setStreamOpenMode:" + player.setStreamOpenMode(port, Player.STREAM_REALTIME));
                                     Log.e(TAG, "初始化 openStream:" + player.openStream(port, head, head.length, 600 * 1024));
-                                    Log.e(TAG, "初始化 setDisplayBuf:" + player.setDisplayBuf(port, 6));
+                                    Log.e(TAG, "初始化 setDisplayBuf:" + player.setDisplayBuf(port, 15));
                                     Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
                                 }
                                 else if (videoData[0] == 2)
                                 {
                                     //传入视频流数据
                                     byte[] dataContent = Arrays.copyOfRange(videoData, 1, videoData.length);
+                                    fileOutputStream.write(dataContent);
                                     boolean isSuccess = player.inputData(port, dataContent, dataContent.length);
                                     Log.e(CameraPlayHKActivity.class.getName(), "data length:" + dataContent.length
                                             + "   isSuccess:" + isSuccess);
@@ -392,7 +399,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 try
                 {
                     OutputStream os = client.getOutputStream();
-                    byte[] b = new byte[]{5, 33};
+                    byte[] b = new byte[]{5, 33, 0, 0, 0, 0};
                     os.write(b);
                     os.flush();
                     Log.e(CameraPlayHKActivity.class.getName(), "发送保活心跳!!");
@@ -1220,7 +1227,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         String beginTime = format.format(date) + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime)
+                camera.getUserName(), camera.getPassword(), beginTime, endTime,"Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)

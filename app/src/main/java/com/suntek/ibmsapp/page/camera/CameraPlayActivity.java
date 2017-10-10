@@ -428,7 +428,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                         {
                             //设备为录像，并加载当天起始录像点到23:59:59,然后移位置到当前
                             isRecorder = true;
-                            String beginTime = chooseDate + " 00:00:00";
+                            String beginTime = chooseDate + " 00:00:01";
                             String endTime = chooseDate + " 23:59:59";
                             reloadVideoView(beginTime, endTime);
 
@@ -1166,7 +1166,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         String beginTime = format.format(date) + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime)
+                camera.getUserName(), camera.getPassword(), beginTime, endTime,"GB28181")
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1178,16 +1178,18 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                     for (RecordItem recordItem : recordItems)
                     {
                         String bt = format1.format(recordItem.getStartTime());
-                        //String et = format1.format(recordItem.getEndTime());
-                        String[] strs = bt.split(" ");
-                        String date = strs[0];
-                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(date);
+                        String et = format1.format(recordItem.getEndTime());
+                        String[] btStr = bt.split(" ");
+                        String[] etStr = et.split(" ");
+                        String btDate = btStr[0];
+                        String etDate = etStr[0];
+                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(btDate);
                         if (recordItems1 == null)
                         {
                             recordItems1 = new ArrayList<RecordItem>();
                         }
                         recordItems1.add(recordItem);
-                        recordMap.put(date, recordItems1);
+                        recordMap.put(btDate, recordItems1);
                     }
 
                     //TODO 渲染时间轴

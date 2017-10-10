@@ -215,7 +215,7 @@ public class CameraControlManager extends BaseComponent
      */
     public List<RecordItem> queryRecord(String deviceId, String parentId, String ip, String channel,
                                         String user, String password,
-                                        String beginTime, String endTime)
+                                        String beginTime, String endTime, String protocol)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("device_id", deviceId);
@@ -224,6 +224,7 @@ public class CameraControlManager extends BaseComponent
         params.put("channel", channel);
         params.put("user", user);
         params.put("password", password);
+        params.put("protocol", protocol);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);
         if (endTime != null || !"".equals(endTime))
