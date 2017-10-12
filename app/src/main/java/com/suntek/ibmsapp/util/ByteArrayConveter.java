@@ -4,7 +4,6 @@ import java.nio.ByteOrder;
 
 public class ByteArrayConveter
 {
-
     // char转换为byte[2]数组
     public static byte[] getByteArray(char c)
     {
@@ -111,70 +110,6 @@ public class ByteArrayConveter
 
     public static void main(String[] args)
     {
-        System.out.println(ByteOrder.nativeOrder());
-        if (args.length < 1)
-        {
-            System.out.println("enter 'char' test method about char");
-            System.out.println("enter 'short' test method about short");
-            System.out.println("enter 'int' test method about int");
-            System.out.println("enter 'float' test method about float");
-            System.out.println("enter 'long' test method about long");
-            System.out.println("enter 'double' test method about double");
-            return;
-        }
-        if (args[0].equals("char"))
-        {
-            char c = '\u0000';
-            while (c < '\uffff')
-            {
-                System.out.println(getChar(getByteArray(c), 0));
-                c++;
-            }
-        }
-        else if (args[0].equals("short"))
-        {
-            short s = Short.MIN_VALUE;
-            while (s < Short.MAX_VALUE)
-            {
-                System.out.println(getShort(getByteArray(s), 0));
-                s++;
-            }
-        }
-        else if (args[0].equals("int"))
-        {
-            int i = Integer.MIN_VALUE;
-            while (i < Integer.MAX_VALUE)
-            {
-                System.out.println(getInt(getByteArray(i), 0));
-                i++;
-            }
-        }
-        else if (args[0].equals("float"))
-        {
-            float f = Float.MIN_VALUE;
-            while (f < Float.MAX_VALUE)
-            {
-                System.out.println(getFloat(getByteArray(f), 0));
-                f += 1.1111f;
-            }
-        }
-        else if (args[0].equals("long"))
-        {
-            long l = Long.MIN_VALUE;
-            while (l < Long.MAX_VALUE)
-            {
-                System.out.println(getLong(getByteArray(l), 0));
-                l++;
-            }
-        }
-        else if (args[0].equals("double"))
-        {
-            double d = Double.MIN_VALUE;
-            while (d < Double.MAX_VALUE)
-            {
-                System.out.println(getDouble(getByteArray(d), 0));
-                d += 1.111D;
-            }
-        }
+        //byte[] b = new byte[]{0,0,9,233};
     }
 }

@@ -253,4 +253,19 @@ public class CameraControlManager extends BaseComponent
         }
     }
 
+    public Map<String, Object> getSocketAddress()
+    {
+        Map<String, Object> params = new HashMap<>();
+        HttpResponse response = ibmsHttpEngine.request("camera.socket_address", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+            Map<String, Object> content = response.getData();
+            return content;
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
 }

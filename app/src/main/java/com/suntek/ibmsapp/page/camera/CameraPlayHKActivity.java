@@ -44,6 +44,7 @@ import com.suntek.ibmsapp.task.camera.control.CameraPlayHKTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
+import com.suntek.ibmsapp.task.camera.control.CameraSocketTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
 import com.suntek.ibmsapp.util.ByteArrayConveter;
 import com.suntek.ibmsapp.util.DateUtil;
@@ -241,6 +242,12 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     Timer keepLiveTimer;
     int port;
 
+    private String socketIp;
+    private int socketPort;
+    private String mediaChannel;
+
+    byte[] temp;
+
     @Override
     public int getLayoutId()
     {
@@ -252,7 +259,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     {
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
 
-        initSocket();
+        getSocketAddress();
+        initSurfaceView();
         //initVideoView();
         //getCameraAddress("2017-08-31 00:00:00", "2017-08-31 23:59:59");
         //getCameraAddress(null, null);
@@ -265,6 +273,49 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     }
 
+    private void initSurfaceView()
+    {
+        ivvVideo.setOnClickListener(v ->
+        {
+            if (llTime.getVisibility() == View.GONE)
+            {
+                llOper.setVisibility(View.GONE);
+                llTime.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                llOper.setVisibility(View.VISIBLE);
+                llTime.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private void getSocketAddress()
+    {
+        new CameraSocketTask(this)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    Map<String, Object> map = (Map<String, Object>) result.getResultData();
+                    socketIp = (String) map.get("ip");
+                    socketPort = Integer.parseInt((String) map.get("port"));
+                    initSocket();
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * 初始化socket连接
+     */
     private void initSocket()
     {
         tcpThread = new Thread(new Runnable()
@@ -274,7 +325,16 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             {
                 try
                 {
-                    client = new Socket("172.16.16.178", 9000);
+                    File file = new File("/sdcard/test.mp4");
+                    if (file.exists())
+                    {
+                        file.delete();
+                        file.createNewFile();
+                    }
+                    FileOutputStream fileOutputStream = new FileOutputStream("/sdcard/test.mp4", true);
+
+
+                    client = new Socket(socketIp, socketPort);
                     if (client.isConnected())
                         keepLive();
                     else
@@ -289,10 +349,12 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     //长度
                     byte[] lengthByte = new byte[4];
                     //视频数据缓冲
-                    byte[] buffer = new byte[1024];
+                    int size = 1024;
+                    byte[] buffer = new byte[size];
                     //先读取头数据
                     while (is.read(header) != -1)
                     {
+                        Log.e(CameraPlayHKActivity.class.getName(), "头:" + header[0] + "  " + header[1]);
                         //连接成功后获取mideaChannel号，发送播放请求
                         if (header[0] == 5 && header[1] == 32 && !isStart)
                         {
@@ -300,22 +362,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             byte[] length = new byte[8];
                             is.read(length);
                             //将mideaChannel转成整型通道号
-                            int mediaChannel = ByteArrayConveter.getInt(length, 4);
+                            mediaChannel = ByteArrayConveter.getInt(length, 4) + "";
                             //请求播放
-                            new CameraPlayHKTask(CameraPlayHKActivity.this, mediaChannel + "", camera.getIp(), camera.getPort(),
-                                    camera.getChannel(), camera.getUserName(), camera.getPassword(), "1", null, null)
-                            {
-                                @Override
-                                protected void onPostExecute(TaskResult result)
-                                {
-                                    super.onPostExecute(result);
-                                    if (result.getError() == null)
-                                    {
-                                        Map<String, Object> map = (Map<String, Object>) result.getResultData();
-                                        session = (String) map.get("session");
-                                    }
-                                }
-                            }.execute();
+                            //String beginTime = "2017-10-11 00:00:00";
+                            //String endTime = "2017-10-11 23:59:59";
+                            play(mediaChannel + "",null,null);
                             isStart = true;
                         }
                         //视频流部分
@@ -325,30 +376,47 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             is.read(lengthByte);
                             //数据长度
                             int length = ByteArrayConveter.getInt(lengthByte, 0);
+                            Log.e(CameraPlayHKActivity.class.getName(), "data length detail:" +
+                                    lengthByte[0] + " " + lengthByte[1] + " " + lengthByte[2] + " " + lengthByte[3]);
                             Log.e(CameraPlayHKActivity.class.getName(), "数据长度data length:" + length);
                             if (length > 0)
                             {
                                 //获取视频流数据部分
                                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                                 int len = -1;
-                                int count = length / 1024;
-                                int more = length % 1024;
-                                for (int i = 0; i < count; i++)
+                                int count = length / size;
+                                int more = length % size;
+//                                for (int i = 0; i < count; i++)
+//                                {
+//                                    len = is.read(buffer);
+//                                    outputStream.write(buffer, 0, len);
+//                                }
+//                                if (more != 0)
+//                                {
+//                                    is.read(buffer, 0, more);
+//                                    outputStream.write(buffer, 0, more);
+//                                }
+
+                                while (outputStream.toByteArray().length != length)
                                 {
-                                    len = is.read(buffer);
-                                    outputStream.write(buffer, 0, len);
-                                }
-                                if (more != 0)
-                                {
-                                    is.read(buffer, 0, more);
-                                    outputStream.write(buffer, 0, more);
+                                    Log.e(CameraPlayHKActivity.class.getName()," 长度：" + outputStream.toByteArray().length);
+                                    int delayLength = length - outputStream.toByteArray().length;
+                                    Log.e(CameraPlayHKActivity.class.getName()," 剩长度：" + delayLength);
+                                    int count1 = delayLength / size;
+                                    int more1 = delayLength % size;
+                                    for (int i = 0; i < count1; i++)
+                                    {
+                                        len = is.read(buffer);
+                                        outputStream.write(buffer, 0, len);
+                                    }
+                                    if (more1 != 0)
+                                    {
+                                        is.read(buffer, 0, more1);
+                                        outputStream.write(buffer, 0, more1);
+                                    }
                                 }
                                 byte[] videoData = outputStream.toByteArray();
 
-                                File file = new File("/sdcard/test.mp4");
-                                if(!file.exists())
-                                    file.createNewFile();
-                                FileOutputStream fileOutputStream = new FileOutputStream("/sdcard/test.mp4",true);
                                 // 头一个字节为数据的类型  1为系统头 2为视频流
                                 if (videoData[0] == 1)
                                 {
@@ -360,7 +428,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                     port = player.getPort();
                                     Log.e(TAG, "初始化 port:" + port);
                                     Log.e(TAG, "初始化 setStreamOpenMode:" + player.setStreamOpenMode(port, Player.STREAM_REALTIME));
-                                    Log.e(TAG, "初始化 openStream:" + player.openStream(port, head, head.length, 600 * 1024));
+                                    Log.e(TAG, "初始化 openStream:" + player.openStream(port, head, head.length, 100000 * 1024));
                                     Log.e(TAG, "初始化 setDisplayBuf:" + player.setDisplayBuf(port, 15));
                                     Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
                                 }
@@ -368,15 +436,18 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                 {
                                     //传入视频流数据
                                     byte[] dataContent = Arrays.copyOfRange(videoData, 1, videoData.length);
+                                    temp = dataContent;
                                     fileOutputStream.write(dataContent);
                                     boolean isSuccess = player.inputData(port, dataContent, dataContent.length);
-                                    Log.e(CameraPlayHKActivity.class.getName(), "data length:" + dataContent.length
-                                            + "   isSuccess:" + isSuccess);
                                 }
                             }
-
                         }
-
+                        else
+                        {
+                            client.close();
+                            Log.e(CameraPlayHKActivity.class.getName(), temp.length + " ");
+                            break;
+                        }
                     }
                 } catch (IOException e)
                 {
@@ -386,6 +457,28 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             }
         });
         tcpThread.start();
+    }
+
+    private void play(String mediaChannel,String startTime,String endTime)
+    {
+        new CameraPlayHKTask(CameraPlayHKActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
+                camera.getChannel(), camera.getUserName(), camera.getPassword(), "1", startTime, endTime)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    Map<String, Object> map = (Map<String, Object>) result.getResultData();
+                    session = (String) map.get("session");
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
     }
 
     private void keepLive()
@@ -601,9 +694,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             isRecorder = true;
                             String beginTime = chooseDate + " 00:00:00";
                             String endTime = chooseDate + " 23:59:59";
-                            reloadVideoView(beginTime, endTime);
-
-                            changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
+                            //reloadVideoView(beginTime, endTime);
+                            play(mediaChannel,beginTime,endTime);
+                            //changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
                         }
                         else
                         {
@@ -1227,7 +1320,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         String beginTime = format.format(date) + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime,"Hikvision")
+                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)
