@@ -350,10 +350,15 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     byte[] lengthByte = new byte[4];
                     //视频数据缓冲
                     int size = 1024;
-                    byte[] buffer = new byte[size];
+                    byte[] buffer;
+                    int r;
                     //先读取头数据
-                    while (is.read(header) != -1)
+                    while ((r = is.read(header)) != -1)
                     {
+                        if (r != 2)
+                        {
+                            Log.e(CameraPlayHKActivity.class.getName(), "长度不等于2  " + r);
+                        }
                         Log.e(CameraPlayHKActivity.class.getName(), "头:" + header[0] + "  " + header[1]);
                         //连接成功后获取mideaChannel号，发送播放请求
                         if (header[0] == 5 && header[1] == 32 && !isStart)
@@ -364,16 +369,20 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             //将mideaChannel转成整型通道号
                             mediaChannel = ByteArrayConveter.getInt(length, 4) + "";
                             //请求播放
-                            //String beginTime = "2017-10-11 00:00:00";
-                            //String endTime = "2017-10-11 23:59:59";
-                            play(mediaChannel + "",null,null);
+                            String beginTime = "2017-10-11 00:00:00";
+                            String endTime = "2017-10-11 23:59:59";
+                            play(mediaChannel + "", beginTime, endTime);
                             isStart = true;
                         }
                         //视频流部分
                         else if (header[0] == 19 && header[1] == 20)
                         {
                             //读取长度字节
-                            is.read(lengthByte);
+                            int ret = is.read(lengthByte);
+                            if (ret != 4)
+                            {
+                                Log.e(CameraPlayHKActivity.class.getName(), "长度字节不等于4");
+                            }
                             //数据长度
                             int length = ByteArrayConveter.getInt(lengthByte, 0);
                             Log.e(CameraPlayHKActivity.class.getName(), "data length detail:" +
@@ -399,20 +408,20 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
                                 while (outputStream.toByteArray().length != length)
                                 {
-                                    Log.e(CameraPlayHKActivity.class.getName()," 长度：" + outputStream.toByteArray().length);
+                                    Log.e(CameraPlayHKActivity.class.getName(), " 长度：" + outputStream.toByteArray().length);
                                     int delayLength = length - outputStream.toByteArray().length;
-                                    Log.e(CameraPlayHKActivity.class.getName()," 剩长度：" + delayLength);
+                                    Log.e(CameraPlayHKActivity.class.getName(), " 剩长度：" + delayLength);
                                     int count1 = delayLength / size;
                                     int more1 = delayLength % size;
                                     for (int i = 0; i < count1; i++)
                                     {
-                                        len = is.read(buffer);
-                                        outputStream.write(buffer, 0, len);
+                                        buffer = read(is, 1024);
+                                        outputStream.write(buffer);
                                     }
                                     if (more1 != 0)
                                     {
-                                        is.read(buffer, 0, more1);
-                                        outputStream.write(buffer, 0, more1);
+                                        buffer = read(is, more1);
+                                        outputStream.write(buffer);
                                     }
                                 }
                                 byte[] videoData = outputStream.toByteArray();
@@ -439,13 +448,15 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                     temp = dataContent;
                                     fileOutputStream.write(dataContent);
                                     boolean isSuccess = player.inputData(port, dataContent, dataContent.length);
+                                    Log.e(CameraPlayHKActivity.class.getName(), "是否input成功" + isSuccess);
                                 }
                             }
                         }
                         else
                         {
+                            fileOutputStream.write(temp);
                             client.close();
-                            Log.e(CameraPlayHKActivity.class.getName(), temp.length + " ");
+                            Log.e(CameraPlayHKActivity.class.getName(), "上一个数据长度：" + temp.length + "头错误");
                             break;
                         }
                     }
@@ -459,7 +470,114 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         tcpThread.start();
     }
 
-    private void play(String mediaChannel,String startTime,String endTime)
+    private byte[] read(InputStream is, int length) throws IOException
+    {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        int ret;
+        while ((ret = is.read()) != -1)
+        {
+            byte b = (byte) ret;
+            outputStream.write(b);
+            if (outputStream.toByteArray().length == length)
+            {
+                break;
+            }
+        }
+        return outputStream.toByteArray();
+    }
+
+    private void initSocket0()
+    {
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+
+                try
+                {
+                    client = new Socket(socketIp, socketPort);
+                    if (client.isConnected())
+                        keepLive();
+                    else
+                        return;
+
+                    InputStream is = client.getInputStream();
+                    final int HEADER = 0;
+                    final int LENGTH = 1;
+                    final int DATA_HERDER = 2;
+                    final int DATA = 3;
+
+                    byte[] head = new byte[2];
+                    byte[] length = new byte[4];
+                    byte[] type = new byte[1];
+
+                    int state = HEADER;
+                    int ret;
+                    int count = 0;
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    while ((ret = is.read()) != -1)
+                    {
+                        byte b = (byte) ret;
+                        switch (state)
+                        {
+                            case HEADER:
+                                head[count++] = b;
+                                count = count == 2 ? 0 : count;
+                                state = count == 2 ? LENGTH : HEADER;
+                                break;
+
+                            case LENGTH:
+                                length[count++] = b;
+                                count = count == 4 ? 0 : count;
+                                state = count == 4 ? DATA_HERDER : LENGTH;
+                                break;
+
+                            case DATA_HERDER:
+                                type[count++] = b;
+                                count = count == 1 ? 1 : count;
+                                state = count == 1 ? DATA : DATA_HERDER;
+                                break;
+
+                            case DATA:
+                                int dataLength = ByteArrayConveter.getInt(length, 0);
+                                if (head[0] == 5 && head[1] == 32)
+                                {
+                                    if (count == dataLength)
+                                    {
+                                        state = HEADER;
+                                        outputStream.reset();
+                                    }
+                                    else if (count == 1)
+                                    {
+                                        outputStream.write(type);
+                                        outputStream.write(b);
+                                        state = DATA;
+                                    }
+                                    else
+                                    {
+                                        outputStream.write(b);
+                                        state = DATA;
+                                    }
+                                    count++;
+                                }
+                                else if (head[0] == 19 && head[1] == 20)
+                                {
+
+                                }
+                                break;
+                        }
+                    }
+
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void play(String mediaChannel, String startTime, String endTime)
     {
         new CameraPlayHKTask(CameraPlayHKActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
                 camera.getChannel(), camera.getUserName(), camera.getPassword(), "1", startTime, endTime)
@@ -695,7 +813,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             String beginTime = chooseDate + " 00:00:00";
                             String endTime = chooseDate + " 23:59:59";
                             //reloadVideoView(beginTime, endTime);
-                            play(mediaChannel,beginTime,endTime);
+                            play(mediaChannel, beginTime, endTime);
                             //changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
                         }
                         else
