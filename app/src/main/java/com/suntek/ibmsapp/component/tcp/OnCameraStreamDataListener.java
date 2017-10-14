@@ -9,9 +9,9 @@ public interface OnCameraStreamDataListener
 {
     void onReceiveMediaChannel(int mediaChannel);
 
-    void onReceiveMediaHeader(byte[] header, int length);
+    void onReceiveMediaHeader(byte[] header, int length, int totalSize, int remainLength);
 
-    void onReceiveVideoData(byte[] videoData, int length);
+    void onReceiveVideoData(byte[] videoData, int length, int totalSize, int remainLength);
 
-    void onReceiveVoiceData(byte[] voiceData, int length);
+    void onReceiveVoiceData(byte[] voiceData, int length, int totalSize, int remainLength);
 }

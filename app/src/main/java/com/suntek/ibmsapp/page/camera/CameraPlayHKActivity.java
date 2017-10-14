@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -31,6 +32,9 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.tcp.CameraStreamSocketClient;
+import com.suntek.ibmsapp.component.tcp.OnCameraStreamDataListener;
+import com.suntek.ibmsapp.component.tcp.OnCameraStreamExceptionListener;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.Photo;
 import com.suntek.ibmsapp.model.RecordItem;
@@ -248,6 +252,12 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     byte[] temp;
 
+    private CameraStreamSocketClient cameraStreamSocketClient;
+    private String TAG = CameraPlayHKActivity.class.getName();
+
+    private String recordFilePath = "/sdcard/";
+    private FileOutputStream fileOutputStream;
+
     @Override
     public int getLayoutId()
     {
@@ -303,7 +313,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     socketIp = (String) map.get("ip");
                     socketPort = Integer.parseInt((String) map.get("port"));
-                    initSocket();
+                    initSocket0();
                 }
                 else
                 {
@@ -369,9 +379,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             //将mideaChannel转成整型通道号
                             mediaChannel = ByteArrayConveter.getInt(length, 4) + "";
                             //请求播放
-                            String beginTime = "2017-10-11 00:00:00";
-                            String endTime = "2017-10-11 23:59:59";
-                            play(mediaChannel + "", beginTime, endTime);
+                            String beginTime = "2017-10-12 14:00:00";
+                            String endTime = "2017-10-12 23:59:59";
+                            play(mediaChannel + "", null, null);
                             isStart = true;
                         }
                         //视频流部分
@@ -406,6 +416,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 //                                    outputStream.write(buffer, 0, more);
 //                                }
 
+                                long st = new Date().getTime();
+                                Log.e(TAG, "开始处理流数据:  " + st);
                                 while (outputStream.toByteArray().length != length)
                                 {
                                     Log.e(CameraPlayHKActivity.class.getName(), " 长度：" + outputStream.toByteArray().length);
@@ -424,6 +436,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                         outputStream.write(buffer);
                                     }
                                 }
+                                long et = new Date().getTime();
+                                Log.e(TAG, "处理流数据结束:  " + et + "\n相差时间间隔:" + (et - st));
                                 byte[] videoData = outputStream.toByteArray();
 
                                 // 头一个字节为数据的类型  1为系统头 2为视频流
@@ -470,6 +484,97 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         tcpThread.start();
     }
 
+    private void createRecord()
+    {
+        String fileName = "VID_" + DateUtil.convertYYYY_MM_DD_HH_MM_SS(new Date()) + ".mp4";
+        File recordFile = new File(recordFilePath + fileName);
+        try
+        {
+            recordFile.createNewFile();
+            fileOutputStream = new FileOutputStream(recordFilePath + fileName);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    private void initSocket0()
+    {
+        createRecord();
+        cameraStreamSocketClient = CameraStreamSocketClient.getInstance()
+                .open(socketIp, socketPort + "")
+                .setOnCameraStreamDataListener(new OnCameraStreamDataListener()
+                {
+                    @Override
+                    public void onReceiveMediaChannel(int mediaChannel)
+                    {
+                        Log.e(CameraPlayHKActivity.class.getName(), "通道号：" + mediaChannel);
+                        String beginTime = "2017-10-14 11:00:00";
+                        String endTime = "2017-10-14 23:59:59";
+                        play(mediaChannel + "", beginTime, endTime);
+                    }
+
+                    @Override
+                    public void onReceiveMediaHeader(byte[] header, int length, int totalSize, int remainLength)
+                    {
+                        Log.e(CameraPlayHKActivity.class.getName(), "头数据：" + totalSize + " 剩余大小:" + remainLength);
+                        writeToFile(header);
+                        player = Player.getInstance();
+                        port = player.getPort();
+                        Log.e(TAG, "初始化 port:" + port);
+                        Log.e(TAG, "初始化 setStreamOpenMode:" + player.setStreamOpenMode(port, Player.STREAM_REALTIME));
+                        Log.e(TAG, "初始化 openStream:" + player.openStream(port, header, header.length, 100000 * 1024));
+                        Log.e(TAG, "初始化 setDisplayBuf:" + player.setDisplayBuf(port, 15));
+                        Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
+                    }
+
+                    @Override
+                    public void onReceiveVideoData(byte[] videoData, int length, int totalSize, int remainLength)
+                    {
+                        writeToFile(videoData);
+                        Log.e(CameraPlayHKActivity.class.getName(), "视频数据：" + totalSize + " 剩余大小:" + remainLength);
+                        player.inputData(port, videoData, videoData.length);
+                    }
+
+                    @Override
+                    public void onReceiveVoiceData(byte[] voiceData, int length, int totalSize, int remainLength)
+                    {
+
+                    }
+                })
+                .setOnCameraStreamExceptionListener(new OnCameraStreamExceptionListener()
+                {
+                    @Override
+                    public void onReceiveDataException(Throwable throwable)
+                    {
+                        Log.e(CameraPlayHKActivity.class.getName(), "异常" + throwable.getMessage());
+                    }
+
+                    @Override
+                    public void onConnectException(Throwable throwable)
+                    {
+                        Log.e(CameraPlayHKActivity.class.getName(), "异常" + throwable.getMessage());
+                    }
+
+                    @Override
+                    public void onHandleDataException(Throwable throwable)
+                    {
+                        Log.e(CameraPlayHKActivity.class.getName(), "异常" + throwable.getMessage());
+                    }
+                });
+    }
+
+    private void writeToFile(byte[] data)
+    {
+        try
+        {
+            fileOutputStream.write(data);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     private byte[] read(InputStream is, int length) throws IOException
     {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -486,101 +591,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         return outputStream.toByteArray();
     }
 
-    private void initSocket0()
-    {
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-
-                try
-                {
-                    client = new Socket(socketIp, socketPort);
-                    if (client.isConnected())
-                        keepLive();
-                    else
-                        return;
-
-                    InputStream is = client.getInputStream();
-                    final int HEADER = 0;
-                    final int LENGTH = 1;
-                    final int DATA_HERDER = 2;
-                    final int DATA = 3;
-
-                    byte[] head = new byte[2];
-                    byte[] length = new byte[4];
-                    byte[] type = new byte[1];
-
-                    int state = HEADER;
-                    int ret;
-                    int count = 0;
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    while ((ret = is.read()) != -1)
-                    {
-                        byte b = (byte) ret;
-                        switch (state)
-                        {
-                            case HEADER:
-                                head[count++] = b;
-                                count = count == 2 ? 0 : count;
-                                state = count == 2 ? LENGTH : HEADER;
-                                break;
-
-                            case LENGTH:
-                                length[count++] = b;
-                                count = count == 4 ? 0 : count;
-                                state = count == 4 ? DATA_HERDER : LENGTH;
-                                break;
-
-                            case DATA_HERDER:
-                                type[count++] = b;
-                                count = count == 1 ? 1 : count;
-                                state = count == 1 ? DATA : DATA_HERDER;
-                                break;
-
-                            case DATA:
-                                int dataLength = ByteArrayConveter.getInt(length, 0);
-                                if (head[0] == 5 && head[1] == 32)
-                                {
-                                    if (count == dataLength)
-                                    {
-                                        state = HEADER;
-                                        outputStream.reset();
-                                    }
-                                    else if (count == 1)
-                                    {
-                                        outputStream.write(type);
-                                        outputStream.write(b);
-                                        state = DATA;
-                                    }
-                                    else
-                                    {
-                                        outputStream.write(b);
-                                        state = DATA;
-                                    }
-                                    count++;
-                                }
-                                else if (head[0] == 19 && head[1] == 20)
-                                {
-
-                                }
-                                break;
-                        }
-                    }
-
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
 
     private void play(String mediaChannel, String startTime, String endTime)
     {
         new CameraPlayHKTask(CameraPlayHKActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
-                camera.getChannel(), camera.getUserName(), camera.getPassword(), "1", startTime, endTime)
+                camera.getChannel(), camera.getUserName(), camera.getPassword(), "0", startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1013,18 +1028,21 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         if (queryProgressTimer != null)
             queryProgressTimer.cancel();
         stopPlay();
+
         //  menu.dismiss();
         //cameraPlayGB28181Task.cancel(true);
-        tcpThread.interrupt();
-        tcpThread = null;
-        //keepLiveTimer.cancel();
-        try
-        {
-            client.close();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+//        tcpThread.interrupt();
+//        tcpThread = null;
+//        //keepLiveTimer.cancel();
+//        try
+//        {
+//            client.close();
+//        } catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+
+        cameraStreamSocketClient.close();
         super.onDestroy();
     }
 
