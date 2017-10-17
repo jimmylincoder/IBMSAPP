@@ -4,12 +4,9 @@ import android.util.Log;
 
 import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.util.ByteArrayConveter;
-import com.suntek.ibmsapp.util.DateUtil;
 
-import org.jsoup.helper.DataUtil;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,33 +93,9 @@ public class CameraStreamSocketClient
 
     private CameraStreamSocketClient()
     {
-        createRecord();
+
     }
 
-    private void createRecord()
-    {
-        String fileName = "VID_" + DateUtil.convertYYYY_MM_DD_HH_MM_SS(new Date()) + ".mp4";
-        File recordFile = new File(recordFilePath + fileName);
-        try
-        {
-            recordFile.createNewFile();
-            fileOutputStream = new FileOutputStream(recordFilePath + fileName);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private void writeToFile(byte[] data)
-    {
-        try
-        {
-            fileOutputStream.write(data);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
 
     public static CameraStreamSocketClient getInstance()
     {
@@ -141,6 +114,7 @@ public class CameraStreamSocketClient
      */
     public CameraStreamSocketClient open(String ip, String port)
     {
+        isStop = true;
         socketThread = new SocketThread(ip, port);
         socketThread.start();
         return this;
@@ -178,7 +152,8 @@ public class CameraStreamSocketClient
             receiveData = read(dataLength);
             //接收通道号
             int mediaChannel = ByteArrayConveter.getInt(receiveData, 0);
-            onCameraStreamDataListener.onReceiveMediaChannel(mediaChannel);
+            if (onCameraStreamDataListener != null)
+                onCameraStreamDataListener.onReceiveMediaChannel(mediaChannel);
         }
         else if (Arrays.equals(header, STREAM_HEADER))
         {
@@ -199,14 +174,22 @@ public class CameraStreamSocketClient
         try
         {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            int readLength = inputStream.read(bufferByte);
-            outputStream.write(bufferByte, 0, readLength);
-            if (BUFFER_SIZE - readLength != 0)
-                outputStream.write(read(BUFFER_SIZE - readLength));
+            if (isStop)
+            {
+                int readLength = inputStream.read(bufferByte);
+                outputStream.write(bufferByte, 0, readLength);
+                if (BUFFER_SIZE - readLength != 0)
+                {
+                    byte[] b = read(BUFFER_SIZE - readLength);
+                    if (b != null && b.length == (BUFFER_SIZE - readLength))
+                        outputStream.write(b);
+                }
+            }
             return outputStream.toByteArray();
 
         } catch (IOException e)
         {
+            log("read()  " + e.getMessage());
             onCameraStreamExceptionListener.onReceiveDataException(e);
             return null;
         }
@@ -219,6 +202,8 @@ public class CameraStreamSocketClient
      */
     private void handData(int type, byte[] data, int totalSize, int remainLength)
     {
+        if (onCameraStreamDataListener == null || data == null)
+            return;
         switch (type)
         {
             case VIDEO_HEADER_TYPE:
@@ -272,7 +257,7 @@ public class CameraStreamSocketClient
         int ret;
         try
         {
-            while ((ret = inputStream.read()) != -1)
+            while (isStop && (ret = inputStream.read()) != -1)
             {
                 byte b = (byte) ret;
                 outputStream.write(b);
@@ -283,6 +268,7 @@ public class CameraStreamSocketClient
             }
         } catch (IOException e)
         {
+            log("read(int length)  " + e.getMessage());
             onCameraStreamExceptionListener.onReceiveDataException(e);
         }
         if (outputStream.toByteArray().length == length)
@@ -416,6 +402,7 @@ public class CameraStreamSocketClient
                     onCameraStreamExceptionListener.onConnectException(new Exception("连接失败"));
             } catch (IOException e)
             {
+                log("run()  " + e.getMessage());
                 onCameraStreamExceptionListener.onConnectException(e);
             }
         }
@@ -425,11 +412,18 @@ public class CameraStreamSocketClient
     {
         try
         {
-            socket.close();
             isStop = false;
-            inputStream.close();
-            socketThread.interrupt();
-            keepLiveTimer.cancel();
+            if (inputStream != null)
+                inputStream.close();
+            if (socket != null)
+            {
+                socket.close();
+                socket.shutdownInput();
+            }
+            if (socketThread != null)
+                socketThread.interrupt();
+            if (keepLiveTimer != null)
+                keepLiveTimer.cancel();
 
             socket = null;
             socketThread = null;
