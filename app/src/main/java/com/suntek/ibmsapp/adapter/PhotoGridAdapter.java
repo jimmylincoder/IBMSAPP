@@ -2,6 +2,8 @@ package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,9 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import wseemann.media.FFmpegMediaMetadataRetriever;
+
+import static android.provider.MediaStore.Video.Thumbnails.MICRO_KIND;
 
 /**
  * 表格相册adapter
@@ -95,8 +100,19 @@ public class PhotoGridAdapter extends BaseAdapter
             convertView.setTag(holder);
         }
 
-        imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
-
+        if (photoPaths.get(position).endsWith(".jpg"))
+        {
+            imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
+        }
+        else
+        {
+//            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(photoPaths.get(position), MICRO_KIND);
+//            holder.ivPhoto.setImageBitmap(bitmap);
+            FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
+            mediaMetadataRetriever.setDataSource(photoPaths.get(position));
+            Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
+            holder.ivPhoto.setImageBitmap(bitmap);
+        }
         boolean isChoose = chooseMap.get(photoPaths.get(position));
         if (isChoose)
         {
@@ -176,7 +192,7 @@ public class PhotoGridAdapter extends BaseAdapter
         while (entries.hasNext())
         {
             Map.Entry entry = (Map.Entry) entries.next();
-            chooseMap.put((String) entry.getKey(),true);
+            chooseMap.put((String) entry.getKey(), true);
         }
     }
 }

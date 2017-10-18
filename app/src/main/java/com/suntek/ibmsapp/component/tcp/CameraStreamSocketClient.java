@@ -290,10 +290,17 @@ public class CameraStreamSocketClient
             {
                 try
                 {
-                    OutputStream os = socket.getOutputStream();
-                    os.write(ping);
-                    os.flush();
-                    Log.e(CameraPlayHKActivity.class.getName(), "发送保活心跳!!");
+                    if (socket != null && !socket.isClosed())
+                    {
+                        OutputStream os = socket.getOutputStream();
+                        os.write(ping);
+                        os.flush();
+                        Log.e(CameraPlayHKActivity.class.getName(), "发送保活心跳!!");
+                    }
+                    else
+                    {
+                        this.cancel();
+                    }
                 } catch (IOException e)
                 {
                     e.printStackTrace();

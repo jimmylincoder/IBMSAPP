@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Photo;
 import com.suntek.ibmsapp.page.photo.PhotoDetailActivity;
+import com.suntek.ibmsapp.page.video.VideoDetailActivity;
 import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.widget.NoScrollGridView;
 
@@ -114,17 +115,18 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
 
         String date = DateUtil.convertByFormat(new Date(), "yyyyMMdd");
         String groupDate = photoList.get(groupPosition).getDate();
-        String dateYear = groupDate.substring(0,4);
+        String dateYear = groupDate.substring(0, 4);
         Calendar now = Calendar.getInstance();
         int year = now.get(Calendar.YEAR);
         if (date.equals(groupDate))
         {
             holder.tvDate.setText("今天");
         }
-        else if(dateYear.equals(year + ""))
+        else if (dateYear.equals(year + ""))
         {
-            holder.tvDate.setText(groupDate.substring(4,6) + "/" + groupDate.substring(6,8));
-        }else
+            holder.tvDate.setText(groupDate.substring(4, 6) + "/" + groupDate.substring(6, 8));
+        }
+        else
         {
             holder.tvDate.setText(photoList.get(groupPosition).getDate());
 
@@ -168,7 +170,16 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
             {
                 if (!isEdit)
                 {
-                    Intent intent = new Intent(context, PhotoDetailActivity.class);
+                    String filePath = paths1.get(position);
+                    Intent intent = null;
+                    if (filePath.endsWith(".jpg"))
+                    {
+                        intent = new Intent(context, PhotoDetailActivity.class);
+                    }
+                    else
+                    {
+                        intent = new Intent(context, VideoDetailActivity.class);
+                    }
                     intent.putExtra("photoPath", paths1.get(position));
                     context.startActivity(intent);
                 }

@@ -135,6 +135,10 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     LinearLayout llChangeTime;
     @BindView(R.id.tv_change_time)
     TextView tvChangeTime;
+    @BindView(R.id.ll_record)
+    LinearLayout llRecord;
+    @BindView(R.id.tv_record_time)
+    TextView tvRecordTime;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -194,6 +198,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     private boolean record = false;
     private boolean isSetRecordSuccess = false;
+    private Timer recordTimer;
+
+    private long beginRecordTime = 0;
 
     @Override
     public int getLayoutId()
@@ -258,6 +265,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     private void getSocketAddress()
     {
+        llLoading.setVisibility(View.VISIBLE);
         new CameraSocketTask(this)
         {
             @Override
@@ -283,7 +291,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat format1 = new SimpleDateFormat("HHmmss");
-        String fileName = "VID_"  + format.format(new Date()) + "_" + format1.format(new Date()) + ".mp4";
+        String fileName = "VID_" + format.format(new Date()) + "_" + format1.format(new Date()) + ".mp4";
         File recordFile = new File(recordFilePath + fileName);
         try
         {
@@ -344,14 +352,30 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                         });
                         Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
 
-
-                        player.playSound(port);
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                if (llLoading != null && llLoading.getVisibility() == View.GONE)
+                                    llLoading.setVisibility(View.VISIBLE);
+                            }
+                        });
                     }
 
                     @Override
                     public void onReceiveVideoData(byte[] videoData, int length, int totalSize, int remainLength)
                     {
                         //Log.e(CameraPlayHKActivity.class.getName(), "视频数据：" + totalSize + " 剩余大小:" + remainLength);
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                if (llLoading != null && llLoading.getVisibility() == View.VISIBLE)
+                                    llLoading.setVisibility(View.GONE);
+                            }
+                        });
                         player.inputData(port, videoData, videoData.length);
 
                         if (!isSetRecordSuccess)
@@ -884,16 +908,54 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_record)
     public void record(View view)
     {
+        if (recordTimer == null)
+            recordTimer = new Timer();
         if (!record)
         {
             createRecord();
             player.setPreRecordFlag(port, true);
+            ToastHelper.getInstance(this).shortShowMessage("录像开始");
+            llRecord.setVisibility(View.VISIBLE);
             Log.e(TAG, "录像开始");
+            recordBeginTime = new Date().getTime();
+            recordTimer.schedule(new TimerTask()
+            {
+                @Override
+                public void run()
+                {
+                    int recordTime = (int) ((new Date().getTime() - recordBeginTime) / 1000);
+                    if (recordTime < 3600)
+                    {
+                        String min = (recordTime / 60) + "";
+                        String sec = (recordTime % 60) + "";
+
+                        min = min.length() == 2 ? min : "0" + min;
+                        sec = sec.length() == 2 ? sec : "0" + sec;
+
+                        String finalMin = min;
+                        String finalSec = sec;
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                if (tvRecordTime != null)
+                                    tvRecordTime.setText(finalMin + ":" + finalSec);
+                            }
+                        });
+                    }
+                }
+            }, 1000, 1000);
             record = true;
         }
         else
         {
+            recordTimer.cancel();
+            recordTimer = null;
             player.setPreRecordFlag(port, false);
+            record = false;
+            ToastHelper.getInstance(this).shortShowMessage("录像结束");
+            llRecord.setVisibility(View.GONE);
             Log.e(TAG, "录像结束");
         }
     }
