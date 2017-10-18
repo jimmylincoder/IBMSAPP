@@ -109,6 +109,7 @@
         <!--海康sdk播放-->
         <activity
             android:name=".page.camera.CameraPlayHKActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"/>
     </application>
 

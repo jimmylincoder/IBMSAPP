@@ -189,8 +189,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private CameraStreamSocketClient cameraStreamSocketClient;
     private String TAG = CameraPlayHKActivity.class.getName();
 
-    private String recordFilePath = "/sdcard/";
+    private String recordFilePath = "/sdcard/DCIM/Camera/ibms/";
     private FileOutputStream fileOutputStream;
+
+    private boolean record = false;
+    private boolean isSetRecordSuccess = false;
 
     @Override
     public int getLayoutId()
@@ -278,7 +281,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     private void createRecord()
     {
-        String fileName = "VID_" + DateUtil.convertYYYY_MM_DD_HH_MM_SS(new Date()) + ".mp4";
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat format1 = new SimpleDateFormat("HHmmss");
+        String fileName = "VID_"  + format.format(new Date()) + "_" + format1.format(new Date()) + ".mp4";
         File recordFile = new File(recordFilePath + fileName);
         try
         {
@@ -292,7 +297,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     private void initSocket0(String beginTime, String endTime)
     {
-        createRecord();
         cameraStreamSocketClient = CameraStreamSocketClient.getInstance()
                 .setOnCameraStreamDataListener(new OnCameraStreamDataListener()
                 {
@@ -325,6 +329,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                         Log.e(TAG, "初始化 setStreamOpenMode:" + player.setStreamOpenMode(port, Player.STREAM_REALTIME));
                         Log.e(TAG, "初始化 openStream:" + player.openStream(port, header, header.length, 100000 * 1024));
                         Log.e(TAG, "初始化 setDisplayBuf:" + player.setDisplayBuf(port, 15));
+                        player.setPreRecordFlag(port, false);
                         player.setDisplayCB(port, new PlayerCallBack.PlayerDisplayCB()
                         {
                             @Override
@@ -334,11 +339,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                 bitmapLen = dataLen;
                                 bitmapWidth = width;
                                 bitmapHeight = height;
-//                                Log.e(TAG, "抓图回调-->port:" + port + " dataLen:" + dataLen + " width:"
-//                                        + width + " height:" + height + " frameTime:" + frameTime);
+
                             }
                         });
                         Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
+
 
                         player.playSound(port);
                     }
@@ -346,9 +351,22 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     @Override
                     public void onReceiveVideoData(byte[] videoData, int length, int totalSize, int remainLength)
                     {
-                        writeToFile(videoData);
                         //Log.e(CameraPlayHKActivity.class.getName(), "视频数据：" + totalSize + " 剩余大小:" + remainLength);
                         player.inputData(port, videoData, videoData.length);
+
+                        if (!isSetRecordSuccess)
+                        {
+                            isSetRecordSuccess = player.setPreRecordCallBack(port, new PlayerCallBack.PlayerPreRecordCB()
+                            {
+                                @Override
+                                public void onPreRecord(int port, byte[] data, int length)
+                                {
+                                    Log.e(TAG, "录像数据回调:" + data.length);
+                                    writeToFile(data);
+                                }
+                            });
+                            Log.e(TAG, "初始化 设置录像回调:" + isSetRecordSuccess);
+                        }
                     }
 
                     @Override
@@ -809,12 +827,46 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     public void takePic(View view)
     {
         PermissionRequest.verifyStoragePermissions(this);
-        byte[] bitmap = new byte[bitmapLen];
-        Player.MPInteger mpInteger = new Player.MPInteger();
-        boolean isSuccess =  player.getBMP(port,bitmap,bitmapLen,mpInteger);
-        Bitmap bitmap1 = BitmapFactory.decodeByteArray(bitmap,0,bitmapLen);
-        FileUtil.saveImageToGallery(this, bitmap1);
-        ToastHelper.getInstance(this).shortShowMessage("截图成功");
+        File localFile = new File(PIC_PATH);
+        localFile.mkdirs();
+        try
+        {
+            byte[] bitmap = new byte[bitmapWidth * bitmapHeight * 3 / 2];
+            Player.MPInteger mpInteger = new Player.MPInteger();
+            boolean isSuccess = player.getJPEG(port, bitmap, bitmapLen, mpInteger);
+            Log.e(TAG, "截图结果: " + isSuccess);
+            Bitmap bitmap1 = BitmapFactory.decodeByteArray(bitmap, 0, bitmapLen);
+            llTakePic.setVisibility(View.VISIBLE);
+            ivTakePic.setImageBitmap(bitmap1);
+            new Thread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    try
+                    {
+                        Thread.sleep(3000);
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                llTakePic.setVisibility(View.GONE);
+                            }
+                        });
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+            FileUtil.saveImageToGallery(this, bitmap1);
+            ToastHelper.getInstance(this).shortShowMessage("截图成功");
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
     }
 
     @OnClick(R.id.ib_talk)
@@ -832,7 +884,18 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_record)
     public void record(View view)
     {
-
+        if (!record)
+        {
+            createRecord();
+            player.setPreRecordFlag(port, true);
+            Log.e(TAG, "录像开始");
+            record = true;
+        }
+        else
+        {
+            player.setPreRecordFlag(port, false);
+            Log.e(TAG, "录像结束");
+        }
     }
 
     @OnClick(R.id.ib_fullscreen)
@@ -939,7 +1002,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }
         else
         {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 320));
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) SizeUtil.getRawSize(this, TypedValue.COMPLEX_UNIT_DIP, 250));
             flVideo.setLayoutParams(layoutParams);
         }
         llHead.setVisibility(viewType);
