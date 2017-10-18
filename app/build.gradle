@@ -114,6 +114,11 @@ dependencies {
     //下拉刷新
     compile(name: "pulltorefresh-release", ext: 'aar')
     compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
+    //compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+    compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi:1.0.14'
+    compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
+
+
     compile files('libs/AudioEngineSDK.jar')
     compile files('libs/HCNetSDK.jar')
     compile files('libs/jna.jar')
