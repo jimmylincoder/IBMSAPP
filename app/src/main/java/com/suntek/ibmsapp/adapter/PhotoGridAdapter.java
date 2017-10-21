@@ -2,8 +2,6 @@ package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.media.ThumbnailUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +13,9 @@ import android.widget.LinearLayout;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,7 +26,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
-import static android.provider.MediaStore.Video.Thumbnails.MICRO_KIND;
 
 /**
  * 表格相册adapter
@@ -47,11 +42,14 @@ public class PhotoGridAdapter extends BaseAdapter
 
     private ImageLoader imageLoader;
 
+    private Map<String, Bitmap> videioBitmapMap;
+
     public PhotoGridAdapter(Context context, List<String> photoPaths)
     {
         this.context = context;
         this.photoPaths = photoPaths;
         this.chooseMap = new HashMap<>();
+        this.videioBitmapMap = new HashMap<>();
         DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
                 .cacheInMemory(true).cacheOnDisc(true).displayer(new SquareBitmapDisplay()).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
@@ -108,10 +106,20 @@ public class PhotoGridAdapter extends BaseAdapter
         {
 //            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(photoPaths.get(position), MICRO_KIND);
 //            holder.ivPhoto.setImageBitmap(bitmap);
-            FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
-            mediaMetadataRetriever.setDataSource(photoPaths.get(position));
-            Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
-            holder.ivPhoto.setImageBitmap(bitmap);
+            String filePath = photoPaths.get(position);
+            Bitmap preview = videioBitmapMap.get(filePath);
+            if (preview == null)
+            {
+                FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
+                mediaMetadataRetriever.setDataSource(photoPaths.get(position));
+                Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
+                videioBitmapMap.put(filePath, bitmap);
+                holder.ivPhoto.setImageBitmap(bitmap);
+            }
+            else
+            {
+                holder.ivPhoto.setImageBitmap(preview);
+            }
         }
         boolean isChoose = chooseMap.get(photoPaths.get(position));
         if (isChoose)

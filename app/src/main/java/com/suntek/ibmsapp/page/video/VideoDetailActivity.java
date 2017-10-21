@@ -2,6 +2,7 @@ package com.suntek.ibmsapp.page.video;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.MediaController;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
@@ -50,7 +51,6 @@ public class VideoDetailActivity extends BaseActivity
         videoView.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
         videoView.setVideoPath(filePath);
         videoView.start();
-
     }
 
     @Override

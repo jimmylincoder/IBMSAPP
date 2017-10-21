@@ -56,6 +56,8 @@ public class PhotoListFragment extends BaseFragment
     @BindView(R.id.iv_video_choose)
     ImageView ivVideoChoose;
 
+    private int nowPosition = 0;
+
     private List<Fragment> fragmentList = new ArrayList<>();
 
     private PhotoFragmentAdapter photoFragmentAdapter;
@@ -94,6 +96,7 @@ public class PhotoListFragment extends BaseFragment
             @Override
             public void onPageSelected(int position)
             {
+                nowPosition = position;
                 pageChange(position);
             }
 
@@ -122,7 +125,10 @@ public class PhotoListFragment extends BaseFragment
     {
         showHeader();
         vpContent.setNoScroll(true);
-        ((PhotoFragment) fragmentList.get(0)).setEdit(true);
+        if (nowPosition == 0)
+            ((PhotoFragment) fragmentList.get(nowPosition)).setEdit(true);
+        else
+            ((VideoFragment) fragmentList.get(nowPosition)).setEdit(true);
         if (popupMenu == null)
         {
             View view1 = getActivity().getLayoutInflater().inflate(R.layout.view_photo_menu, null);
@@ -161,7 +167,10 @@ public class PhotoListFragment extends BaseFragment
                                             file.delete();
                                         }
                                     }
-                                    ((PhotoFragment) fragmentList.get(0)).update();
+                                    if (nowPosition == 0)
+                                        ((PhotoFragment) fragmentList.get(nowPosition)).update();
+                                    else
+                                        ((VideoFragment) fragmentList.get(nowPosition)).update();
                                     unityDialog.dismiss();
                                     showNormal();
                                 }
@@ -220,8 +229,16 @@ public class PhotoListFragment extends BaseFragment
 
     public void showNormal()
     {
-        ((PhotoFragment) fragmentList.get(0)).setEdit(false);
-        ((PhotoFragment) fragmentList.get(0)).clearChoose();
+        if (nowPosition == 0)
+        {
+            ((PhotoFragment) fragmentList.get(nowPosition)).setEdit(false);
+            ((PhotoFragment) fragmentList.get(nowPosition)).clearChoose();
+        }
+        else
+        {
+            ((VideoFragment) fragmentList.get(nowPosition)).setEdit(false);
+            ((VideoFragment) fragmentList.get(nowPosition)).clearChoose();
+        }
         vpContent.setNoScroll(false);
         popupMenu.dismiss();
         showHeader();

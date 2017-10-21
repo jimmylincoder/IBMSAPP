@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.text.Layout;
 import android.text.TextPaint;
@@ -27,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -52,11 +54,13 @@ import java.util.TimerTask;
 public class TimeSeekBarView extends View
 {
     // 一小格的长度，单位dp
-    private static final float INTERVAL_LENGTH = 0.03f;
-    // 30分钟一大格
-    private static final int BIG_TIME_INTERVAL = 360;
-    // 1秒钟一小格 ,小刻度线不画
+    private static float INTERVAL_LENGTH = 0.08f;
+    // 多少分钟一格  360--6分钟
+    private static int BIG_TIME_INTERVAL = 180;
+    // 1秒钟一小格 ,mw小刻度线不画
     private static final int SMALL_TIME_INTERVAL = 1;
+    //隔多久绘制时间  1800--半小时 3600---一小时
+    private static int TIME_TEXT = 900;
     // 大刻度线高度
     private static final int TICK_MARK_HEIGHT = 20;
     // 小刻度线高度
@@ -111,6 +115,20 @@ public class TimeSeekBarView extends View
     //刻度类型
     private int style;
 
+    //单指
+    private final int MODE_SINGLE_FINGER = 0;
+    //双指
+    private final int MODE_DOUBLE_FINGER = 1;
+    //当前模式
+    private int mode = MODE_SINGLE_FINGER;
+
+    //初始两指原长
+    private float lengthOld = 1;
+    //是否已操作张开或缩放
+    private boolean isOper = true;
+
+    private int sizeMode = 0;
+    private List<Map<String, Number>> sizeList;
 
     /**
      * 滑动时时间变化监听器
@@ -162,6 +180,34 @@ public class TimeSeekBarView extends View
 
         //设置背景色
         setBackgroundColor(backgroundColor);
+
+        initSizeMode();
+    }
+
+    /**
+     * 初始化时间轴大小
+     */
+    private void initSizeMode()
+    {
+        sizeList = new ArrayList<>();
+
+        Map<String, Number> minSize = new HashMap<>();
+        minSize.put("intervalLength", 0.08f);
+        minSize.put("bigTimeInterval", 180);
+        minSize.put("timeText", 900);
+        sizeList.add(minSize);
+
+        Map<String, Number> halfHourSize = new HashMap<>();
+        halfHourSize.put("intervalLength", 0.03f);
+        halfHourSize.put("bigTimeInterval", 360);
+        halfHourSize.put("timeText", 1800);
+        sizeList.add(halfHourSize);
+
+        Map<String, Number> hourSize = new HashMap<>();
+        hourSize.put("intervalLength", 0.005f);
+        hourSize.put("bigTimeInterval", 4 * 3600 / 5);
+        hourSize.put("timeText", 4 * 60 * 60);
+        sizeList.add(hourSize);
     }
 
     /**
@@ -501,7 +547,7 @@ public class TimeSeekBarView extends View
         //字数大小
         int numSize = String.valueOf("00:00").length();
         //算出刻度数(余数在1-1799)  (分钟 * 60 + 秒数）
-        int mod = nowTimeValue.mod(BIG_TIME_INTERVAL);
+        int mod = nowTimeValue.modWithHour(BIG_TIME_INTERVAL);
 
         //如果大于刻度间中间值绘制于左侧，小于则画右侧
 //        if (mod < BIG_TIME_INTERVAL / 2)
@@ -529,7 +575,7 @@ public class TimeSeekBarView extends View
                         SMALL_TIME_INTERVAL * i * BIG_TIME_INTERVAL + BIG_TIME_INTERVAL - mod);
                 int lineHeight = 0;
                 //画时间值
-                if (timeAlgorithm.mod(1800) == 0)
+                if (timeAlgorithm.modWithHour(TIME_TEXT) == 0)
                 {
                     canvas.drawText(String.valueOf(timeAlgorithm.getData()).substring(0, 5), xPosition - (textWidth * numSize)
                             / 2, (getHeight()) / 2, textPaint);
@@ -558,7 +604,7 @@ public class TimeSeekBarView extends View
                         -SMALL_TIME_INTERVAL * BIG_TIME_INTERVAL * i - mod);
 
                 int lineHeight = 0;
-                if (timeAlgorithm.mod(1800) == 0)
+                if (timeAlgorithm.modWithHour(TIME_TEXT) == 0)
                 {
                     canvas.drawText(String.valueOf(timeAlgorithm.getData()).substring(0, 5),
                             xPosition - (textWidth * numSize) / 2, (getHeight()) / 2, textPaint);
@@ -601,6 +647,20 @@ public class TimeSeekBarView extends View
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+//        //双指
+//        if (MotionEventCompat.getPointerCount(event) > 1)
+//        {
+//            float touchX_1 = MotionEventCompat.getX(event, 0);
+//            float touchY_1 = MotionEventCompat.getY(event, 0);
+//            float touchX_2 = MotionEventCompat.getX(event, 1);
+//            float touchY_2 = MotionEventCompat.getY(event, 1);
+//
+//
+//            Log.e(TimeSeekBarView.class.getName(), "多指:" + String.format("touchX_1:%f,touchY_1:%f,touchX_2:%f,touchY_2:%f\n", touchX_1, touchY_1, touchX_2, touchY_2));
+//
+//        }
+//        else
+//        {
         //获取当前动作
         int action = event.getAction();
         //事件触发的x坐标
@@ -610,11 +670,16 @@ public class TimeSeekBarView extends View
             velocityTracker = VelocityTracker.obtain();
         velocityTracker.addMovement(event);
 
-        switch (action)
+        switch (action & event.getActionMasked())
         {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mode = MODE_DOUBLE_FINGER;
+                lengthOld = calculation(event);
+                Log.e(TimeSeekBarView.class.getName(), "另一个手指点击");
+                break;
+
             //点击动作,必定触发
             case MotionEvent.ACTION_DOWN:
-                //  vg.requestDisallowInterceptTouchEvent(true);
                 //通知监听器当前值
                 listener.onStartValueChange(getNowDate());
                 scroller.forceFinished(true);
@@ -622,13 +687,22 @@ public class TimeSeekBarView extends View
                 beginPointX = xPosition;
                 //移动距离为0
                 moveDistance = 0;
+                Log.e(TimeSeekBarView.class.getName(), "一个手指点击");
+                mode = MODE_SINGLE_FINGER;
                 return true;
 
             //移动动作
             case MotionEvent.ACTION_MOVE:
-                // vg.requestDisallowInterceptTouchEvent(true);
-                //算出移动距离
-                moveDistance += (beginPointX - xPosition);
+                if (mode == MODE_SINGLE_FINGER)
+                {
+                    //算出移动距离
+                    moveDistance += (beginPointX - xPosition);
+                }
+                else
+                {
+                    float scale = calculation(event) / lengthOld;
+                    fingerOper(scale);
+                }
                 //更新界面变化和值变化通知
                 changeMoveAndValue();
                 break;
@@ -640,15 +714,77 @@ public class TimeSeekBarView extends View
                 //动作取消
             case MotionEvent.ACTION_CANCEL:
                 //  vg.requestDisallowInterceptTouchEvent(false);
-                countVelocityTracker(event);
-                countMoveEnd();
+                if (mode == MODE_SINGLE_FINGER)
+                {
+                    countVelocityTracker(event);
+                    countMoveEnd();
+                }
+
+                lengthOld = 1;
+                isOper = true;
                 break;
 
             default:
                 break;
         }
         beginPointX = xPosition;
+//        }
         return super.onTouchEvent(event);
+    }
+
+    /**
+     * 对双指操作手势进行处理
+     *
+     * @param scale
+     */
+    private void fingerOper(float scale)
+    {
+        Log.e(TimeSeekBarView.class.getName(), "双指移动 scale:" + scale);
+        if (scale > 2 && isOper)
+        {
+            isOper = false;
+            if (sizeMode < 2)
+            {
+                sizeMode++;
+                Map<String, Number> sizeMap = sizeList.get(sizeMode);
+                INTERVAL_LENGTH = (float) sizeMap.get("intervalLength");
+                TIME_TEXT = (int) sizeMap.get("timeText");
+                BIG_TIME_INTERVAL = (int) sizeMap.get("bigTimeInterval");
+            }
+            Log.e(TimeSeekBarView.class.getName(), "张开手指");
+        }
+
+        if (scale < 0.5 && isOper)
+        {
+            isOper = false;
+            if (sizeMode > 0)
+            {
+                sizeMode--;
+                Map<String, Number> sizeMap = sizeList.get(sizeMode);
+                INTERVAL_LENGTH = (float) sizeMap.get("intervalLength");
+                TIME_TEXT = (int) sizeMap.get("timeText");
+                BIG_TIME_INTERVAL = (int) sizeMap.get("bigTimeInterval");
+            }
+            Log.e(TimeSeekBarView.class.getName(), "缩放手指");
+        }
+    }
+
+    private float calculation(MotionEvent event)
+    {
+        if (event.getPointerCount() > 1)
+        {
+            float x1 = event.getX();
+            float x2 = event.getX(1);
+            float y1 = event.getY();
+            float y2 = event.getY(1);
+
+            return (float) Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2));
+        }
+        else
+        {
+            return 1;
+        }
+
     }
 
     // 松开手控件滑动起来,fling()需要postInvalidate()
