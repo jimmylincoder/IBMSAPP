@@ -5,26 +5,20 @@ import android.content.Context;
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.suntek.ibmsapp.component.http.FHttpException;
 import com.suntek.ibmsapp.manager.CameraControlManager;
-import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.task.base.BaseTask;
 
-import org.bouncycastle.jce.provider.symmetric.ARC4;
-
-import java.util.List;
 import java.util.Map;
 
 /**
- * 查询录像
+ * 视频播放任务
  *
  * @author jimmy
  */
-public class CameraQueryRecordTask extends BaseTask
+public class CameraPlayGB28181Task extends BaseTask
 {
     private CameraControlManager cameraControlManager;
 
     private String deviceId;
-
-    private String parentId;
 
     private String ip;
 
@@ -38,22 +32,21 @@ public class CameraQueryRecordTask extends BaseTask
 
     private String endTime;
 
-    private String protocol;
+    private String parentId;
 
-    public CameraQueryRecordTask(Context context, String deviceId, String parentId, String ip, String channel,
-                                 String user, String password, String beginTime, String endTime,String protocol)
+    public CameraPlayGB28181Task(Context context, String deviceId, String parentId, String ip, String channel,
+                                 String user, String password, String beginTime, String endTime)
     {
         super(context);
 
         this.deviceId = deviceId;
-        this.parentId = parentId;
         this.ip = ip;
         this.channel = channel;
         this.user = user;
         this.password = password;
         this.beginTime = beginTime;
         this.endTime = endTime;
-        this.protocol = protocol;
+        this.parentId = parentId;
 
         cameraControlManager = (CameraControlManager) ComponentEngine.getInstance(CameraControlManager.class);
     }
@@ -63,8 +56,7 @@ public class CameraQueryRecordTask extends BaseTask
     {
         try
         {
-            List<RecordItem> res = cameraControlManager.queryRecord(deviceId, parentId, ip, channel,
-                    user, password, beginTime, endTime,protocol);
+            Map<String, Object> res = cameraControlManager.playByGb28181(deviceId, parentId, ip, channel, user, password, beginTime, endTime);
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {
