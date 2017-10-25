@@ -51,6 +51,7 @@ import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.PermissionRequest;
+import com.suntek.ibmsapp.util.ScreenUtils;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.CustomSurfaceView;
 import com.suntek.ibmsapp.widget.GestureSurfaceView.GestureSurfaceView;
@@ -139,6 +140,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     LinearLayout llRecord;
     @BindView(R.id.tv_record_time)
     TextView tvRecordTime;
+    @BindView(R.id.ll_sfv)
+    LinearLayout llSfv;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -200,7 +203,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private boolean isSetRecordSuccess = false;
     private Timer recordTimer;
 
-    private long beginRecordTime = 0;
+    private Object changePositionLock = new Object();
 
     @Override
     public int getLayoutId()
@@ -229,39 +232,70 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
     private void initSurfaceView()
     {
-        ivvVideo.setOnClickListener(v ->
+        ivvVideo.setOnClickListener(new View.OnClickListener()
         {
-            if (llTime.getVisibility() == View.GONE)
+            @Override
+            public void onClick(View v)
             {
-                llOper.setVisibility(View.GONE);
-                llTime.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                llOper.setVisibility(View.VISIBLE);
-                llTime.setVisibility(View.GONE);
+                if (llTime.getVisibility() == View.GONE)
+                {
+                    llOper.setVisibility(View.GONE);
+                    llTime.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    llOper.setVisibility(View.VISIBLE);
+                    llTime.setVisibility(View.GONE);
+                }
             }
         });
 
+//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) ivvVideo.getLayoutParams();
+//        layoutParams.width = (int) (ScreenUtils.getScreenWidth(getApplicationContext()) * (1.2));
+//        layoutParams.gravity = Gravity.CENTER;
+//        ivvVideo.setLayoutParams(layoutParams);
+//
+//        initgetViewW_H();
+//
 //        SurfaceHolder surfaceHolder = ivvVideo.getHolder();
-//        surfaceHolder.setFixedSize(800, 800);
 //        surfaceHolder.setKeepScreenOn(true);
 //        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-//        surfaceHolder.addCallback(new SurfaceHolder.Callback() {
+//        surfaceHolder.addCallback(new SurfaceHolder.Callback()
+//        {
 //            @Override
-//            public void surfaceCreated(SurfaceHolder holder) {
+//            public void surfaceCreated(SurfaceHolder holder)
+//            {
 //            }
 //
 //            @Override
-//            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+//            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+//            {
 //            }
 //
 //            @Override
-//            public void surfaceDestroyed(SurfaceHolder holder) {
+//            public void surfaceDestroyed(SurfaceHolder holder)
+//            {
 //
 //            }
 //        });
+
+
     }
+
+//    private void initgetViewW_H()
+//    {
+//        llSfv.postDelayed(new Runnable()
+//        {
+//            @Override
+//            public void run()
+//            {
+//                Log.i(TAG, "father Top" + llSfv.getTop());
+//                Log.i(TAG, "father Bottom" + llSfv.getBottom());
+//                ivvVideo.setFatherW_H(llSfv.getTop(), llSfv.getBottom());
+//                ivvVideo.setFatherTopAndBottom(llSfv.getTop(), llSfv.getBottom());
+//            }
+//        }, 100);
+//    }
 
     private void getSocketAddress()
     {
@@ -311,7 +345,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     @Override
                     public void onReceiveMediaChannel(int mediaChannel)
                     {
-                        Log.e(CameraPlayHKActivity.class.getName(), "通道号：" + mediaChannel);
+                        //                       Log.e(CameraPlayHKActivity.class.getName(), "通道号：" + mediaChannel
+                        //                               + "session:" + session);
 //                        String beginTime = "2017-10-14 11:00:00";
 //                        String endTime = "2017-10-14 23:59:59";
                         play(mediaChannel + "", beginTime, endTime);
@@ -321,7 +356,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     @Override
                     public void onReceiveMediaHeader(byte[] header, int length, int totalSize, int remainLength)
                     {
-                        Log.e(CameraPlayHKActivity.class.getName(), "头数据：" + totalSize + " 剩余大小:" + remainLength);
+                        //                      Log.e(CameraPlayHKActivity.class.getName(), "头数据：" + totalSize + " 剩余大小:"
+                        //                              + remainLength + "session:" + session);
                         //writeToFile(header);
                         if (player == null)
                         {
@@ -366,7 +402,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     @Override
                     public void onReceiveVideoData(byte[] videoData, int length, int totalSize, int remainLength)
                     {
-                        //Log.e(CameraPlayHKActivity.class.getName(), "视频数据：" + totalSize + " 剩余大小:" + remainLength);
+                        //                     Log.e(CameraPlayHKActivity.class.getName(), "视频数据：" + totalSize + " 剩余大小:" + remainLength
+                        //                             + "session:" + session);
                         runOnUiThread(new Runnable()
                         {
                             @Override
@@ -385,11 +422,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                 @Override
                                 public void onPreRecord(int port, byte[] data, int length)
                                 {
-                                    Log.e(TAG, "录像数据回调:" + data.length);
+                                    //Log.e(TAG, "录像数据回调:" + data.length);
                                     writeToFile(data);
                                 }
                             });
-                            Log.e(TAG, "初始化 设置录像回调:" + isSetRecordSuccess);
+                            //Log.e(TAG, "初始化 设置录像回调:" + isSetRecordSuccess);
                         }
                     }
 
@@ -445,6 +482,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 {
                     Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     session = (String) map.get("session");
+                    Log.e(TAG, "session:" + session);
+                    if (isRecorder)
+                        changePosition(changePosition);
                 }
                 else
                 {
@@ -579,7 +619,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     timeSeekBar.setValue(new Date().getTime());
                     tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
                     isRecorder = false;
-                    reloadVideoView(null, null);
+                    cameraStreamSocketClient.close();
+                    stopPlay();
+                    initSocket0(null, null);
                     tvPlayType.setText("直播");
                 }
                 else
@@ -1128,28 +1170,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 }
             }
         }.execute();
-    }
-
-    /**
-     * 重新加载videoview进入历史回放
-     *
-     * @param startTime
-     * @param endTime
-     */
-    private void reloadVideoView(String startTime, String endTime)
-    {
-//        ivvVideo.stopPlayback();
-//        ivvVideo.release(true);
-//        ivvVideo.stopBackgroundPlay();
-//        IjkMediaPlayer.native_profileEnd();
-//        if (!cameraPlayGB28181Task.isCancelled())
-//            cameraPlayGB28181Task.cancel(true);
-//        stopPlay();
-//        initVideoView();
-//        if (llFail.getVisibility() == View.VISIBLE)
-//            llFail.setVisibility(View.GONE);
-//        llLoading.setVisibility(View.VISIBLE);
-//        getCameraAddress(startTime, endTime);
     }
 
     private void pause()

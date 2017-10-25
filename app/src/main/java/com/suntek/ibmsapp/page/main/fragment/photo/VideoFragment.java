@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.main.fragment.photo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.PhotoListAdapter;
@@ -36,6 +37,9 @@ public class VideoFragment extends BaseFragment
     @BindView(R.id.elv_photo)
     ExpandableListView lvPhoto;
 
+    @BindView(R.id.ll_message)
+    LinearLayout llMessage;
+
     private PhotoListAdapter photoListAdapter;
 
     private List<Photo> photos = new ArrayList<>();
@@ -57,6 +61,10 @@ public class VideoFragment extends BaseFragment
      */
     private void initListView()
     {
+        if (photos.isEmpty())
+            llMessage.setVisibility(View.VISIBLE);
+        else
+            llMessage.setVisibility(View.GONE);
         Collections.sort(photos, new Comparator<Photo>()
         {
             @Override

@@ -24,6 +24,7 @@ import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.task.camera.CameraListTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,12 +109,29 @@ public class CameraListFragment extends BaseFragment
             {
                 Intent intent = new Intent(getActivity(), CameraPlayHKActivity.class);
                 Camera camera = cameraList.get(position - 1);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("camera", camera);
-                intent.putExtras(bundle);
-                intent.putExtra("cameraId", cameraList.get(position - 1).getId());
-                intent.putExtra("cameraName", cameraList.get(position - 1).getName());
-                startActivity(intent);
+                if (camera.getIsUsed().equals("1"))
+                {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("camera", camera);
+                    intent.putExtras(bundle);
+                    intent.putExtra("cameraId", cameraList.get(position - 1).getId());
+                    intent.putExtra("cameraName", cameraList.get(position - 1).getName());
+                    startActivity(intent);
+                }
+                else
+                {
+                    new UnityDialog(getActivity())
+                            .setTitle("温馨提示")
+                            .setHint("该摄像头已离线")
+                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                            {
+                                @Override
+                                public void confirm(UnityDialog unityDialog, String content)
+                                {
+                                    unityDialog.dismiss();
+                                }
+                            }).show();
+                }
             }
         });
 
@@ -170,10 +188,10 @@ public class CameraListFragment extends BaseFragment
                     }
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
-                    try{
+                    try
+                    {
                         ptrCameraList.onRefreshComplete();
-                    }
-                    catch (Exception e)
+                    } catch (Exception e)
                     {
                         e.printStackTrace();
                     }

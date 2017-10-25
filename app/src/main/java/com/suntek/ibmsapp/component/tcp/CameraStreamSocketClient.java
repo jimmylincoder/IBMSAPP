@@ -144,7 +144,9 @@ public class CameraStreamSocketClient
     {
         //获取数据长度
         dataLengthByte = read(DATA_LENGTH);
-        int dataLength = ByteArrayConveter.getInt(dataLengthByte, 0);
+        int dataLength = 0;
+        if (dataLengthByte != null)
+            dataLength = ByteArrayConveter.getInt(dataLengthByte, 0);
 
         //获取通道头
         if (Arrays.equals(header, MEDIA_CHANNEL_HEADER))
@@ -176,13 +178,17 @@ public class CameraStreamSocketClient
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             if (isStop)
             {
-                int readLength = inputStream.read(bufferByte);
-                outputStream.write(bufferByte, 0, readLength);
-                if (BUFFER_SIZE - readLength != 0)
+                int readLength = 0;
+                if (bufferByte != null)
                 {
-                    byte[] b = read(BUFFER_SIZE - readLength);
-                    if (b != null && b.length == (BUFFER_SIZE - readLength))
-                        outputStream.write(b);
+                    readLength = inputStream.read(bufferByte);
+                    outputStream.write(bufferByte, 0, readLength);
+                    if (BUFFER_SIZE - readLength != 0)
+                    {
+                        byte[] b = read(BUFFER_SIZE - readLength);
+                        if (b != null && b.length == (BUFFER_SIZE - readLength))
+                            outputStream.write(b);
+                    }
                 }
             }
             return outputStream.toByteArray();

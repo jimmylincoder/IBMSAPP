@@ -54,13 +54,13 @@ import java.util.TimerTask;
 public class TimeSeekBarView extends View
 {
     // 一小格的长度，单位dp
-    private static float INTERVAL_LENGTH = 0.08f;
+    private float INTERVAL_LENGTH = 0.08f;
     // 多少分钟一格  360--6分钟
-    private static int BIG_TIME_INTERVAL = 180;
+    private int BIG_TIME_INTERVAL = 180;
     // 1秒钟一小格 ,mw小刻度线不画
     private static final int SMALL_TIME_INTERVAL = 1;
     //隔多久绘制时间  1800--半小时 3600---一小时
-    private static int TIME_TEXT = 900;
+    private int TIME_TEXT = 900;
     // 大刻度线高度
     private static final int TICK_MARK_HEIGHT = 20;
     // 小刻度线高度
