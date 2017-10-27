@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.suntek.ibmsapp.R;
@@ -41,6 +42,9 @@ public class PhotoFragment extends BaseFragment
     @BindView(R.id.elv_photo)
     ExpandableListView lvPhoto;
 
+    @BindView(R.id.ll_message)
+    LinearLayout llMessage;
+
     private PhotoListAdapter photoListAdapter;
 
     private List<Photo> photos = new ArrayList<>();
@@ -63,6 +67,11 @@ public class PhotoFragment extends BaseFragment
      */
     private void initListView()
     {
+        if (photos.isEmpty())
+            llMessage.setVisibility(View.VISIBLE);
+        else
+            llMessage.setVisibility(View.GONE);
+
         Collections.sort(photos, new Comparator<Photo>()
         {
             @Override

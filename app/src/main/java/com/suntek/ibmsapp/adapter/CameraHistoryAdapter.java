@@ -13,6 +13,7 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.DateUtil;
+import com.suntek.ibmsapp.util.PreviewUtil;
 
 import java.util.Date;
 import java.util.List;
@@ -88,22 +89,28 @@ public class CameraHistoryAdapter extends BaseAdapter
             holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
         }
 
-        String photoBase64 = cameraList.get(i).getPhotoBase64();
-        String id = cameraList.get(i).getId();
-        holder.ivPreview.setTag(id);
-        if (photoBase64 != null)
-        {
-            if (holder.ivPreview.getTag() != null && holder.ivPreview.getTag().equals(id))
-            {
-                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
-                holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
-                        ivPreviewWidth, ivPreviewHeight));
-            }
-        }
+//        String photoBase64 = cameraList.get(i).getPhotoBase64();
+//        String id = cameraList.get(i).getId();
+//        holder.ivPreview.setTag(id);
+//        if (photoBase64 != null)
+//        {
+//            if (holder.ivPreview.getTag() != null && holder.ivPreview.getTag().equals(id))
+//            {
+//                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
+//                holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
+//                        ivPreviewWidth, ivPreviewHeight));
+//            }
+//        }
+//        else
+//        {
+//            holder.ivPreview.setImageBitmap(null);
+//        }
+        Camera camera = cameraList.get(i);
+        Bitmap bitmap = PreviewUtil.getInstance().getPreview(camera.getId(), camera.getDeviceId());
+        if (bitmap != null)
+            holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap, ivPreviewWidth, ivPreviewHeight));
         else
-        {
             holder.ivPreview.setImageBitmap(null);
-        }
         return view;
     }
 

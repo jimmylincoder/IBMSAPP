@@ -13,11 +13,11 @@ import android.widget.LinearLayout;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +26,8 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import wseemann.media.FFmpegMediaMetadataRetriever;
+
 
 /**
  * 表格相册adapter
@@ -42,13 +44,16 @@ public class PhotoGridAdapter extends BaseAdapter
 
     private ImageLoader imageLoader;
 
+    private Map<String, Bitmap> videioBitmapMap;
+
     public PhotoGridAdapter(Context context, List<String> photoPaths)
     {
         this.context = context;
         this.photoPaths = photoPaths;
         this.chooseMap = new HashMap<>();
+        this.videioBitmapMap = new HashMap<>();
         DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
-                .cacheInMemory(true).cacheOnDisc(true).displayer(new SquareBitmapDisplay()).build();
+                .cacheInMemory(true).cacheOnDisc(true).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
                 .Builder(context)
                 .defaultDisplayImageOptions(options)
@@ -95,8 +100,41 @@ public class PhotoGridAdapter extends BaseAdapter
             convertView.setTag(holder);
         }
 
-        imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
+        if (photoPaths.get(position).endsWith(".jpg"))
+        {
+            imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
+        }
+        else
+        {
+//            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(photoPaths.get(position), MICRO_KIND);
+//            holder.ivPhoto.setImageBitmap(bitmap);
+            String filePath = photoPaths.get(position);
+            File file = new File(filePath);
+            String thumbnail = file.getParentFile().getAbsolutePath() + "/thumbnail/" + file.getName() + "_thumbnail.jpg";
+            File preview = new File(thumbnail);
+            if (preview.exists())
+            {
+                imageLoader.displayImage("file://" + thumbnail, holder.ivPhoto);
+            }
+            else
+            {
+                holder.ivPhoto.setImageBitmap(null);
+            }
 
+//            Bitmap preview = videioBitmapMap.get(filePath);
+//            if (preview == null)
+//            {
+//                FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
+//                mediaMetadataRetriever.setDataSource(photoPaths.get(position));
+//                Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
+//                videioBitmapMap.put(filePath, bitmap);
+//                holder.ivPhoto.setImageBitmap(bitmap);
+//            }
+//            else
+//            {
+//                holder.ivPhoto.setImageBitmap(preview);
+//            }
+        }
         boolean isChoose = chooseMap.get(photoPaths.get(position));
         if (isChoose)
         {
@@ -176,7 +214,7 @@ public class PhotoGridAdapter extends BaseAdapter
         while (entries.hasNext())
         {
             Map.Entry entry = (Map.Entry) entries.next();
-            chooseMap.put((String) entry.getKey(),true);
+            chooseMap.put((String) entry.getKey(), true);
         }
     }
 }

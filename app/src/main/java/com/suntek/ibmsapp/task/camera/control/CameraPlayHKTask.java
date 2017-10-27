@@ -10,15 +10,18 @@ import com.suntek.ibmsapp.task.base.BaseTask;
 import java.util.Map;
 
 /**
- * 视频播放任务
+ * 海康sdk形式播放
  *
  * @author jimmy
  */
-public class CameraPlayTask extends BaseTask
+
+public class CameraPlayHKTask extends BaseTask
 {
     private CameraControlManager cameraControlManager;
 
-    private String deviceId;
+    private String port;
+
+    private String mediaChannel;
 
     private String ip;
 
@@ -28,25 +31,25 @@ public class CameraPlayTask extends BaseTask
 
     private String password;
 
+    private String streamType;
+
     private String beginTime;
 
     private String endTime;
 
-    private String parentId;
-
-    public CameraPlayTask(Context context, String deviceId, String parentId, String ip, String channel,
-                          String user, String password, String beginTime, String endTime)
+    public CameraPlayHKTask(Context context, String mediaChannel, String ip, String port, String channel,
+                            String user, String password, String streamType, String beginTime, String endTime)
     {
         super(context);
-
-        this.deviceId = deviceId;
+        this.mediaChannel = mediaChannel;
         this.ip = ip;
         this.channel = channel;
         this.user = user;
         this.password = password;
+        this.streamType = streamType;
         this.beginTime = beginTime;
         this.endTime = endTime;
-        this.parentId = parentId;
+        this.port = port;
 
         cameraControlManager = (CameraControlManager) ComponentEngine.getInstance(CameraControlManager.class);
     }
@@ -56,7 +59,9 @@ public class CameraPlayTask extends BaseTask
     {
         try
         {
-            Map<String, Object> res = cameraControlManager.play(deviceId, parentId, ip, channel, user, password, beginTime, endTime);
+            Map<String, Object> res = cameraControlManager.playByHK(mediaChannel, streamType, ip, port,
+                    channel, user, password, beginTime, endTime);
+
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {

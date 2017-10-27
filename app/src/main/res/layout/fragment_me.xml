@@ -71,6 +71,7 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/ll_reset_password"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center_vertical"
@@ -113,6 +114,7 @@
                 android:background="@color/col_e6e6e6"/>
 
             <LinearLayout
+                android:id="@+id/ll_update"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"
                 android:gravity="center_vertical"
@@ -129,7 +131,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:text="应用设置"
+                    android:text="检测更新"
                     android:textColor="@color/col_333333"
                     android:textSize="17sp"/>
 
@@ -159,6 +161,7 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/ll_help"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center_vertical"

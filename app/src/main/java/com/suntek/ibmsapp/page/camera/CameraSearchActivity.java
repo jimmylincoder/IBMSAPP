@@ -79,7 +79,9 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
             @Override
             public void afterTextChanged(Editable s)
             {
-                search(s.toString());
+                String keyword = s.toString();
+                if (!"".equals(keyword))
+                    search(s.toString());
             }
         });
     }

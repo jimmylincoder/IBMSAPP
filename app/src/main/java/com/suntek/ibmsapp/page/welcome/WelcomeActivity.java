@@ -6,7 +6,10 @@ import android.view.WindowManager;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.page.login.UserLoginActivity;
+import com.suntek.ibmsapp.page.main.MainActivity;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 
 /**
  * 欢迎界面
@@ -21,6 +24,9 @@ public class WelcomeActivity extends BaseActivity
         return R.layout.activity_welcome;
     }
 
+    @Autowired
+    private SaveDataWithSharedHelper sharedHelper;
+
     @Override
     public void initViews(Bundle savedInstanceState)
     {
@@ -34,8 +40,15 @@ public class WelcomeActivity extends BaseActivity
                 try
                 {
                     Thread.sleep(1000);
-                    Intent intent  = new Intent(WelcomeActivity.this,UserLoginActivity.class);
+                    String userCode = sharedHelper.getString("user");
+                    Intent intent = null;
+                    if (userCode == null || "".equals(userCode))
+                        intent = new Intent(WelcomeActivity.this, UserLoginActivity.class);
+                    else
+                        intent = new Intent(WelcomeActivity.this, MainActivity.class);
+
                     startActivity(intent);
+
                     finish();
                 } catch (InterruptedException e)
                 {

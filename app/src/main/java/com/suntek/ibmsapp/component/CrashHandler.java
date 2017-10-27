@@ -166,7 +166,7 @@ public class CrashHandler implements UncaughtExceptionHandler
             }
         }.start();
         //保存日志文件
-        //saveCatchInfo2File(ex);
+        saveCatchInfo2File(ex);
         //提交服务器
         String errorMessage = getExceptionMessage(ex);
         sendToServer(errorMessage);

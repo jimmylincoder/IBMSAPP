@@ -10,7 +10,6 @@ import java.util.Locale;
  * 时间算法对象
  *
  * @author jimmy
- *
  */
 public class TimeAlgorithm
 {
@@ -68,6 +67,34 @@ public class TimeAlgorithm
             //获取秒数
             int s = calendarObj.get(Calendar.SECOND);
             return (60 * m + s) % _timeInterval;
+        } catch (ParseException e)
+        {
+            return -1;
+        }
+
+    }
+
+    /**
+     * 当前时间值取余数
+     *
+     * @param _timeInterval 秒数
+     * @return
+     */
+    public int modWithHour(int _timeInterval)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date date;
+        try
+        {
+            date = sdf.parse("2015-07-07 " + mTime);
+            Calendar calendarObj = Calendar.getInstance(Locale.CHINA);
+            calendarObj.setTime(date);
+            int h = calendarObj.get(Calendar.HOUR);
+            //获取分钟数
+            int m = calendarObj.get(Calendar.MINUTE);
+            //获取秒数
+            int s = calendarObj.get(Calendar.SECOND);
+            return (h * 60 * 60 + 60 * m + s) % _timeInterval;
         } catch (ParseException e)
         {
             return -1;

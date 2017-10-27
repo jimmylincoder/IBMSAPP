@@ -28,19 +28,15 @@ import com.dsw.calendar.views.GridCalendarView;
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
-import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.task.camera.control.CameraChangePositionTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPauseTask;
-import com.suntek.ibmsapp.task.camera.control.CameraPlayTask;
+import com.suntek.ibmsapp.task.camera.control.CameraPlayGB28181Task;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
@@ -50,15 +46,12 @@ import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SizeUtil;
-import com.suntek.ibmsapp.widget.HorizontalPicker;
-import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
 import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
 
 import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -66,7 +59,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -207,7 +199,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     //当前摄像头
     private Camera camera;
     //请求播放线程
-    private CameraPlayTask cameraPlayTask;
+    private CameraPlayGB28181Task cameraPlayGB28181Task;
     //存储录像对应时间段
     private Map<String, Object> recordMap = new HashMap<>();
     //是否为录像状态
@@ -331,9 +323,9 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
 
     private void getCameraAddress(String startTime, String endTime)
     {
-        if (cameraPlayTask != null)
-            cameraPlayTask.cancel(true);
-        cameraPlayTask = new CameraPlayTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
+        if (cameraPlayGB28181Task != null)
+            cameraPlayGB28181Task.cancel(true);
+        cameraPlayGB28181Task = new CameraPlayGB28181Task(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
                 camera.getPassword(), startTime, endTime)
         {
             @Override
@@ -369,7 +361,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                 }
             }
         };
-        cameraPlayTask.execute();
+        cameraPlayGB28181Task.execute();
     }
 
     /**
@@ -436,7 +428,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                         {
                             //设备为录像，并加载当天起始录像点到23:59:59,然后移位置到当前
                             isRecorder = true;
-                            String beginTime = chooseDate + " 00:00:00";
+                            String beginTime = chooseDate + " 00:00:01";
                             String endTime = chooseDate + " 23:59:59";
                             reloadVideoView(beginTime, endTime);
 
@@ -712,7 +704,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
             queryProgressTimer.cancel();
         stopPlay();
         //  menu.dismiss();
-        cameraPlayTask.cancel(true);
+        cameraPlayGB28181Task.cancel(true);
 
         if (mBackPressed || !ivvVideo.isBackgroundPlayEnabled())
         {
@@ -993,8 +985,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         ivvVideo.release(true);
         ivvVideo.stopBackgroundPlay();
         IjkMediaPlayer.native_profileEnd();
-        if (!cameraPlayTask.isCancelled())
-            cameraPlayTask.cancel(true);
+        if (!cameraPlayGB28181Task.isCancelled())
+            cameraPlayGB28181Task.cancel(true);
         stopPlay();
         initVideoView();
         if (llFail.getVisibility() == View.VISIBLE)
@@ -1174,7 +1166,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         String beginTime = format.format(date) + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime)
+                camera.getUserName(), camera.getPassword(), beginTime, endTime,"GB28181")
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1186,16 +1178,18 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                     for (RecordItem recordItem : recordItems)
                     {
                         String bt = format1.format(recordItem.getStartTime());
-                        //String et = format1.format(recordItem.getEndTime());
-                        String[] strs = bt.split(" ");
-                        String date = strs[0];
-                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(date);
+                        String et = format1.format(recordItem.getEndTime());
+                        String[] btStr = bt.split(" ");
+                        String[] etStr = et.split(" ");
+                        String btDate = btStr[0];
+                        String etDate = etStr[0];
+                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(btDate);
                         if (recordItems1 == null)
                         {
                             recordItems1 = new ArrayList<RecordItem>();
                         }
                         recordItems1.add(recordItem);
-                        recordMap.put(date, recordItems1);
+                        recordMap.put(btDate, recordItems1);
                     }
 
                     //TODO 渲染时间轴
