@@ -73,7 +73,8 @@
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/iv_edit"

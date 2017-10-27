@@ -10,7 +10,8 @@
         android:orientation="horizontal"
         android:layout_width="110dp"
         android:gravity="center_vertical"
-        android:layout_height="40dp">
+        android:layout_height="40dp"
+        android:visibility="gone">
 
         <ImageView
             android:layout_marginLeft="10dp"

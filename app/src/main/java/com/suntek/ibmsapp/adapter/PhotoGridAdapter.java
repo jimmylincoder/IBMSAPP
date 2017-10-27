@@ -16,6 +16,8 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -51,7 +53,7 @@ public class PhotoGridAdapter extends BaseAdapter
         this.chooseMap = new HashMap<>();
         this.videioBitmapMap = new HashMap<>();
         DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
-                .cacheInMemory(true).cacheOnDisc(true).displayer(new SquareBitmapDisplay()).build();
+                .cacheInMemory(true).cacheOnDisc(true).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
                 .Builder(context)
                 .defaultDisplayImageOptions(options)
@@ -107,19 +109,31 @@ public class PhotoGridAdapter extends BaseAdapter
 //            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(photoPaths.get(position), MICRO_KIND);
 //            holder.ivPhoto.setImageBitmap(bitmap);
             String filePath = photoPaths.get(position);
-            Bitmap preview = videioBitmapMap.get(filePath);
-            if (preview == null)
+            File file = new File(filePath);
+            String thumbnail = file.getParentFile().getAbsolutePath() + "/thumbnail/" + file.getName() + "_thumbnail.jpg";
+            File preview = new File(thumbnail);
+            if (preview.exists())
             {
-                FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
-                mediaMetadataRetriever.setDataSource(photoPaths.get(position));
-                Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
-                videioBitmapMap.put(filePath, bitmap);
-                holder.ivPhoto.setImageBitmap(bitmap);
+                imageLoader.displayImage("file://" + thumbnail, holder.ivPhoto);
             }
             else
             {
-                holder.ivPhoto.setImageBitmap(preview);
+                holder.ivPhoto.setImageBitmap(null);
             }
+
+//            Bitmap preview = videioBitmapMap.get(filePath);
+//            if (preview == null)
+//            {
+//                FFmpegMediaMetadataRetriever mediaMetadataRetriever = new FFmpegMediaMetadataRetriever();
+//                mediaMetadataRetriever.setDataSource(photoPaths.get(position));
+//                Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
+//                videioBitmapMap.put(filePath, bitmap);
+//                holder.ivPhoto.setImageBitmap(bitmap);
+//            }
+//            else
+//            {
+//                holder.ivPhoto.setImageBitmap(preview);
+//            }
         }
         boolean isChoose = chooseMap.get(photoPaths.get(position));
         if (isChoose)

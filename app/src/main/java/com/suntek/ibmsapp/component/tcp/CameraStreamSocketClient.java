@@ -153,8 +153,10 @@ public class CameraStreamSocketClient
         {
             receiveData = read(dataLength);
             //接收通道号
-            int mediaChannel = ByteArrayConveter.getInt(receiveData, 0);
-            if (onCameraStreamDataListener != null)
+            int mediaChannel = -1;
+            if (receiveData != null)
+                mediaChannel = ByteArrayConveter.getInt(receiveData, 0);
+            if (onCameraStreamDataListener != null && mediaChannel != -1)
                 onCameraStreamDataListener.onReceiveMediaChannel(mediaChannel);
         }
         else if (Arrays.equals(header, STREAM_HEADER))

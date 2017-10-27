@@ -18,6 +18,7 @@ public class SaveDataWithSharedHelper extends BaseComponent
     //保存的缓存名
     @Config("share_preferences.data_file_name")
     private String dataFileName;
+
     /**
      * 构造方法
      */
@@ -111,7 +112,7 @@ public class SaveDataWithSharedHelper extends BaseComponent
      * @param key
      * @return Boolean
      */
-    public Boolean getBoolean(String key,boolean isDefault)
+    public Boolean getBoolean(String key, boolean isDefault)
     {
         return sharedPreferences.getBoolean(key, isDefault);
     }
@@ -125,5 +126,15 @@ public class SaveDataWithSharedHelper extends BaseComponent
     public String getString(String key)
     {
         return sharedPreferences.getString(key, "");
+    }
+
+    /**
+     * 清除数据
+     */
+    public void clear()
+    {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.commit();
     }
 }

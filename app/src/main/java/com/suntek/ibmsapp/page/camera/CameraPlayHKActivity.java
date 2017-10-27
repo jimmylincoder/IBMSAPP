@@ -51,10 +51,11 @@ import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.PermissionRequest;
+import com.suntek.ibmsapp.util.PreviewUtil;
 import com.suntek.ibmsapp.util.ScreenUtils;
 import com.suntek.ibmsapp.util.SizeUtil;
+import com.suntek.ibmsapp.util.ThumbnailUtil;
 import com.suntek.ibmsapp.widget.CustomSurfaceView;
-import com.suntek.ibmsapp.widget.GestureSurfaceView.GestureSurfaceView;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
@@ -93,7 +94,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private final String PIC_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ibms";
     //视频view
     @BindView(R.id.video_view)
-    SurfaceView ivvVideo;
+    CustomSurfaceView ivvVideo;
     //顶部标题
     @BindView(R.id.ll_head)
     LinearLayout llHead;
@@ -185,25 +186,30 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private Player player;
     int port;
 
+    //socket ip和端口
     private String socketIp;
     private int socketPort;
-    private String mediaChannel;
+
 
     private int bitmapLen;
     private int bitmapWidth;
     private int bitmapHeight;
 
+    //视频流sokcet连接类
     private CameraStreamSocketClient cameraStreamSocketClient;
     private String TAG = CameraPlayHKActivity.class.getName();
 
+
     private String recordFilePath = "/sdcard/DCIM/Camera/ibms/";
     private FileOutputStream fileOutputStream;
+    private File recordFile;
 
     private boolean record = false;
     private boolean isSetRecordSuccess = false;
     private Timer recordTimer;
+    private SurfaceHolder surfaceHolder;
 
-    private Object changePositionLock = new Object();
+    private boolean isRequestRecord = false;
 
     @Override
     public int getLayoutId()
@@ -214,89 +220,30 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        //获取摄像头信息
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
 
+        //获取socket连接ip和端口
         getSocketAddress();
+        //初始化视频播放界面
         initSurfaceView();
-        //initVideoView();
-        //getCameraAddress("2017-08-31 00:00:00", "2017-08-31 23:59:59");
-        //getCameraAddress(null, null);
+        //初始化顶部时间
         initTimeView();
+        //添加历史记录
         loadData();
+        //初始化时间轴
         initTimeSeekBarView();
-        initRecord();
+        //初始化历史记录
+        //initRecord();
+        //网络测速
         DeviceBandwidthSampler.getInstance().startSampling();
         netSpeed();
 
     }
 
-    private void initSurfaceView()
-    {
-        ivvVideo.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if (llTime.getVisibility() == View.GONE)
-                {
-                    llOper.setVisibility(View.GONE);
-                    llTime.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    llOper.setVisibility(View.VISIBLE);
-                    llTime.setVisibility(View.GONE);
-                }
-            }
-        });
-
-//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) ivvVideo.getLayoutParams();
-//        layoutParams.width = (int) (ScreenUtils.getScreenWidth(getApplicationContext()) * (1.2));
-//        layoutParams.gravity = Gravity.CENTER;
-//        ivvVideo.setLayoutParams(layoutParams);
-//
-//        initgetViewW_H();
-//
-//        SurfaceHolder surfaceHolder = ivvVideo.getHolder();
-//        surfaceHolder.setKeepScreenOn(true);
-//        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-//        surfaceHolder.addCallback(new SurfaceHolder.Callback()
-//        {
-//            @Override
-//            public void surfaceCreated(SurfaceHolder holder)
-//            {
-//            }
-//
-//            @Override
-//            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
-//            {
-//            }
-//
-//            @Override
-//            public void surfaceDestroyed(SurfaceHolder holder)
-//            {
-//
-//            }
-//        });
-
-
-    }
-
-//    private void initgetViewW_H()
-//    {
-//        llSfv.postDelayed(new Runnable()
-//        {
-//            @Override
-//            public void run()
-//            {
-//                Log.i(TAG, "father Top" + llSfv.getTop());
-//                Log.i(TAG, "father Bottom" + llSfv.getBottom());
-//                ivvVideo.setFatherW_H(llSfv.getTop(), llSfv.getBottom());
-//                ivvVideo.setFatherTopAndBottom(llSfv.getTop(), llSfv.getBottom());
-//            }
-//        }, 100);
-//    }
-
+    /**
+     * 获取socket连接地址和端口
+     */
     private void getSocketAddress()
     {
         llLoading.setVisibility(View.VISIBLE);
@@ -321,12 +268,87 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }.execute();
     }
 
+    /**
+     * 初始化视频界面
+     */
+    private void initSurfaceView()
+    {
+        ivvVideo.setOnClickListener(new CustomSurfaceView.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if (playerState == PLAYER_NOT_FULL)
+                {
+                    if (llTime.getVisibility() == View.GONE)
+                    {
+                        llOper.setVisibility(View.GONE);
+                        llTime.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        llOper.setVisibility(View.VISIBLE);
+                        llTime.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+        initgetViewW_H();
+
+        surfaceHolder = ivvVideo.getHolder();
+        surfaceHolder.setKeepScreenOn(true);
+        surfaceHolder.setFixedSize(800, 800);
+        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        surfaceHolder.addCallback(new SurfaceHolder.Callback()
+        {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder)
+            {
+                if (player != null)
+                    player.play(port, holder);
+                Log.e(TAG, "surfaceview created");
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+            {
+                Log.e(TAG, "surfaceview changed");
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder)
+            {
+                Log.e(TAG, "surfaceview destroyed");
+            }
+        });
+
+
+    }
+
+    private void initgetViewW_H()
+    {
+        ivvVideo.postDelayed(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Log.i(TAG, "father Top" + llSfv.getTop());
+                Log.i(TAG, "father Bottom" + llSfv.getBottom());
+                Log.i(TAG, "father Right" + llSfv.getRight());
+                Log.i(TAG, "father Left" + llSfv.getLeft());
+                ivvVideo.setFatherW_H(llSfv.getRight(), llSfv.getBottom());
+                ivvVideo.setFatherTopAndBottom(llSfv.getRight(), llSfv.getBottom());
+            }
+        }, 100);
+    }
+
+
     private void createRecord()
     {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat format1 = new SimpleDateFormat("HHmmss");
         String fileName = "VID_" + format.format(new Date()) + "_" + format1.format(new Date()) + ".mp4";
-        File recordFile = new File(recordFilePath + fileName);
+        recordFile = new File(recordFilePath + fileName);
         try
         {
             recordFile.createNewFile();
@@ -386,7 +408,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
                             }
                         });
-                        Log.e(TAG, "初始化 play:" + player.play(port, ivvVideo.getHolder()));
+                        Log.e(TAG, "初始化 play:" + player.play(port, surfaceHolder));
 
                         runOnUiThread(new Runnable()
                         {
@@ -485,6 +507,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     Log.e(TAG, "session:" + session);
                     if (isRecorder)
                         changePosition(changePosition);
+                    if (!isRequestRecord)
+                    {
+                        initRecord();
+                        isRequestRecord = true;
+                    }
                 }
                 else
                 {
@@ -522,27 +549,30 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                         final ConnectionQuality connectionQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
                         String netState = "";
                         final double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-                        switch (connectionQuality)
+                        if (tvNetState != null && tvNetSpeed != null)
                         {
-                            case POOR:
-                                netState = "差强人意";
-                                tvNetState.setTextColor(getResources().getColor(R.color.red));
-                                break;
-                            case MODERATE:
-                                netState = "马马虎虎";
-                                tvNetState.setTextColor(getResources().getColor(R.color.white));
-                                break;
-                            case GOOD:
-                                netState = "不错哟";
-                                tvNetState.setTextColor(getResources().getColor(R.color.green));
-                                break;
-                            case EXCELLENT:
-                                netState = "无人匹敌";
-                                tvNetState.setTextColor(getResources().getColor(R.color.green));
-                                break;
+                            switch (connectionQuality)
+                            {
+                                case POOR:
+                                    netState = "差强人意";
+                                    tvNetState.setTextColor(getResources().getColor(R.color.red));
+                                    break;
+                                case MODERATE:
+                                    netState = "马马虎虎";
+                                    tvNetState.setTextColor(getResources().getColor(R.color.white));
+                                    break;
+                                case GOOD:
+                                    netState = "不错哟";
+                                    tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                    break;
+                                case EXCELLENT:
+                                    netState = "无人匹敌";
+                                    tvNetState.setTextColor(getResources().getColor(R.color.green));
+                                    break;
+                            }
+                            tvNetState.setText(netState);
+                            tvNetSpeed.setText(speed + " kb/s");
                         }
-                        tvNetState.setText(netState);
-                        tvNetSpeed.setText(speed + " kb/s");
                     }
                 });
             }
@@ -804,19 +834,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         new Thread(this).start();
     }
 
-    /**
-     * 初始化视频控件
-     */
-    private void initVideoView()
-    {
-        player = Player.getInstance();
-        port = player.getPort();
-        player.setStreamOpenMode(port, Player.STREAM_REALTIME);
-        player.openStream(port, null, 0, 600 * 1024);
-        player.setDisplayBuf(port, 352 * 288 * 4);
-        player.play(port, ivvVideo.getHolder());
-    }
-
     @Override
     public void initToolBar()
     {
@@ -848,22 +865,18 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         if (queryProgressTimer != null)
             queryProgressTimer.cancel();
         stopPlay();
-
-        //  menu.dismiss();
-        //cameraPlayGB28181Task.cancel(true);
-//        tcpThread.interrupt();
-//        tcpThread = null;
-//        //keepLiveTimer.cancel();
-//        try
-//        {
-//            client.close();
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-
-        cameraStreamSocketClient.close();
+        if (cameraStreamSocketClient != null)
+            cameraStreamSocketClient.close();
         super.onDestroy();
+    }
+
+    private Bitmap getBitmap()
+    {
+        byte[] bitmap = new byte[bitmapWidth * bitmapHeight * 3 / 2];
+        Player.MPInteger mpInteger = new Player.MPInteger();
+        boolean isSuccess = player.getJPEG(port, bitmap, bitmapLen, mpInteger);
+        Bitmap bitmap1 = BitmapFactory.decodeByteArray(bitmap, 0, bitmapLen);
+        return bitmap1;
     }
 
     @OnClick(R.id.iv_back)
@@ -881,10 +894,29 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             setFullScreenLayout(View.VISIBLE);
             playerState = PLAYER_NOT_FULL;
+
+            surfaceHolder.setFixedSize(800, 800);
+            ivvVideo.setStart_Top(-1);
+            initgetViewW_H();
         }
         else
         {
+            savePreview();
             finish();
+        }
+    }
+
+    private void savePreview()
+    {
+        byte[] bitmap = new byte[bitmapWidth * bitmapHeight * 3 / 2];
+        Player.MPInteger mpInteger = new Player.MPInteger();
+        if (player != null)
+        {
+            boolean isSuccess = player.getJPEG(port, bitmap, bitmapLen, mpInteger);
+            Log.e(TAG, "截图结果: " + isSuccess);
+            Bitmap bitmap1 = BitmapFactory.decodeByteArray(bitmap, 0, bitmapLen);
+            if (bitmap1 != null)
+                PreviewUtil.getInstance().savePreview(bitmap1, camera.getId(), camera.getDeviceId());
         }
     }
 
@@ -950,56 +982,70 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_record)
     public void record(View view)
     {
-        if (recordTimer == null)
-            recordTimer = new Timer();
-        if (!record)
-        {
-            createRecord();
-            player.setPreRecordFlag(port, true);
-            ToastHelper.getInstance(this).shortShowMessage("录像开始");
-            llRecord.setVisibility(View.VISIBLE);
-            Log.e(TAG, "录像开始");
-            recordBeginTime = new Date().getTime();
-            recordTimer.schedule(new TimerTask()
-            {
-                @Override
-                public void run()
-                {
-                    int recordTime = (int) ((new Date().getTime() - recordBeginTime) / 1000);
-                    if (recordTime < 3600)
-                    {
-                        String min = (recordTime / 60) + "";
-                        String sec = (recordTime % 60) + "";
-
-                        min = min.length() == 2 ? min : "0" + min;
-                        sec = sec.length() == 2 ? sec : "0" + sec;
-
-                        String finalMin = min;
-                        String finalSec = sec;
-                        runOnUiThread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                if (tvRecordTime != null)
-                                    tvRecordTime.setText(finalMin + ":" + finalSec);
-                            }
-                        });
-                    }
-                }
-            }, 1000, 1000);
-            record = true;
-        }
-        else
-        {
-            recordTimer.cancel();
-            recordTimer = null;
-            player.setPreRecordFlag(port, false);
-            record = false;
-            ToastHelper.getInstance(this).shortShowMessage("录像结束");
-            llRecord.setVisibility(View.GONE);
-            Log.e(TAG, "录像结束");
-        }
+        ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage("功能完善中!!");
+//        if (recordTimer == null)
+//            recordTimer = new Timer();
+//        if (!record)
+//        {
+//            createRecord();
+//            player.setPreRecordFlag(port, true);
+//            ToastHelper.getInstance(this).shortShowMessage("录像开始");
+//            llRecord.setVisibility(View.VISIBLE);
+//            Log.e(TAG, "录像开始");
+//            recordBeginTime = new Date().getTime();
+//            recordTimer.schedule(new TimerTask()
+//            {
+//                @Override
+//                public void run()
+//                {
+//                    int recordTime = (int) ((new Date().getTime() - recordBeginTime) / 1000);
+//                    if (recordTime < 3600)
+//                    {
+//                        String min = (recordTime / 60) + "";
+//                        String sec = (recordTime % 60) + "";
+//
+//                        min = min.length() == 2 ? min : "0" + min;
+//                        sec = sec.length() == 2 ? sec : "0" + sec;
+//
+//                        String finalMin = min;
+//                        String finalSec = sec;
+//                        runOnUiThread(new Runnable()
+//                        {
+//                            @Override
+//                            public void run()
+//                            {
+//                                if (tvRecordTime != null)
+//                                    tvRecordTime.setText(finalMin + ":" + finalSec);
+//                            }
+//                        });
+//                    }
+//                }
+//            }, 1000, 1000);
+//            record = true;
+//        }
+//        else
+//        {
+//            recordTimer.cancel();
+//            recordTimer = null;
+//            player.setPreRecordFlag(port, false);
+//            record = false;
+//            llRecord.setVisibility(View.GONE);
+//
+//            int recordDuration = (int) ((new Date().getTime() - recordBeginTime) / 1000);
+//
+//            if (recordDuration > 3)
+//            {
+//                ToastHelper.getInstance(this).shortShowMessage("录像结束");
+//                Bitmap bitmap = ThumbnailUtil.getInstance().getBitmap(recordFile.getAbsolutePath());
+//                PreviewUtil.getInstance().saveVideoPreview(bitmap, recordFile.getName() + "_thumbnail");
+//                Log.e(TAG, "录像结束");
+//            }
+//            else
+//            {
+//                ToastHelper.getInstance(this).shortShowMessage("录像时间过短");
+//                recordFile.delete();
+//            }
+//        }
     }
 
     @OnClick(R.id.ib_fullscreen)
@@ -1007,10 +1053,20 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     {
         if (playerState == PLAYER_NOT_FULL)
         {
+            ivvVideo.setStart_Top(-1);
+            //surfaceHolder.setFixedSize(800, 1920);
+//            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) ivvVideo.getLayoutParams();
+//            layoutParams.gravity = Gravity.CENTER;
+//            layoutParams.weight = ViewGroup.LayoutParams.MATCH_PARENT;
+//            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+//            ivvVideo.setLayoutParams(layoutParams);
+
             NiceUtil.hideActionBar(this);
             NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             setFullScreenLayout(View.GONE);
             playerState = PLAYER_FULLSCREEN;
+
+            initgetViewW_H();
         }
     }
 
@@ -1087,10 +1143,15 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 setFullScreenLayout(View.VISIBLE);
                 playerState = PLAYER_NOT_FULL;
+
+                surfaceHolder.setFixedSize(800, 800);
+                ivvVideo.setStart_Top(-1);
+                initgetViewW_H();
                 return true;
             }
             else
             {
+                savePreview();
                 finish();
             }
         }
@@ -1339,7 +1400,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
 
         //当前时间加一个月
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
+        cal.add(Calendar.DATE, -1);
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
 

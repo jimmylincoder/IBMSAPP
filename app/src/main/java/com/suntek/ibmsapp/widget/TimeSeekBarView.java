@@ -681,6 +681,7 @@ public class TimeSeekBarView extends View
             //点击动作,必定触发
             case MotionEvent.ACTION_DOWN:
                 //通知监听器当前值
+                Log.e(TimeSeekBarView.class.getName(), "滑动开始" + nowTimeValue.getData());
                 listener.onStartValueChange(getNowDate());
                 scroller.forceFinished(true);
                 //记录起点X坐标
@@ -743,20 +744,6 @@ public class TimeSeekBarView extends View
         if (scale > 2 && isOper)
         {
             isOper = false;
-            if (sizeMode < 2)
-            {
-                sizeMode++;
-                Map<String, Number> sizeMap = sizeList.get(sizeMode);
-                INTERVAL_LENGTH = (float) sizeMap.get("intervalLength");
-                TIME_TEXT = (int) sizeMap.get("timeText");
-                BIG_TIME_INTERVAL = (int) sizeMap.get("bigTimeInterval");
-            }
-            Log.e(TimeSeekBarView.class.getName(), "张开手指");
-        }
-
-        if (scale < 0.5 && isOper)
-        {
-            isOper = false;
             if (sizeMode > 0)
             {
                 sizeMode--;
@@ -766,6 +753,21 @@ public class TimeSeekBarView extends View
                 BIG_TIME_INTERVAL = (int) sizeMap.get("bigTimeInterval");
             }
             Log.e(TimeSeekBarView.class.getName(), "缩放手指");
+
+        }
+
+        if (scale < 0.5 && isOper)
+        {
+            isOper = false;
+            if (sizeMode < 2)
+            {
+                sizeMode++;
+                Map<String, Number> sizeMap = sizeList.get(sizeMode);
+                INTERVAL_LENGTH = (float) sizeMap.get("intervalLength");
+                TIME_TEXT = (int) sizeMap.get("timeText");
+                BIG_TIME_INTERVAL = (int) sizeMap.get("bigTimeInterval");
+            }
+            Log.e(TimeSeekBarView.class.getName(), "张开手指");
         }
     }
 
@@ -790,7 +792,7 @@ public class TimeSeekBarView extends View
     // 松开手控件滑动起来,fling()需要postInvalidate()
     private void countVelocityTracker(MotionEvent event)
     {
-        velocityTracker.computeCurrentVelocity(1000, 1000);
+        velocityTracker.computeCurrentVelocity(200, 1000);
         float xVelocity = velocityTracker.getXVelocity();
         if (Math.abs(xVelocity) > minVelocity)
             scroller.fling(0, 0, (int) xVelocity, 0, Integer.MIN_VALUE,
@@ -857,14 +859,21 @@ public class TimeSeekBarView extends View
             {
                 countMoveEnd();
                 if (isEnabled)
+                {
+                    Log.e(TimeSeekBarView.class.getName(), "滑动变化停止后" + getNowTimeValue().getData());
                     listener.onStopValueChange(getNowDate());
+                }
             }
             else
             {
+                Log.e(TimeSeekBarView.class.getName(), "滑动变化前" + getNowTimeValue().getData());
                 int xPosition = scroller.getCurrX();
-                moveDistance += (beginPointX - xPosition);
+                moveDistance -= (xPosition);
+                Log.e(TimeSeekBarView.class.getName(), "滑动变化中值变化 xPosition:" + xPosition + " beginPointX:" + beginPointX + " " +
+                        "moveDistance:" + moveDistance);
                 changeMoveAndValue();
                 beginPointX = xPosition;
+                Log.e(TimeSeekBarView.class.getName(), "滑动变化后" + getNowTimeValue().getData());
             }
         }
     }

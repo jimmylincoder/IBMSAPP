@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.widget;
 
 import android.content.Context;
+import android.nfc.Tag;
 import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
@@ -120,7 +121,7 @@ public class CustomSurfaceView extends SurfaceView
     public boolean onTouchEvent(MotionEvent event)
     {
         mGestureDetector.onTouchEvent(event);
-        switch (event.getAction())
+        switch (event.getAction() & event.getActionMasked())
         {
             case MotionEvent.ACTION_DOWN:
                 onTouchDown(event);
@@ -172,16 +173,22 @@ public class CustomSurfaceView extends SurfaceView
                 // 水平判断
                 if (isControl_Horizal)
                 {
+                    Log.e(TAG, "水平移动前 left:" + left + " right:" + right + " bottom:" + bottom + " top:" + top + " viewWidth:" +
+                            this.getWidth() + " screenWidth:" + screenWidth);
                     if (left >= 0)
                     {
                         left = 0;
                         right = this.getWidth();
                     }
+                    Log.e(TAG, "水平移动中 left:" + left + " right:" + right + " bottom:" + bottom + " top:" + top + " viewWidth:" +
+                            this.getWidth() + " screenWidth:" + screenWidth);
                     if (right <= screenWidth)
                     {
                         left = screenWidth - this.getWidth();
                         right = screenWidth;
                     }
+                    Log.e(TAG, "水平移动后 left:" + left + " right:" + right + " bottom:" + bottom + " top:" + top + " viewWidth:" +
+                            this.getWidth() + " screenWidth:" + screenWidth);
                 }
                 else
                 {
@@ -207,6 +214,7 @@ public class CustomSurfaceView extends SurfaceView
                     top = this.getTop();
                     bottom = this.getBottom();
                 }
+                Log.e(TAG, "isControl_horizal:" + isControl_Horizal + " isControl_Vertical:" + isControl_Vertical);
                 if (isControl_Horizal || isControl_Vertical)
                 {
                     this.setPosition(left, top, right, bottom);
@@ -253,6 +261,7 @@ public class CustomSurfaceView extends SurfaceView
         {
             isControl_Vertical = false;
         }
+        Log.e(TAG, "viewWidth:" + View_Width + " fatheView_W:" + fatherView_W);
         if (View_Width > fatherView_W)
         {
             isControl_Horizal = true;
@@ -298,6 +307,13 @@ public class CustomSurfaceView extends SurfaceView
                 top = getTop();
                 bottom = getBottom();
                 right = getRight();
+                Log.e(TAG, "left:" + left + " top:" + top + " bottom:" + bottom + " right:" + right);
+                Log.e(TAG, "viewHeight:" + getHeight() + "  viewWidth:" + getWidth());
+                Log.e(TAG, "fatherViewHeight:" + fatherView_H + " fatherViewWidth:" + fatherView_W);
+                Log.e(TAG, "screenWidth:" + screenWidth + " screenHeight:" + screenHeight);
+                Log.e(TAG, "ratio:" + ratio);
+                Log.e(TAG, "start_left:" + start_Left + " start_right:" + start_Right + " start_top:" + start_Top +
+                        " startBottom:" + start_Bottom + " initViewWidth:" + initViewWidth);
                 if (ratio > 1)
                 { // 放大撞状态
                     length = (int) ((getHeight() * (ratio - 1)) / 7.0);
@@ -530,6 +546,11 @@ public class CustomSurfaceView extends SurfaceView
     public void setOnClickListener(OnClickListener onClickListener)
     {
         this.onClickListener = onClickListener;
+    }
+
+    public void setStart_Top(int start_Top)
+    {
+        this.start_Top = start_Top;
     }
 
     public static interface OnClickListener

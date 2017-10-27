@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.util.BitmapUtil;
+import com.suntek.ibmsapp.util.PreviewUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -113,22 +114,28 @@ public class CameraListAdapter extends BaseAdapter
                 holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
             }
         }
-        String photoBase64 = cameraList.get(position).getPhotoBase64();
-        String id = cameraList.get(position).getId();
-        holder.ivPreView.setTag(id);
-        if (photoBase64 != null)
-        {
-            if (holder.ivPreView.getTag() != null && holder.ivPreView.getTag().equals(id))
-            {
-                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
-                holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
-                        ivPreviewWidth, ivPreviewHeight));
-            }
-        }
+//        String photoBase64 = cameraList.get(position).getPhotoBase64();
+//        String id = cameraList.get(position).getId();
+//        holder.ivPreView.setTag(id);
+//        if (photoBase64 != null)
+//        {
+//            if (holder.ivPreView.getTag() != null && holder.ivPreView.getTag().equals(id))
+//            {
+//                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
+//                holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
+//                        ivPreviewWidth, ivPreviewHeight));
+//            }
+//        }
+//        else
+//        {
+//            holder.ivPreView.setImageBitmap(null);
+//        }
+        Camera camera = cameraList.get(position);
+        Bitmap bitmap = PreviewUtil.getInstance().getPreview(camera.getId(), camera.getDeviceId());
+        if (bitmap != null)
+            holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap, ivPreviewWidth, ivPreviewHeight));
         else
-        {
             holder.ivPreView.setImageBitmap(null);
-        }
         return convertView;
     }
 

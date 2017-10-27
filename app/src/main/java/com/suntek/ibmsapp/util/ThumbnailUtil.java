@@ -59,6 +59,13 @@ public class ThumbnailUtil
         return thumbnailUtil;
     }
 
+    public Bitmap getBitmap(String fileName)
+    {
+        mediaMetadataRetriever.setDataSource(fileName);
+        Bitmap bitmap = mediaMetadataRetriever.getFrameAtTime();
+        return bitmap;
+    }
+
     public void display(String filePath, OnGetThumbnail onGetThumbnail)
     {
         this.onGetThumbnail = onGetThumbnail;

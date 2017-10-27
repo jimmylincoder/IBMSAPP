@@ -23,14 +23,14 @@ import static android.R.attr.path;
  */
 public class FileUtil
 {
-    public static void saveImage(Bitmap bmp)
+    public static void saveImage(String path, String name, Bitmap bmp)
     {
-        File appDir = new File(Environment.getExternalStorageDirectory(), "imbs");
+        File appDir = new File(path);
         if (!appDir.exists())
         {
             appDir.mkdir();
         }
-        String fileName = System.currentTimeMillis() + ".jpg";
+        String fileName = name + ".jpg";
         File file = new File(appDir, fileName);
         try
         {

@@ -82,9 +82,12 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                     List<Area> newAreas = (List<Area>) result.getResultData();
                     if (!newAreas.isEmpty())
                     {
-                        areas.addAll(newAreas);
-                        areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
-                        lvArea.setAdapter(areaListAdapter);
+                        if (lvArea != null)
+                        {
+                            areas.addAll(newAreas);
+                            areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
+                            lvArea.setAdapter(areaListAdapter);
+                        }
                     }
                     else
                     {
