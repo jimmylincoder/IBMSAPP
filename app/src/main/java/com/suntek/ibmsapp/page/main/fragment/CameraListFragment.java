@@ -6,6 +6,7 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -15,6 +16,7 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraListAdapter;
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
@@ -26,6 +28,7 @@ import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.suntek.ibmsapp.widget.UnityDialog;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +48,8 @@ public class CameraListFragment extends BaseFragment
 
     private ListView actualListView;
 
+    private ACache aCache;
+
     @BindView(R.id.ptr_camera_list)
     PullToRefreshListView ptrCameraList;
 
@@ -53,6 +58,12 @@ public class CameraListFragment extends BaseFragment
 
     @Autowired
     SaveDataWithSharedHelper sharedHelper;
+
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+
+    @BindView(R.id.ll_retry)
+    LinearLayout llRetry;
 
     private String areaId;
 
@@ -71,6 +82,7 @@ public class CameraListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        aCache = ACache.get(getActivity());
         ptrCameraList.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
         ptrCameraList.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>()
         {
@@ -79,7 +91,6 @@ public class CameraListFragment extends BaseFragment
             {
                 String label = DateUtils.formatDateTime(getActivity(), System.currentTimeMillis(),
                         DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
-
                 // Update the LastUpdatedLabel
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
 
@@ -180,27 +191,26 @@ public class CameraListFragment extends BaseFragment
 
                     if (isRefresh)
                     {
+                        aCache.put("camera_list", (Serializable) newCameraList);
+                        //newCameraList = (List<Camera>) aCache.getAsObject("camera_list");
                         cameraList = newCameraList;
                     }
                     else
                     {
                         cameraList.addAll(newCameraList);
                     }
+                    ptrCameraList.setVisibility(View.VISIBLE);
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
-                    try
-                    {
-                        ptrCameraList.onRefreshComplete();
-                    } catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
-
+                    ptrCameraList.onRefreshComplete();
+                    llLoading.setVisibility(View.GONE);
                 }
                 else
                 {
-                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
-
+                    llLoading.setVisibility(View.GONE);
+                    ptrCameraList.onRefreshComplete();
+                    llRetry.setVisibility(View.VISIBLE);
+                    //ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
                 }
             }
         }.execute();
@@ -216,6 +226,8 @@ public class CameraListFragment extends BaseFragment
         {
             currentPage = 1;
             areaId = chooseAreaId;
+            ptrCameraList.setVisibility(View.GONE);
+            llLoading.setVisibility(View.VISIBLE);
             getCameraList(currentPage, true);
         }
     }
@@ -226,4 +238,12 @@ public class CameraListFragment extends BaseFragment
         Intent intent = new Intent(getActivity(), CameraSearchActivity.class);
         startActivity(intent);
     }
+
+    @OnClick(R.id.ll_retry)
+    public void retry(View view)
+    {
+        llRetry.setVisibility(View.GONE);
+        getCameraList(currentPage, true);
+    }
 }
+

@@ -104,21 +104,22 @@ public class UserLoginActivity extends BaseActivity
             @Override
             protected void onPostExecute(TaskResult result)
             {
-                LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
+                //LoadingDialog.getInstance(UserLoginActivity.this).loadingDiss();
+                super.onPostExecute(result);
                 if (result.getError() == null)
                 {
                     User user = (User) result.getResultData();
                     sharedHelper.save("user", user.getUserCode());
-
                     ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("登录成功");
                     Intent intent = new Intent(UserLoginActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 }
-                else
-                {
-                    ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage(result.getError().getMessage());
-                }
+//                else
+//                {
+//
+//                    ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage(result.getError().getMessage());
+//                }
             }
         }.execute();
     }

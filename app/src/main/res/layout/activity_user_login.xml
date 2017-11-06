@@ -62,7 +62,9 @@
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
                         android:background="@null"
+                        android:digits="@string/register_name_digits"
                         android:hint="请输入账号"
+                        android:maxLines="1"
                         android:textColorHint="@color/col_c6c8cf"
                         android:textSize="14dp"/>
 
@@ -106,8 +108,10 @@
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
                         android:background="@null"
+                        android:digits="@string/register_name_digits"
                         android:hint="请输入密码"
                         android:inputType="textPassword"
+                        android:maxLines="1"
                         android:textColorHint="@color/col_c6c8cf"
                         android:textSize="14dp"/>
 
@@ -145,17 +149,17 @@
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center|bottom">
+            android:gravity="center|bottom"
+            android:orientation="vertical">
 
             <TextView
-                android:layout_marginBottom="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/col_545e7a"
-                android:text="忘记密码?"/>
+                android:layout_marginBottom="20dp"
+                android:text="忘记密码?"
+                android:textColor="@color/col_545e7a"/>
 
         </LinearLayout>
 

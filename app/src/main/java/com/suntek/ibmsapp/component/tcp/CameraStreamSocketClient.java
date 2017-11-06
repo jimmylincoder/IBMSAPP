@@ -164,7 +164,8 @@ public class CameraStreamSocketClient
             //读取第一字节类型
             receiveData = read(1);
             //处理流数据
-            handleBigData(receiveData[0], dataLength - 1);
+            if (receiveData.length > 0)
+                handleBigData(receiveData[0], dataLength - 1);
         }
     }
 

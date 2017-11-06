@@ -41,7 +41,7 @@ public class UserLoginTask extends BaseTask
         }
         catch (FHttpException e)
         {
-            return new TaskResult("",e);
+            return new TaskResult(null,e);
         }
     }
 }
