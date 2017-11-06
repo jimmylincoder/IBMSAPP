@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseFragment;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.page.about.AboutActivity;
 import com.suntek.ibmsapp.page.login.UserLoginActivity;
@@ -29,6 +30,8 @@ public class MeFragment extends BaseFragment
     @BindView(R.id.tv_user_name)
     TextView tvUserName;
 
+    private ACache aCache;
+
     @Override
     public int getLayoutId()
     {
@@ -40,12 +43,14 @@ public class MeFragment extends BaseFragment
     {
         String userName = sharedHelper.getString("userName");
         tvUserName.setText(userName);
+        aCache = ACache.get(getActivity());
     }
 
     @OnClick(R.id.ll_login_out)
     public void loginout(View view)
     {
         sharedHelper.clear();
+        aCache.clear();
         Intent intent = new Intent(getActivity(), UserLoginActivity.class);
         startActivity(intent);
         getActivity().finish();

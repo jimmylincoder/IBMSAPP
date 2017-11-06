@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.camera;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -43,6 +44,12 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     @BindView(R.id.tv_now_area)
     TextView tvNowArea;
 
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+
+    @BindView(R.id.ll_error)
+    LinearLayout llError;
+
     @Override
     public int getLayoutId()
     {
@@ -59,6 +66,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private void initNowArea()
     {
+        llLoading.setVisibility(View.VISIBLE);
+        lvArea.setVisibility(View.GONE);
         tvNowArea.setText(sharedHelper.getString("choose_name"));
         areas = new ArrayList<>();
         Area area = new Area();
@@ -72,7 +81,6 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     {
         new AreaListTask(this, parentId)
         {
-
             @Override
             protected void onPostExecute(TaskResult result)
             {
@@ -80,6 +88,12 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                 if (result.getError() == null)
                 {
                     List<Area> newAreas = (List<Area>) result.getResultData();
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
+                    if (llError != null)
+                        llError.setVisibility(View.GONE);
+                    if (lvArea != null)
+                        lvArea.setVisibility(View.VISIBLE);
                     if (!newAreas.isEmpty())
                     {
                         if (lvArea != null)
@@ -96,8 +110,11 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                 }
                 else
                 {
-                    ToastHelper.getInstance(CameraChooseActivity.this).shortShowMessage(result.getError().getMessage());
-
+                    //ToastHelper.getInstance(CameraChooseActivity.this).shortShowMessage(result.getError().getMessage());
+                    if (llError != null)
+                        llError.setVisibility(View.VISIBLE);
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
                 }
             }
         }.execute();
@@ -121,6 +138,15 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         finish();
     }
 
+    @OnClick(R.id.ll_error)
+    public void reTry(View view)
+    {
+        llError.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
+        lvArea.setVisibility(View.GONE);
+        initAreaListView("1");
+    }
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
@@ -135,15 +161,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         }
         else
         {
-            try
-            {
-                areas.clear();
-                initAreaListView(id);
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
+            areas.clear();
+            initAreaListView(id);
         }
     }
 }

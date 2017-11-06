@@ -82,7 +82,38 @@ public class CameraListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        init();
+        initPtrListView();
+        initCameraList();
+    }
+
+    private void initCameraList()
+    {
+        cameraList = (List<Camera>) aCache.getAsObject("camera_list");
+        if (cameraList == null)
+        {
+            ptrCameraList.setVisibility(View.GONE);
+            llLoading.setVisibility(View.VISIBLE);
+            getCameraList(currentPage, true);
+        }
+        else
+        {
+            cameraListAdapter.setCameraList(cameraList);
+            cameraListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void init()
+    {
         aCache = ACache.get(getActivity());
+        areaId = sharedHelper.getString("choose_org_code");
+    }
+
+    /**
+     * 初始化下拉刷新列表
+     */
+    private void initPtrListView()
+    {
         ptrCameraList.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
         ptrCameraList.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>()
         {
@@ -151,14 +182,9 @@ public class CameraListFragment extends BaseFragment
         ptrCameraList.setEmptyView(view);
 
         cameraList = new ArrayList<>();
-
         cameraListAdapter = new CameraListAdapter(getActivity(), cameraList);
         actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
-
-        areaId = sharedHelper.getString("choose_org_code");
-
-        getCameraList(currentPage, true);
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -175,6 +201,12 @@ public class CameraListFragment extends BaseFragment
         startActivity(intent);
     }
 
+    /**
+     * 获取摄像机列表
+     *
+     * @param page      页数
+     * @param isRefresh 是否为上拉刷新
+     */
     private void getCameraList(int page, boolean isRefresh)
     {
         new CameraListTask(getActivity(), areaId, page)
@@ -192,25 +224,32 @@ public class CameraListFragment extends BaseFragment
                     if (isRefresh)
                     {
                         aCache.put("camera_list", (Serializable) newCameraList);
-                        //newCameraList = (List<Camera>) aCache.getAsObject("camera_list");
                         cameraList = newCameraList;
                     }
                     else
                     {
                         cameraList.addAll(newCameraList);
+                        aCache.put("camera_list", (Serializable) cameraList);
                     }
-                    ptrCameraList.setVisibility(View.VISIBLE);
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
-                    ptrCameraList.onRefreshComplete();
-                    llLoading.setVisibility(View.GONE);
+
+                    if (ptrCameraList != null)
+                    {
+                        ptrCameraList.setVisibility(View.VISIBLE);
+                        ptrCameraList.onRefreshComplete();
+                    }
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
                 }
                 else
                 {
-                    llLoading.setVisibility(View.GONE);
-                    ptrCameraList.onRefreshComplete();
-                    llRetry.setVisibility(View.VISIBLE);
-                    //ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
+                    if (ptrCameraList != null)
+                        ptrCameraList.onRefreshComplete();
+                    if (llRetry != null)
+                        llRetry.setVisibility(View.VISIBLE);
                 }
             }
         }.execute();
@@ -243,6 +282,8 @@ public class CameraListFragment extends BaseFragment
     public void retry(View view)
     {
         llRetry.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
+        ptrCameraList.setVisibility(View.GONE);
         getCameraList(currentPage, true);
     }
 }
