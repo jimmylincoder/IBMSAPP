@@ -17,6 +17,7 @@ import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
+import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.task.camera.CameraHistoryListTask;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
@@ -98,7 +99,7 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        Intent intent = new Intent(getActivity(), CameraPlayActivity.class);
+        Intent intent = new Intent(getActivity(), CameraPlayHKActivity.class);
         Camera camera = cameraList.get(i - 1);
         Bundle bundle = new Bundle();
         bundle.putSerializable("camera", camera);

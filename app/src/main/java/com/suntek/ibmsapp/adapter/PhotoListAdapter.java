@@ -64,7 +64,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
     public int getChildrenCount(int groupPosition)
     {
         int total = photoList.get(groupPosition).getPhotoPaths().size();
-        int count = total / 4 + (total % 4);
+        int count = total / 3 + (total % 3);
         return count;
     }
 
@@ -150,7 +150,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
         }
         List<String> paths = photoList.get(groupPosition).getPhotoPaths();
         List<String> paths1 = new ArrayList<>();
-        for (int i = childPosition * 4; i < childPosition * 4 + 4; i++)
+        for (int i = childPosition * 3; i < childPosition * 3 + 3; i++)
         {
             if (i < paths.size())
                 paths1.add(paths.get(i));
