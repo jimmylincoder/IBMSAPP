@@ -31,25 +31,51 @@ public class UserManager extends BaseComponent
      * @param password
      * @return
      */
-    public User login(String userName,String password)
+    public User login(String userName, String password)
     {
-        Map<String,Object> params = new HashMap<>();
-        params.put("user_name",userName);
-        params.put("password",password);
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_name", userName);
+        params.put("password", password);
 
-        HttpResponse response = ibmsHttpEngine.request("user.login",params);
+        HttpResponse response = ibmsHttpEngine.request("user.login", params);
 
-        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
-            Map<String,Object> content = (Map<String, Object>) response.getData().get("user");
+            Map<String, Object> content = (Map<String, Object>) response.getData().get("user");
             User user = User.generateByJson(content);
-            sharedHelper.save("userCode",user.getUserCode());
-            sharedHelper.save("userName",user.getUserName());
+            sharedHelper.save("userCode", user.getUserCode());
+            sharedHelper.save("userName", user.getUserName());
             return user;
         }
         else
         {
-            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR,response.getErrorMessage());
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param userName
+     * @param newPassword
+     * @param oldPassword
+     */
+    public void changePassword(String userName, String newPassword, String oldPassword)
+    {
+        Map<String, Object> params = new HashMap<>();
+        params.put("user_code", userName);
+        params.put("new_password", newPassword);
+        params.put("old_password", oldPassword);
+
+        HttpResponse response = ibmsHttpEngine.request("user.change_password", params);
+
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
         }
     }
 

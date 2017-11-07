@@ -465,7 +465,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 @Override
                 public void run()
                 {
-                    tvLoadPercent.setText("(" + (int) (percent * 100) + "%)");
+                    if (tvLoadPercent != null)
+                        tvLoadPercent.setText("(" + (int) (percent * 100) + "%)");
                 }
             });
             if (pauseState == 0)

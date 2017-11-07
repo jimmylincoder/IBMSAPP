@@ -22,6 +22,7 @@ import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.ToastHelper;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 
 import butterknife.BindView;
@@ -140,6 +141,24 @@ public class UserLoginActivity extends BaseActivity
                 Toast.makeText(this, "你不给权限我就不好干事了啦", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+
+    @OnClick(R.id.tv_forget_password)
+    public void forgetPassword(View view)
+    {
+        new UnityDialog(this)
+                .setTitle("温馨提示")
+                .setHint("请找管理员获取账号和密码\n管理员联系方式QQ:523160615")
+                .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                {
+                    @Override
+                    public void confirm(UnityDialog unityDialog, String content)
+                    {
+                        unityDialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     private void initArea()

@@ -7,10 +7,9 @@ import com.suntek.ibmsapp.component.CrashHandler;
 import com.suntek.ibmsapp.component.base.BaseApplication;
 
 /**
+ * 应用程序启动类
  *
- *  应用程序启动类
- *
- *  @author jimmy
+ * @author jimmy
  */
 public class IBMSApp extends BaseApplication
 {
@@ -23,15 +22,17 @@ public class IBMSApp extends BaseApplication
         mInstance = this;
         CrashHandler catchHandler = CrashHandler.getInstance();
         catchHandler.init(getApplicationContext());
-        init();
+        //init();
     }
 
-    private void init() {
+    private void init()
+    {
         //初始化Leak内存泄露检测工具
         LeakCanary.install(this);
     }
 
-    public static IBMSApp getInstance() {
+    public static IBMSApp getInstance()
+    {
         return mInstance;
     }
 
