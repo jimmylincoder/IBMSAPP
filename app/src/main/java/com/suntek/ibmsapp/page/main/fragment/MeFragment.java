@@ -13,6 +13,7 @@ import com.suntek.ibmsapp.page.about.AboutActivity;
 import com.suntek.ibmsapp.page.login.UserLoginActivity;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -59,7 +60,18 @@ public class MeFragment extends BaseFragment
     @OnClick(R.id.ll_update)
     public void checkUpdate(View view)
     {
-        ToastHelper.getInstance(getActivity()).shortShowMessage("功能完善中！！");
+        //ToastHelper.getInstance(getActivity()).shortShowMessage("功能完善中！！");
+        new UnityDialog(getActivity())
+                .setTitle("版本更新")
+                .setHint("已是最新版本")
+                .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                {
+                    @Override
+                    public void confirm(UnityDialog unityDialog, String content)
+                    {
+                        unityDialog.dismiss();
+                    }
+                }).show();
     }
 
     @OnClick(R.id.ll_reset_password)

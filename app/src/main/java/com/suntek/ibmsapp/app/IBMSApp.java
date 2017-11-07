@@ -23,7 +23,7 @@ public class IBMSApp extends BaseApplication
         mInstance = this;
         CrashHandler catchHandler = CrashHandler.getInstance();
         catchHandler.init(getApplicationContext());
-        //   init();
+        init();
     }
 
     private void init() {

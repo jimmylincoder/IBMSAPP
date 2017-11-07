@@ -141,8 +141,13 @@ public class PhotoListFragment extends BaseFragment
                 @Override
                 public void onClick(View v)
                 {
-                    List<String> paths = ((PhotoFragment) fragmentList.get(0)).getSelectedPath();
+                    List<String> paths = new ArrayList<String>();
+                    if (nowPosition == 0)
+                        paths = ((PhotoFragment) fragmentList.get(0)).getSelectedPath();
+                    else
+                        paths = ((VideoFragment) fragmentList.get(1)).getSelectedPath();
 
+                    List<String> finalPaths = paths;
                     new UnityDialog(getActivity())
                             .setTitle("是否确认删除")
                             .setHint("是否确认删除选中照片")
@@ -159,7 +164,7 @@ public class PhotoListFragment extends BaseFragment
                                 @Override
                                 public void confirm(UnityDialog unityDialog, String content)
                                 {
-                                    for (String path : paths)
+                                    for (String path : finalPaths)
                                     {
                                         File file = new File(path);
                                         if (file.exists())
@@ -224,7 +229,10 @@ public class PhotoListFragment extends BaseFragment
     @OnClick(R.id.tv_all)
     public void selectAll(View view)
     {
-        ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        if (nowPosition == 0)
+            ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        else
+            ((VideoFragment) fragmentList.get(1)).selecteAll();
     }
 
     public void showNormal()

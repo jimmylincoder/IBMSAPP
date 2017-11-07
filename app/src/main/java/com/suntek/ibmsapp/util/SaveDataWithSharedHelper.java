@@ -2,7 +2,9 @@ package com.suntek.ibmsapp.util;
 
 import android.content.SharedPreferences;
 
+import com.suntek.ibmsapp.app.IBMSApp;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.base.BaseApplication;
 import com.suntek.ibmsapp.component.core.BaseComponent;
 import com.suntek.ibmsapp.component.core.Config;
 
@@ -24,7 +26,7 @@ public class SaveDataWithSharedHelper extends BaseComponent
      */
     public SaveDataWithSharedHelper()
     {
-        sharedPreferences = BaseActivity.context.getSharedPreferences(dataFileName, 0);
+        sharedPreferences = IBMSApp.mInstance.getSharedPreferences(dataFileName, 0);
     }
 
     /**

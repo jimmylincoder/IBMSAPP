@@ -46,12 +46,14 @@ import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraResumeTask;
 import com.suntek.ibmsapp.task.camera.control.CameraSocketTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
+import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
 import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.PreviewUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
+import com.suntek.ibmsapp.util.ThumbnailUtil;
 import com.suntek.ibmsapp.widget.CustomSurfaceView;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
@@ -143,6 +145,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     TextView tvRecordTime;
     @BindView(R.id.ll_sfv)
     LinearLayout llSfv;
+    @BindView(R.id.iv_pot)
+    ImageView ivPot;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -212,7 +216,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private boolean isRequestRecord = false;
     private int pauseState = 0;
     //缓冲1m
-    private static final int MAX_BUFFER_SIZE = 1024 * 1024 * 1;
+    private static final int MAX_BUFFER_SIZE = 1024 * 1024 * 2;
     private static final int MIN_BUFFER_SIZE = 1;
     private int size = MAX_BUFFER_SIZE;
 
@@ -438,6 +442,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 @Override
                 public void onPreRecord(int port, byte[] data, int length)
                 {
+                    Log.e(TAG, "录像中,录像文件地址:" + recordFilePath);
                     writeToFile(data);
                 }
             });
@@ -993,8 +998,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             boolean isSuccess = player.getJPEG(port, bitmap, bitmapLen, mpInteger);
             Log.e(TAG, "截图结果: " + isSuccess);
             Bitmap bitmap1 = BitmapFactory.decodeByteArray(bitmap, 0, bitmapLen);
+            Bitmap preview = BitmapUtil.centerSquareScaleBitmap(bitmap1, 100);
             llTakePic.setVisibility(View.VISIBLE);
-            ivTakePic.setImageBitmap(bitmap1);
+            ivTakePic.setImageBitmap(preview);
             new Thread(new Runnable()
             {
                 @Override
@@ -1043,70 +1049,80 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_record)
     public void record(View view)
     {
-        ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage("功能完善中!!");
-//        if (recordTimer == null)
-//            recordTimer = new Timer();
-//        if (!record)
-//        {
-//            createRecord();
-//            player.setPreRecordFlag(port, true);
-//            ToastHelper.getInstance(this).shortShowMessage("录像开始");
-//            llRecord.setVisibility(View.VISIBLE);
-//            Log.e(TAG, "录像开始");
-//            recordBeginTime = new Date().getTime();
-//            recordTimer.schedule(new TimerTask()
-//            {
-//                @Override
-//                public void run()
-//                {
-//                    int recordTime = (int) ((new Date().getTime() - recordBeginTime) / 1000);
-//                    if (recordTime < 3600)
-//                    {
-//                        String min = (recordTime / 60) + "";
-//                        String sec = (recordTime % 60) + "";
-//
-//                        min = min.length() == 2 ? min : "0" + min;
-//                        sec = sec.length() == 2 ? sec : "0" + sec;
-//
-//                        String finalMin = min;
-//                        String finalSec = sec;
-//                        runOnUiThread(new Runnable()
-//                        {
-//                            @Override
-//                            public void run()
-//                            {
-//                                if (tvRecordTime != null)
-//                                    tvRecordTime.setText(finalMin + ":" + finalSec);
-//                            }
-//                        });
-//                    }
-//                }
-//            }, 1000, 1000);
-//            record = true;
-//        }
-//        else
-//        {
-//            recordTimer.cancel();
-//            recordTimer = null;
-//            player.setPreRecordFlag(port, false);
-//            record = false;
-//            llRecord.setVisibility(View.GONE);
-//
-//            int recordDuration = (int) ((new Date().getTime() - recordBeginTime) / 1000);
-//
-//            if (recordDuration > 3)
-//            {
-//                ToastHelper.getInstance(this).shortShowMessage("录像结束");
-//                Bitmap bitmap = ThumbnailUtil.getInstance().getBitmap(recordFile.getAbsolutePath());
-//                PreviewUtil.getInstance().saveVideoPreview(bitmap, recordFile.getName() + "_thumbnail");
-//                Log.e(TAG, "录像结束");
-//            }
-//            else
-//            {
-//                ToastHelper.getInstance(this).shortShowMessage("录像时间过短");
-//                recordFile.delete();
-//            }
-//        }
+        if (recordTimer == null)
+            recordTimer = new Timer();
+        if (!record)
+        {
+            createRecord();
+            isSetRecordSuccess = false;
+            player.setPreRecordFlag(port, true);
+            ToastHelper.getInstance(this).shortShowMessage("录像开始");
+            llRecord.setVisibility(View.VISIBLE);
+            Log.e(TAG, "录像开始");
+            recordBeginTime = new Date().getTime();
+            recordTimer.schedule(new TimerTask()
+            {
+                @Override
+                public void run()
+                {
+                    int recordTime = (int) ((new Date().getTime() - recordBeginTime) / 1000);
+                    if (recordTime < 3600)
+                    {
+                        String min = (recordTime / 60) + "";
+                        String sec = (recordTime % 60) + "";
+
+                        min = min.length() == 2 ? min : "0" + min;
+                        sec = sec.length() == 2 ? sec : "0" + sec;
+
+                        String finalMin = min;
+                        String finalSec = sec;
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                if (tvRecordTime != null)
+                                    tvRecordTime.setText(finalMin + ":" + finalSec);
+                                if (ivPot.getVisibility() == View.VISIBLE)
+                                    ivPot.setVisibility(View.INVISIBLE);
+                                else
+                                    ivPot.setVisibility(View.VISIBLE);
+                            }
+                        });
+                    }
+                }
+            }, 0, 1000);
+            record = true;
+        }
+        else
+        {
+            recordTimer.cancel();
+            recordTimer = null;
+            player.setPreRecordFlag(port, false);
+            record = false;
+            llRecord.setVisibility(View.GONE);
+
+            int recordDuration = (int) ((new Date().getTime() - recordBeginTime) / 1000);
+
+            if (recordDuration > 2 && recordFile.length() > 0)
+            {
+                ToastHelper.getInstance(this).shortShowMessage("录像结束");
+                ThumbnailUtil.getInstance().display(recordFile.getAbsolutePath(), new ThumbnailUtil.OnGetThumbnail()
+                {
+                    @Override
+                    public void onThumbnail(Bitmap bitmap)
+                    {
+                        PreviewUtil.getInstance().saveVideoPreview(bitmap, recordFile.getName() + "_thumbnail");
+                    }
+                });
+                Log.e(TAG, "录像结束");
+            }
+            else
+            {
+                ToastHelper.getInstance(this).shortShowMessage("录像时间过短");
+                recordFile.delete();
+            }
+        }
     }
 
     @OnClick(R.id.ib_fullscreen)

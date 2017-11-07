@@ -46,7 +46,7 @@ public class PhotoDetailActivity extends BaseActivity
     private void initData()
     {
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(context)
+                .Builder(getApplicationContext())
                 .build();
         ImageLoader.getInstance().init(config);
         photoPath = getIntent().getStringExtra("photoPath");
