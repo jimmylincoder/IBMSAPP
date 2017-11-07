@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author jimmy
  */
-public class Photo
+public class Photo implements Serializable
 {
     private String date;
 

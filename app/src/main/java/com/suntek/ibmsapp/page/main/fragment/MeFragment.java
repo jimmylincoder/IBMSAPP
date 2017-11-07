@@ -129,6 +129,7 @@ public class MeFragment extends BaseFragment
                                     @Override
                                     public void confirm(UnityDialog unityDialog, String content)
                                     {
+                                        unityDialog.dismiss();
                                         Intent intent = new Intent();
                                         intent.setAction("android.intent.action.VIEW");
                                         Uri uri = Uri.parse(version.getDownloadAddress());

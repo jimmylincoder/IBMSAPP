@@ -21,8 +21,13 @@
                 android:layout_weight="1"
                 android:gravity="center">
 
-                <com.suntek.ibmsapp.widget.GestureImageView.GestureImageView
-                    android:id="@+id/giv_detail"
+                <!--<com.suntek.ibmsapp.widget.GestureImageView.GestureImageView-->
+                <!--android:id="@+id/giv_detail"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"/>-->
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/vp_photo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"/>
 

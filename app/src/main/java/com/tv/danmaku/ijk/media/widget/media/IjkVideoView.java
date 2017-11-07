@@ -1197,11 +1197,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
                     ijkMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
                 }
-                ijkMediaPlayer.setOption(1,"analyzemaxduration",100L);
-                ijkMediaPlayer.setOption(1,"probesize",10240L);
-                ijkMediaPlayer.setOption(1,"flush_packets",1L);
-                ijkMediaPlayer.setOption(4,"packet-buffering",0L);
-                ijkMediaPlayer.setOption(4,"framedrop",1L);
+                ijkMediaPlayer.setOption(1, "analyzemaxduration", 100L);
+                ijkMediaPlayer.setOption(1, "probesize", 10240L);
+                ijkMediaPlayer.setOption(1, "flush_packets", 1L);
+                ijkMediaPlayer.setOption(4, "packet-buffering", 0L);
+                ijkMediaPlayer.setOption(4, "framedrop", 1L);
 
                 mediaPlayer = ijkMediaPlayer;
             }
@@ -1399,7 +1399,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         @Override
         public boolean onDoubleTap(MotionEvent e)
         {
-            onVideoTouchListener.onDoubleTouchEvent(e);
+            if (onVideoTouchListener != null)
+                onVideoTouchListener.onDoubleTouchEvent(e);
             return super.onDoubleTap(e);
         }
     });

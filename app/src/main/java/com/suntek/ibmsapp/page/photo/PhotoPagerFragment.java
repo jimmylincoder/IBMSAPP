@@ -24,7 +24,7 @@ public class PhotoPagerFragment extends BaseFragment
     private String path;
 
     @BindView(R.id.giv_detail)
-    private GestureImageView givPhoto;
+    GestureImageView givPhoto;
 
     public static PhotoPagerFragment newInstance(String path)
     {

@@ -1,11 +1,17 @@
 package com.suntek.ibmsapp.page.video;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.MediaController;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.model.Photo;
+import com.suntek.ibmsapp.page.photo.PhotoPagerFragment;
 import com.suntek.ibmsapp.widget.UnityDialog;
 import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
 
@@ -13,6 +19,8 @@ import org.MediaPlayer.PlayM4.Player;
 
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -25,16 +33,17 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  */
 public class VideoDetailActivity extends BaseActivity
 {
-    @BindView(R.id.sv_video)
-    IjkVideoView videoView;
+//    @BindView(R.id.sv_video)
+//    IjkVideoView videoView;
+
+    @BindView(R.id.vp_video)
+    ViewPager vpVideo;
 
     private final String TAG = VideoDetailActivity.class.getName();
 
-    private Player player;
-
     private String filePath;
 
-    private int port;
+    private List<String> pathList;
 
     @Override
     public int getLayoutId()
@@ -45,12 +54,41 @@ public class VideoDetailActivity extends BaseActivity
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        pathList = new ArrayList<>();
         filePath = getIntent().getStringExtra("photoPath");
-        IjkMediaPlayer.loadLibrariesOnce(null);
-        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
-        videoView.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
-        videoView.setVideoPath(filePath);
-        videoView.start();
+        List<Photo> paths = (List<Photo>) getIntent().getSerializableExtra("paths");
+        for (Photo photo : paths)
+        {
+            pathList.addAll(photo.getPhotoPaths());
+        }
+        vpVideo.setAdapter(new VideoPagerAdapter(getSupportFragmentManager()));
+        vpVideo.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                filePath = pathList.get(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+
+            }
+        });
+        int index = pathList.indexOf(filePath);
+        vpVideo.setCurrentItem(index);
+//        IjkMediaPlayer.loadLibrariesOnce(null);
+//        IjkMediaPlayer.native_profileBegin("libijkplayer.so");
+//        videoView.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
+//        videoView.setVideoPath(filePath);
+//        videoView.start();
     }
 
     @Override
@@ -63,11 +101,11 @@ public class VideoDetailActivity extends BaseActivity
     protected void onDestroy()
     {
         super.onDestroy();
-        if (videoView != null)
-        {
-            videoView.stopPlayback();
-            videoView.release(true);
-        }
+//        if (videoView != null)
+//        {
+//            videoView.stopPlayback();
+//            videoView.release(true);
+//        }
     }
 
     @OnClick(R.id.ll_back)
@@ -104,5 +142,25 @@ public class VideoDetailActivity extends BaseActivity
                         finish();
                     }
                 }).show();
+    }
+
+    private class VideoPagerAdapter extends FragmentStatePagerAdapter
+    {
+        public VideoPagerAdapter(FragmentManager fm)
+        {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position)
+        {
+            return VideoPagerFragment.newInstance(pathList.get(position));
+        }
+
+        @Override
+        public int getCount()
+        {
+            return pathList.size();
+        }
     }
 }
