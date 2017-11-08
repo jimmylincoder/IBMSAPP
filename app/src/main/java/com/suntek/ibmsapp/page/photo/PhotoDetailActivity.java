@@ -154,7 +154,7 @@ public class PhotoDetailActivity extends BaseActivity
     {
         UMImage image = new UMImage(PhotoDetailActivity.this, new File(photoPath));
         new ShareAction(PhotoDetailActivity.this).withText("hello").withMedia(image)
-                .setDisplayList(SHARE_MEDIA.QQ)
+                .setDisplayList(SHARE_MEDIA.QQ,SHARE_MEDIA.WEIXIN, SHARE_MEDIA.WEIXIN_CIRCLE)
                 .setCallback(new UMShareListener()
                 {
                     @Override

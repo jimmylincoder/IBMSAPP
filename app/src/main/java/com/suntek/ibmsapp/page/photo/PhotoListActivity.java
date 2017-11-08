@@ -1,15 +1,26 @@
 package com.suntek.ibmsapp.page.photo;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+
 import android.view.View;
-import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.PhotoListAdapter;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Photo;
+import com.suntek.ibmsapp.page.main.fragment.adapter.PhotoFragmentAdapter;
+import com.suntek.ibmsapp.page.main.fragment.photo.PhotoFragment;
+import com.suntek.ibmsapp.page.main.fragment.photo.VideoFragment;
 import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.PermissionRequest;
+import com.suntek.ibmsapp.widget.NoScrollViewPager;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +42,32 @@ import butterknife.OnClick;
  */
 public class PhotoListActivity extends BaseActivity
 {
-    //图片路径
-    private final String picPath = "/sdcard/DCIM/Camera/ibms";
+    @BindView(R.id.vp_content)
+    NoScrollViewPager vpContent;
 
-    @BindView(R.id.elv_photo)
-    ExpandableListView lvPhoto;
+    @BindView(R.id.tv_photo)
+    TextView tvPhoto;
 
-    private PhotoListAdapter photoListAdapter;
+    @BindView(R.id.tv_video)
+    TextView tvVideo;
 
-    private List<Photo> photos = new ArrayList<>();
+    @BindView(R.id.ll_title)
+    LinearLayout llTitle;
+
+    @BindView(R.id.ll_choose)
+    LinearLayout llChoose;
+
+    @BindView(R.id.iv_photo_choose)
+    ImageView ivPhotoChoose;
+
+    @BindView(R.id.iv_video_choose)
+    ImageView ivVideoChoose;
+
+    private int nowPosition = 0;
+
+    private List<Fragment> fragmentList = new ArrayList<>();
+
+    private PhotoFragmentAdapter photoFragmentAdapter;
 
     @Override
     public int getLayoutId()
@@ -50,8 +78,7 @@ public class PhotoListActivity extends BaseActivity
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-        initData();
-        initListView();
+        initViewPager();
     }
 
     @Override
@@ -60,105 +87,125 @@ public class PhotoListActivity extends BaseActivity
 
     }
 
-    /**
-     * 初始化列表数据
-     */
-    private void initListView()
+    private void initViewPager()
     {
-        Collections.sort(photos, new Comparator<Photo>()
-        {
-            @Override
-            public int compare(Photo o1, Photo o2)
-            {
-                long date1 = DateUtil.convertToLong(o1.getDate(), "yyyyMMdd");
-                long date2 = DateUtil.convertToLong(o2.getDate(), "yyyyMMdd");
-                if (date1 < date2)
-                    return 1;
-                else if (date1 == date2)
-                    return 0;
-                else
-                    return -1;
-            }
-        });
-        photoListAdapter = new PhotoListAdapter(this, photos);
-        lvPhoto.setAdapter(photoListAdapter);
-        for (int i = 0; i < photoListAdapter.getGroupCount(); i++)
-        {
-            lvPhoto.expandGroup(i);
-        }
+        Fragment photoFragment = new PhotoFragment();
+        Fragment videoFragment = new VideoFragment();
+        fragmentList.add(photoFragment);
+        fragmentList.add(videoFragment);
 
-        lvPhoto.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener()
+        photoFragmentAdapter = new PhotoFragmentAdapter(getSupportFragmentManager(), fragmentList);
+        vpContent.setAdapter(photoFragmentAdapter);
+        vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
             @Override
-            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id)
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
             {
-                return true;
+
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                nowPosition = position;
+                pageChange(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+
             }
         });
     }
 
-    /**
-     * 初始化相册数据
-     */
-    private void initData()
+    @OnClick(R.id.tv_photo)
+    public void photo(View view)
     {
-        PermissionRequest.verifyStoragePermissions(this);
-        photos.clear();
-        File file = new File(picPath);
-        if (!file.exists())
-            file.mkdir();
-        try
+        pageChange(0);
+    }
+
+    @OnClick(R.id.tv_video)
+    public void video(View view)
+    {
+        pageChange(1);
+    }
+
+    @OnClick(R.id.iv_edit)
+    public void edit(View view)
+    {
+        showHeader();
+        vpContent.setNoScroll(true);
+        if (nowPosition == 0)
+            ((PhotoFragment) fragmentList.get(nowPosition)).setEdit(true);
+        else
+            ((VideoFragment) fragmentList.get(nowPosition)).setEdit(true);
+    }
+
+    private void showHeader()
+    {
+        if (llTitle.isShown())
         {
-            File[] files = file.getCanonicalFile().listFiles();
-            Map<String, List<String>> mapTag = new HashMap<>();
-            if (files == null)
-                return;
-            for (File file1 : files)
-            {
-                if (file1.getName().startsWith("IMG_"))
-                {
-                    String[] strs = file1.getName().split("_");
-                    String date = strs[1];
-                    List<String> paths = mapTag.get(date);
-                    if (paths == null)
-                    {
-                        paths = new ArrayList<>();
-                        paths.add(file1.getAbsolutePath());
-                    }
-                    else
-                    {
-                        paths.add(file1.getAbsolutePath());
-                    }
-                    mapTag.put(date, paths);
-                }
-            }
-
-
-            Iterator entries = mapTag.entrySet().iterator();
-
-            while (entries.hasNext())
-            {
-
-                Map.Entry entry = (Map.Entry) entries.next();
-
-                String key = (String) entry.getKey();
-
-                List<String> value = (List<String>) entry.getValue();
-
-                Photo photo = new Photo();
-                photo.setDate(key);
-                photo.setPhotoPaths(value);
-                photos.add(photo);
-            }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+            llTitle.setVisibility(View.GONE);
+            llChoose.setVisibility(View.VISIBLE);
         }
+        else
+        {
+            llTitle.setVisibility(View.VISIBLE);
+            llChoose.setVisibility(View.GONE);
+        }
+    }
+
+    private void pageChange(int position)
+    {
+        if (position == 0)
+        {
+            vpContent.setCurrentItem(position);
+            ivPhotoChoose.setVisibility(View.VISIBLE);
+            ivVideoChoose.setVisibility(View.GONE);
+        }
+        if (position == 1)
+        {
+            vpContent.setCurrentItem(position);
+            ivPhotoChoose.setVisibility(View.GONE);
+            ivVideoChoose.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @OnClick(R.id.tv_cancel)
+    public void cancel(View view)
+    {
+        showNormal();
+    }
+
+    @OnClick(R.id.tv_all)
+    public void selectAll(View view)
+    {
+        if (nowPosition == 0)
+            ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        else
+            ((VideoFragment) fragmentList.get(1)).selecteAll();
     }
 
     @OnClick(R.id.ll_back)
     public void back(View view)
     {
         finish();
+    }
+
+    public void showNormal()
+    {
+        if (nowPosition == 0)
+        {
+            ((PhotoFragment) fragmentList.get(nowPosition)).setEdit(false);
+            ((PhotoFragment) fragmentList.get(nowPosition)).clearChoose();
+        }
+        else
+        {
+            ((VideoFragment) fragmentList.get(nowPosition)).setEdit(false);
+            ((VideoFragment) fragmentList.get(nowPosition)).clearChoose();
+        }
+        vpContent.setNoScroll(false);
+        showHeader();
     }
 }

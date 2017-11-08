@@ -1015,7 +1015,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             @Override
                             public void run()
                             {
-                                llTakePic.setVisibility(View.GONE);
+                                if (llTakePic != null)
+                                    llTakePic.setVisibility(View.GONE);
                             }
                         });
                     } catch (InterruptedException e)
@@ -1036,15 +1037,15 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_talk)
     public void talk(View view)
     {
-        //ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
+        ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
         player.pause(port, 0);
     }
 
     @OnClick(R.id.ib_voice)
     public void voice(View view)
     {
-        //ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持播放声音");
-        player.pause(port, 1);
+        ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持播放声音");
+        //player.pause(port, 1);
     }
 
     @OnClick(R.id.ib_record)
@@ -1114,6 +1115,37 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     public void onThumbnail(Bitmap bitmap)
                     {
                         PreviewUtil.getInstance().saveVideoPreview(bitmap, recordFile.getName() + "_thumbnail");
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                llTakePic.setVisibility(View.VISIBLE);
+                                ivTakePic.setImageBitmap(bitmap);
+                            }
+                        });
+                        new Thread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                try
+                                {
+                                    Thread.sleep(3000);
+                                    runOnUiThread(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            llTakePic.setVisibility(View.GONE);
+                                        }
+                                    });
+                                } catch (InterruptedException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
                     }
                 });
                 Log.e(TAG, "录像结束");

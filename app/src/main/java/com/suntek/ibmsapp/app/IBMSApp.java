@@ -37,6 +37,7 @@ public class IBMSApp extends BaseApplication
     }
 
     {
+        PlatformConfig.setWeixin("wxa038574f9c6fb1d5","ab05eea80ed5dc818f769fc2663a2535");
         PlatformConfig.setQQZone("1106525692", "0pNBWO0rSIooNQ1U");
     }
 

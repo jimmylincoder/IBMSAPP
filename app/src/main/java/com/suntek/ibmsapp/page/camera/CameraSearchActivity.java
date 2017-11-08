@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraHistoryAdapter;
@@ -49,6 +50,12 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
 
     @BindView(R.id.ll_retry)
     LinearLayout llRetry;
+
+    @BindView(R.id.ll_list_size)
+    LinearLayout llListSize;
+
+    @BindView(R.id.tv_list_size)
+    TextView tvListSize;
 
     private CameraSearchAdapter cameraSearchAdapter;
 
@@ -125,13 +132,16 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
                     cameraList = cameraPage.getData();
                     if (cameraList.isEmpty())
                     {
+                        llListSize.setVisibility(View.GONE);
                         lvSearchResult.setVisibility(View.GONE);
                         llMessage.setVisibility(View.VISIBLE);
                     }
                     else
                     {
+                        llListSize.setVisibility(View.VISIBLE);
                         llMessage.setVisibility(View.GONE);
                         lvSearchResult.setVisibility(View.VISIBLE);
+                        tvListSize.setText("共搜索到" + cameraList.size() + "个结果");
                     }
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();

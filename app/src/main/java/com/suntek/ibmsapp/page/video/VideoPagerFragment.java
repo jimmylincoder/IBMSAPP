@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseFragment;
@@ -19,6 +20,7 @@ import java.io.FileNotFoundException;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
@@ -80,6 +82,7 @@ public class VideoPagerFragment extends BaseFragment
     @OnClick(R.id.ll_play)
     public void play(View view)
     {
+        MediaController mediaController = new MediaController(getActivity());
         flPreview.setVisibility(View.GONE);
         llVideo.setVisibility(View.VISIBLE);
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -87,6 +90,16 @@ public class VideoPagerFragment extends BaseFragment
         ijkVideoView.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
         ijkVideoView.setVideoPath(path);
         ijkVideoView.start();
+
+        ijkVideoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener()
+        {
+            @Override
+            public void onCompletion(IMediaPlayer iMediaPlayer)
+            {
+                flPreview.setVisibility(View.VISIBLE);
+                llVideo.setVisibility(View.GONE);
+            }
+        });
     }
 
     @Override

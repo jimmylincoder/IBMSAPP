@@ -12,53 +12,34 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/ll_back"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="2.8"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_marginLeft="10dp"
-                android:background="@mipmap/ic_return"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="返回"/>
-
-        </LinearLayout>
-
-        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:gravity="center"
             android:orientation="horizontal"
             android:padding="5dp">
 
             <LinearLayout
                 android:id="@+id/ll_search"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="35dp"
                 android:background="@drawable/button_shape_corner"
                 android:gravity="center_vertical">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="10dp"
                     android:background="@mipmap/ic_search"/>
 
                 <EditText
                     android:id="@+id/et_keyword"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
                     android:background="@null"
                     android:hint="搜索摄像头"
+                    android:maxLines="1"
                     android:textSize="14dp"/>
 
             </LinearLayout>
@@ -89,6 +70,25 @@
         android:layout_height="match_parent"
         android:background="@color/col_ecebf3"
         android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/ll_list_size"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_list_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:text="搜索到5个结果"
+                android:textColor="@color/gray_80"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
 
         <ListView
             android:id="@+id/lv_search_result"
