@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.page.photo;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -16,6 +17,11 @@ import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Photo;
 import com.suntek.ibmsapp.widget.GestureImageView.GestureImageView;
 import com.suntek.ibmsapp.widget.UnityDialog;
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +31,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+
+import static android.R.attr.data;
 
 /**
  * 查看相片界面
@@ -134,6 +142,52 @@ public class PhotoDetailActivity extends BaseActivity
                         finish();
                     }
                 }).show();
+    }
+
+    @OnClick(R.id.iv_share)
+    public void share(View view)
+    {
+        share();
+    }
+
+    private void share()
+    {
+        UMImage image = new UMImage(PhotoDetailActivity.this, new File(photoPath));
+        new ShareAction(PhotoDetailActivity.this).withText("hello").withMedia(image)
+                .setDisplayList(SHARE_MEDIA.QQ)
+                .setCallback(new UMShareListener()
+                {
+                    @Override
+                    public void onStart(SHARE_MEDIA share_media)
+                    {
+
+                    }
+
+                    @Override
+                    public void onResult(SHARE_MEDIA share_media)
+                    {
+
+                    }
+
+                    @Override
+                    public void onError(SHARE_MEDIA share_media, Throwable throwable)
+                    {
+
+                    }
+
+                    @Override
+                    public void onCancel(SHARE_MEDIA share_media)
+                    {
+
+                    }
+                }).open();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
     }
 
     private class PhotoPagerAdapter extends FragmentStatePagerAdapter
