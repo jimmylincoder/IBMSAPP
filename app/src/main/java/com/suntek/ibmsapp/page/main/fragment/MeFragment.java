@@ -84,9 +84,9 @@ public class MeFragment extends BaseFragment
     @OnClick(R.id.ll_about)
     public void about(View view)
     {
-        ToastHelper.getInstance(getActivity()).shortShowMessage("功能完善中！！");
-//        Intent intent = new Intent(getActivity(), AboutActivity.class);
-//        startActivity(intent);
+//        ToastHelper.getInstance(getActivity()).shortShowMessage("功能完善中！！");
+        Intent intent = new Intent(getActivity(), AboutActivity.class);
+        startActivity(intent);
     }
 
     private void checkUpdate()

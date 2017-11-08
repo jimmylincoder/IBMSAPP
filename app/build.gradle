@@ -23,7 +23,7 @@ android {
         //对消费者不可见，仅用于应用市场、程序内部识别版本，判断新旧等用途
         versionCode 1
         //展示给消费者，消费者会通过它认知自己安装的版本
-        versionName "1.1.1"
+        versionName "1.1.2"
         //单元测试
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //多dex打包

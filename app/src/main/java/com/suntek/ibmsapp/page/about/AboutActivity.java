@@ -1,9 +1,12 @@
 package com.suntek.ibmsapp.page.about;
 
 import android.os.Bundle;
+import android.view.View;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+
+import butterknife.OnClick;
 
 /**
  * 关于详情界面
@@ -30,5 +33,10 @@ public class AboutActivity extends BaseActivity
 
     }
 
+    @OnClick(R.id.ll_back)
+    public void back(View view)
+    {
+        finish();
+    }
 
 }

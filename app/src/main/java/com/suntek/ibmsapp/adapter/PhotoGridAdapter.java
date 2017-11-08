@@ -104,6 +104,7 @@ public class PhotoGridAdapter extends BaseAdapter
         if (photoPaths.get(position).endsWith(".jpg"))
         {
             imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
+            holder.llRecord.setVisibility(View.GONE);
         }
         else
         {
@@ -121,7 +122,7 @@ public class PhotoGridAdapter extends BaseAdapter
             {
                 holder.ivPhoto.setImageBitmap(null);
             }
-
+            holder.llRecord.setVisibility(View.VISIBLE);
 //            Bitmap preview = videioBitmapMap.get(filePath);
 //            if (preview == null)
 //            {
@@ -156,6 +157,9 @@ public class PhotoGridAdapter extends BaseAdapter
 
         @BindView(R.id.ll_choose)
         LinearLayout llChoose;
+
+        @BindView(R.id.ll_record)
+        LinearLayout llRecord;
 
         public ViewHolder(View view)
         {
