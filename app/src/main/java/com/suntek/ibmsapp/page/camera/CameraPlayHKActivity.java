@@ -216,7 +216,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     private boolean isRequestRecord = false;
     private int pauseState = 0;
     //缓冲1m
-    private static final int MAX_BUFFER_SIZE = 1024 * 1024 * 2;
+    private static final int MAX_BUFFER_SIZE = 1024 * 1024 * 1;
     private static final int MIN_BUFFER_SIZE = 1;
     private int size = MAX_BUFFER_SIZE;
 
@@ -431,10 +431,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
      */
     private void handleVideoData(byte[] videoData)
     {
+        Log.e(TAG, "接收到数据 长度:" + videoData.length + " 接收到时间:" + new Date().getTime());
         player.inputData(port, videoData, videoData.length);
-
         dataBuffer();
-
         if (!isSetRecordSuccess)
         {
             isSetRecordSuccess = player.setPreRecordCallBack(port, new PlayerCallBack.PlayerPreRecordCB()
@@ -531,6 +530,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             }
         });
         player.play(port, surfaceHolder);
+        player.playSound(port);
         runOnUiThread(new Runnable()
         {
             @Override
@@ -584,7 +584,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 }
                 else
                 {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
+                    //ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
+                    if (llFail != null)
+                        llFail.setVisibility(View.VISIBLE);
                 }
             }
         }.execute();
@@ -1037,8 +1041,9 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_talk)
     public void talk(View view)
     {
-        ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
-        player.pause(port, 0);
+        //ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
+        Intent intent = new Intent(CameraPlayHKActivity.this, CameraHKHistoryActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.ib_voice)
@@ -1137,7 +1142,8 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                                         @Override
                                         public void run()
                                         {
-                                            llTakePic.setVisibility(View.GONE);
+                                            if (llTakePic != null)
+                                                llTakePic.setVisibility(View.GONE);
                                         }
                                     });
                                 } catch (InterruptedException e)

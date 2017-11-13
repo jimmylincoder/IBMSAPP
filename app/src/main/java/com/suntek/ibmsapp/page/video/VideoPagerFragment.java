@@ -90,14 +90,15 @@ public class VideoPagerFragment extends BaseFragment
         ijkVideoView.setRender(IjkVideoView.RENDER_TEXTURE_VIEW);
         ijkVideoView.setVideoPath(path);
         ijkVideoView.start();
-
         ijkVideoView.setOnCompletionListener(new IMediaPlayer.OnCompletionListener()
         {
             @Override
             public void onCompletion(IMediaPlayer iMediaPlayer)
             {
-                flPreview.setVisibility(View.VISIBLE);
-                llVideo.setVisibility(View.GONE);
+                if (flPreview != null)
+                    flPreview.setVisibility(View.VISIBLE);
+                if (llVideo != null)
+                    llVideo.setVisibility(View.GONE);
             }
         });
     }

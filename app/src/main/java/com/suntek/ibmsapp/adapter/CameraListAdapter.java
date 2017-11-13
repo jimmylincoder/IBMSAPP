@@ -1,21 +1,31 @@
 package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.PreviewUtil;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,14 +45,20 @@ public class CameraListAdapter extends BaseAdapter
 
     private ViewHolder viewHolder;
 
+    private ACache aCache;
+
     private int ivPreviewWidth = 200;
 
     private int ivPreviewHeight = 110;
+
+    private List<Camera> topCameras;
 
     public CameraListAdapter(Context context, List<Camera> cameraList)
     {
         this.context = context;
         this.cameraList = cameraList;
+        this.aCache = ACache.get(context);
+        topList();
     }
 
     @Override
@@ -114,29 +130,117 @@ public class CameraListAdapter extends BaseAdapter
                 holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
             }
         }
-//        String photoBase64 = cameraList.get(position).getPhotoBase64();
-//        String id = cameraList.get(position).getId();
-//        holder.ivPreView.setTag(id);
-//        if (photoBase64 != null)
-//        {
-//            if (holder.ivPreView.getTag() != null && holder.ivPreView.getTag().equals(id))
-//            {
-//                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
-//                holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
-//                        ivPreviewWidth, ivPreviewHeight));
-//            }
-//        }
-//        else
-//        {
-//            holder.ivPreView.setImageBitmap(null);
-//        }
         Camera camera = cameraList.get(position);
         Bitmap bitmap = PreviewUtil.getInstance().getPreview(camera.getId(), camera.getDeviceId());
         if (bitmap != null)
             holder.ivPreView.setImageBitmap(BitmapUtil.zoomBitmap(bitmap, ivPreviewWidth, ivPreviewHeight));
         else
             holder.ivPreView.setImageBitmap(null);
+
+        if (topCameras.contains(camera))
+        {
+            holder.llContent.setBackgroundColor(context.getResources().getColor(R.color.clo_e8f9ff));
+            holder.btnTop.setText("取消");
+        }
+        else
+        {
+            holder.btnTop.setText("置顶");
+            holder.llContent.setBackgroundColor(context.getResources().getColor(R.color.white));
+        }
+
+        holder.llContent.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(context, CameraPlayHKActivity.class);
+                Camera camera = cameraList.get(position);
+                if (camera.getIsUsed().equals("1"))
+                {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("camera", camera);
+                    intent.putExtras(bundle);
+                    intent.putExtra("cameraId", cameraList.get(position).getId());
+                    intent.putExtra("cameraName", cameraList.get(position).getName());
+                    context.startActivity(intent);
+                }
+                else
+                {
+                    new UnityDialog(context)
+                            .setTitle("温馨提示")
+                            .setHint("该摄像头已离线")
+                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                            {
+                                @Override
+                                public void confirm(UnityDialog unityDialog, String content)
+                                {
+                                    unityDialog.dismiss();
+                                }
+                            }).show();
+                }
+            }
+        });
+
+        holder.btnTop.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                List<String> cameraIds = (List<String>) aCache.getAsObject("camera_top");
+                String id = camera.getId();
+                if (cameraIds == null)
+                {
+                    cameraIds = new ArrayList<String>();
+                    cameraIds.add(id);
+                }
+                else
+                {
+                    int index = cameraIds.indexOf(id);
+                    if (!cameraIds.contains(id))
+                    {
+                        if (index != -1)
+                            cameraIds.remove(index);
+                        cameraIds.add(0, id);
+                    }
+                    else
+                    {
+                        cameraIds.remove(id);
+                    }
+                }
+                aCache.put("camera_top", (Serializable) cameraIds);
+                topList();
+                holder.swlMore.quickClose();
+                notifyDataSetChanged();
+            }
+        });
         return convertView;
+    }
+
+    private void topList()
+    {
+        List<String> cameraIds = (List<String>) aCache.getAsObject("camera_top");
+        if (cameraIds == null)
+        {
+            topCameras = new ArrayList<>();
+            return;
+        }
+        List<Camera> topCamera = new ArrayList<>();
+        for (Camera camera : cameraList)
+        {
+            for (String cameraId : cameraIds)
+            {
+                if (camera.getId().equals(cameraId))
+                {
+                    topCamera.add(camera);
+                }
+            }
+        }
+        this.topCameras = topCamera;
+        for (Camera camera : topCamera)
+        {
+            cameraList.remove(camera);
+            cameraList.add(0, camera);
+        }
     }
 
     static class ViewHolder
@@ -159,6 +263,15 @@ public class CameraListAdapter extends BaseAdapter
         @BindView(R.id.tv_online_status)
         TextView tvOnlineStatus;
 
+        @BindView(R.id.ll_content)
+        LinearLayout llContent;
+
+        @BindView(R.id.btn_top)
+        Button btnTop;
+
+        @BindView(R.id.sml_more)
+        SwipeMenuLayout swlMore;
+
         public ViewHolder(View view)
         {
             ButterKnife.bind(this, view);
@@ -173,5 +286,6 @@ public class CameraListAdapter extends BaseAdapter
     public void setCameraList(List<Camera> cameraList)
     {
         this.cameraList = cameraList;
+        topList();
     }
 }

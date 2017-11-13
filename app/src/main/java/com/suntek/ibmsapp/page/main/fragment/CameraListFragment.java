@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.page.main.fragment;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ import com.suntek.ibmsapp.widget.UnityDialog;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -132,6 +134,8 @@ public class CameraListFragment extends BaseFragment
 
         });
 
+
+
         ptrCameraList.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
         {
             @Override
@@ -140,39 +144,6 @@ public class CameraListFragment extends BaseFragment
                 if (currentPage < totalPage)
                 {
                     getCameraList(++currentPage, false);
-                }
-            }
-        });
-
-        ptrCameraList.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
-                Intent intent = new Intent(getActivity(), CameraPlayHKActivity.class);
-                Camera camera = cameraList.get(position - 1);
-                if (camera.getIsUsed().equals("1"))
-                {
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("camera", camera);
-                    intent.putExtras(bundle);
-                    intent.putExtra("cameraId", cameraList.get(position - 1).getId());
-                    intent.putExtra("cameraName", cameraList.get(position - 1).getName());
-                    startActivity(intent);
-                }
-                else
-                {
-                    new UnityDialog(getActivity())
-                            .setTitle("温馨提示")
-                            .setHint("该摄像头已离线")
-                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
-                            {
-                                @Override
-                                public void confirm(UnityDialog unityDialog, String content)
-                                {
-                                    unityDialog.dismiss();
-                                }
-                            }).show();
                 }
             }
         });

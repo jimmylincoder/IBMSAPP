@@ -185,6 +185,7 @@ public class CameraStreamSocketClient
                 if (bufferByte != null)
                 {
                     readLength = inputStream.read(bufferByte);
+                    readLength = readLength == -1 ? 0 : readLength;
                     outputStream.write(bufferByte, 0, readLength);
                     if (BUFFER_SIZE - readLength != 0)
                     {
