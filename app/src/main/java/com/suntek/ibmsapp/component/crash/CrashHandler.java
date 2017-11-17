@@ -1,4 +1,4 @@
-package com.suntek.ibmsapp.component;
+package com.suntek.ibmsapp.component.crash;
 
 
 import java.io.BufferedReader;
@@ -29,7 +29,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.crash.CrashLogTask;
 import com.suntek.ibmsapp.widget.ToastHelper;
 

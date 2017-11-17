@@ -1042,7 +1042,10 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     public void talk(View view)
     {
         //ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
+        cameraStreamSocketClient.close();
+        stopPlay();
         Intent intent = new Intent(CameraPlayHKActivity.this, CameraHKHistoryActivity.class);
+        intent.putExtra("camera", camera);
         startActivity(intent);
     }
 

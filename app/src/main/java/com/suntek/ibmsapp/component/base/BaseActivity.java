@@ -7,13 +7,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
+import com.suntek.ibmsapp.component.AppManager;
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 /**
- *
  * activity base类
  *
  * @author jimmy
@@ -40,6 +40,7 @@ public abstract class BaseActivity extends AppCompatActivity
         initViews(savedInstanceState);
         //初始化ToolBar
         initToolBar();
+        AppManager.addActivity(this);
     }
 
     /**
@@ -64,41 +65,48 @@ public abstract class BaseActivity extends AppCompatActivity
     /**
      * 加载数据
      */
-    public void loadData() {
+    public void loadData()
+    {
     }
 
     /**
      * 显示进度条
      */
-    public void showProgressBar() {
+    public void showProgressBar()
+    {
     }
 
     /**
      * 隐藏进度条
      */
-    public void hideProgressBar() {
+    public void hideProgressBar()
+    {
     }
 
     /**
      * 初始化recyclerView
      */
-    public void initRecyclerView() {
+    public void initRecyclerView()
+    {
     }
 
     /**
      * 初始化refreshLayout
      */
-    public void initRefreshLayout() {
+    public void initRefreshLayout()
+    {
     }
 
     /**
      * 设置数据显示
      */
-    public void finishTask() {
+    public void finishTask()
+    {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         super.onDestroy();
         bind.unbind();
     }

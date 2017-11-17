@@ -1,10 +1,7 @@
 package com.suntek.ibmsapp.app;
 
-import android.app.Application;
-
 import com.squareup.leakcanary.LeakCanary;
-import com.sun.jna.Platform;
-import com.suntek.ibmsapp.component.CrashHandler;
+import com.suntek.ibmsapp.component.crash.CrashHandler;
 import com.suntek.ibmsapp.component.base.BaseApplication;
 import com.umeng.socialize.Config;
 import com.umeng.socialize.PlatformConfig;

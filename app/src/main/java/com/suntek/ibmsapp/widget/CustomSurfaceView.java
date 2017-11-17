@@ -386,7 +386,7 @@ public class CustomSurfaceView extends SurfaceView
         @Override
         public boolean onDown(MotionEvent e)
         {
-            if (mode == 0)
+            if (mode == 0 && onClickListener != null)
                 onClickListener.onClick(CustomSurfaceView.this);
             return super.onDown(e);
         }

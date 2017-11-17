@@ -7,7 +7,7 @@ import android.view.WindowManager;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.core.Autowired;
-import com.suntek.ibmsapp.page.login.UserLoginActivity;
+import com.suntek.ibmsapp.page.user.UserLoginActivity;
 import com.suntek.ibmsapp.page.main.MainActivity;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 

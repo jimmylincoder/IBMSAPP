@@ -12,8 +12,8 @@ import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Version;
 import com.suntek.ibmsapp.page.about.AboutActivity;
-import com.suntek.ibmsapp.page.login.UserLoginActivity;
-import com.suntek.ibmsapp.task.base.BaseTask;
+import com.suntek.ibmsapp.page.user.ResetPasswordActivity;
+import com.suntek.ibmsapp.page.user.UserLoginActivity;
 import com.suntek.ibmsapp.task.version.CheckVersionTask;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.util.VersionUtil;
@@ -72,7 +72,8 @@ public class MeFragment extends BaseFragment
     @OnClick(R.id.ll_reset_password)
     public void resetPassword(View view)
     {
-        ToastHelper.getInstance(getActivity()).shortShowMessage("功能完善中！！");
+        Intent intent = new Intent(getActivity(), ResetPasswordActivity.class);
+        startActivity(intent);
     }
 
     @OnClick(R.id.ll_help)

@@ -1,4 +1,4 @@
-package com.suntek.ibmsapp.page.login;
+package com.suntek.ibmsapp.page.user;
 
 import android.Manifest;
 import android.content.Intent;

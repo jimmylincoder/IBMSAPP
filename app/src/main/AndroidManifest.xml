@@ -54,7 +54,7 @@
 
         <!--登录界面-->
         <activity
-            android:name=".page.login.UserLoginActivity"
+            android:name=".page.user.UserLoginActivity"
             android:screenOrientation="portrait"/>
 
         <!--主界面-->
@@ -124,6 +124,10 @@
 
         <activity
             android:name=".page.video.VideoDetailActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".page.user.ResetPasswordActivity"
             android:screenOrientation="portrait"/>
 
         <activity
