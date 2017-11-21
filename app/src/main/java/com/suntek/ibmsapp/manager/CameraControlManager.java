@@ -268,4 +268,34 @@ public class CameraControlManager extends BaseComponent
         }
     }
 
+    /**
+     * 云台控制
+     *
+     * @param protocol
+     * @param videoId
+     * @param command
+     * @param speed
+     * @param stopFlag
+     */
+    public void ptzControl(String protocol, String videoId, String command, String speed,
+                           String stopFlag)
+    {
+        Map<String, Object> params = new HashMap<>();
+        params.put("protocol", protocol);
+        params.put("video_id", videoId);
+        params.put("command", command);
+        params.put("speed", speed);
+        params.put("stop_flag", stopFlag);
+
+        HttpResponse response = ibmsHttpEngine.request("camera.ptz", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
 }
