@@ -157,6 +157,10 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     LinearLayout llTimeLoading;
     @BindView(R.id.ll_no_record)
     LinearLayout llNoRecord;
+    @BindView(R.id.ll_full_back)
+    LinearLayout llFullBack;
+    @BindView(R.id.ll_full_oper)
+    LinearLayout llFullOper;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -300,13 +304,28 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
             @Override
             public void onClick(View view)
             {
-                if (llNetSpeed.getVisibility() == View.GONE)
+                if (playerState == PLAYER_NOT_FULL)
                 {
-                    llNetSpeed.setVisibility(View.VISIBLE);
+                    if (llNetSpeed.getVisibility() == View.GONE)
+                    {
+                        llNetSpeed.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        llNetSpeed.setVisibility(View.GONE);
+                    }
                 }
                 else
                 {
-                    llNetSpeed.setVisibility(View.GONE);
+                    if (llFullBack.getVisibility() == View.GONE)
+                        llFullBack.setVisibility(View.VISIBLE);
+                    else
+                        llFullBack.setVisibility(View.GONE);
+
+                    if (llFullOper.getVisibility() == View.GONE)
+                        llFullOper.setVisibility(View.VISIBLE);
+                    else
+                        llFullOper.setVisibility(View.GONE);
                 }
             }
         });
@@ -988,6 +1007,17 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ll_snapshot)
     public void takePic(View view)
     {
+        takePic();
+    }
+
+    @OnClick(R.id.iv_full_take_pic)
+    public void fullTakePic()
+    {
+        takePic();
+    }
+
+    private void takePic()
+    {
         PermissionRequest.verifyStoragePermissions(this);
         File localFile = new File(PIC_PATH);
         localFile.mkdirs();
@@ -1030,7 +1060,6 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         {
             e.printStackTrace();
         }
-
     }
 
     @OnClick(R.id.ib_talk)
@@ -1050,6 +1079,17 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
 
     @OnClick(R.id.ll_btn_record)
     public void record(View view)
+    {
+        record();
+    }
+
+    @OnClick(R.id.iv_full_record)
+    public void fullRecord()
+    {
+        record();
+    }
+
+    private void record()
     {
         if (recordTimer == null)
             recordTimer = new Timer();
@@ -1177,6 +1217,10 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
             setFullScreenLayout(View.GONE);
             playerState = PLAYER_FULLSCREEN;
 
+            llNetSpeed.setVisibility(View.GONE);
+            llFullBack.setVisibility(View.GONE);
+            llFullOper.setVisibility(View.GONE);
+
             initSurfaceViewSize();
         }
     }
@@ -1269,6 +1313,8 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
                 surfaceHolder.setFixedSize(800, 800);
                 ivvVideo.setStart_Top(-1);
                 initSurfaceViewSize();
+                llFullBack.setVisibility(View.GONE);
+                llFullOper.setVisibility(View.GONE);
                 return true;
             }
             else
@@ -1461,6 +1507,17 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ll_play)
     public void playHistory(View view)
     {
+        playHistory();
+    }
+
+    @OnClick(R.id.iv_full_stop)
+    public void fullStop()
+    {
+        playHistory();
+    }
+
+    private void playHistory()
+    {
         if (playState == STATE_STOP)
         {
             List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(chooseDate);
@@ -1516,6 +1573,24 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
             chooseDate = DateUtil.convertYYYY_MM_DD(calendar.getTime());
             tvNowChooseTime.setText(chooseDate);
             initRecord();
+        }
+    }
+
+    @OnClick(R.id.iv_full_back)
+    public void fullBack(View view)
+    {
+        if (playerState == PLAYER_FULLSCREEN)
+        {
+            NiceUtil.showActionBar(this);
+            NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            setFullScreenLayout(View.VISIBLE);
+            playerState = PLAYER_NOT_FULL;
+
+            llFullBack.setVisibility(View.GONE);
+            llFullOper.setVisibility(View.GONE);
+            surfaceHolder.setFixedSize(800, 800);
+            ivvVideo.setStart_Top(-1);
+            initSurfaceViewSize();
         }
     }
 

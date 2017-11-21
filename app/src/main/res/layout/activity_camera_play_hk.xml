@@ -416,33 +416,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="horizontal">
+                android:gravity="center|right"
+                android:orientation="horizontal"
+                android:paddingRight="15dp">
 
                 <ImageView
                     android:id="@+id/iv_full_stop"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:background="@mipmap/ic_oper_stop"/>
 
                 <ImageView
                     android:id="@+id/iv_full_sounds"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:layout_marginLeft="20dp"
                     android:background="@mipmap/ic_oper_sounds"/>
 
                 <ImageView
                     android:id="@+id/iv_full_take_pic"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:layout_marginLeft="20dp"
                     android:background="@mipmap/ic_oper_take_pic"/>
 
                 <ImageView
                     android:id="@+id/iv_full_record"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
                     android:layout_marginLeft="20dp"
                     android:background="@mipmap/ic_oper_record"/>
 

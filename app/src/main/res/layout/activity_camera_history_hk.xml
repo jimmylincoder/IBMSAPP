@@ -324,8 +324,7 @@
             android:layout_gravity="top"
             android:background="@color/black_alpha_60"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:visibility="gone">
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -381,6 +380,80 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_full_back"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_gravity="top"
+            android:layout_marginTop="5dp"
+            android:gravity="left|center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_full_back"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/ic_back_player"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_full_oper"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="2">
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center|right"
+                android:orientation="horizontal"
+                android:paddingRight="15dp">
+
+                <ImageView
+                    android:id="@+id/iv_full_stop"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="@mipmap/ic_oper_stop"/>
+
+                <ImageView
+                    android:id="@+id/iv_full_sounds"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@mipmap/ic_oper_sounds"/>
+
+                <ImageView
+                    android:id="@+id/iv_full_take_pic"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@mipmap/ic_oper_take_pic"/>
+
+                <ImageView
+                    android:id="@+id/iv_full_record"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@mipmap/ic_oper_record"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
     </FrameLayout>
 
     <LinearLayout
