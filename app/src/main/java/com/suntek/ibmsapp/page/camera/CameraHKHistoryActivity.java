@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Environment;
@@ -88,6 +89,12 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     private final int PLAYER_FULLSCREEN = 0;
     //非全屏
     private final int PLAYER_NOT_FULL = 1;
+    //停止
+    private final int STATE_STOP = 1;
+    //播放
+    private final int STATE_PLAY = 2;
+    //当前播放状态
+    private int playState = STATE_STOP;
     //截图保存位置
     private final String PIC_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ibms";
     //视频view
@@ -102,9 +109,6 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     //当前时间
     @BindView(R.id.ll_time)
     LinearLayout llTime;
-    //云台控制
-    @BindView(R.id.ll_message)
-    LinearLayout llMessage;
     //视频界面
     @BindView(R.id.fl_video)
     FrameLayout flVideo;
@@ -145,6 +149,14 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     LinearLayout llSfv;
     @BindView(R.id.iv_pot)
     ImageView ivPot;
+    @BindView(R.id.ll_net_speed)
+    LinearLayout llNetSpeed;
+    @BindView(R.id.tv_now_time)
+    TextView tvNowChooseTime;
+    @BindView(R.id.ll_time_loading)
+    LinearLayout llTimeLoading;
+    @BindView(R.id.ll_no_record)
+    LinearLayout llNoRecord;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -218,6 +230,8 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     private static final int MIN_BUFFER_SIZE = 1;
     private int size = MAX_BUFFER_SIZE;
 
+    private Bitmap preview;
+
     @Override
     public int getLayoutId()
     {
@@ -229,6 +243,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     {
         //获取摄像头信息
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
+        preview = getIntent().getExtras().getParcelable("preview");
         //获取socket连接ip和端口
         getSocketAddress();
         //初始化视频播放界面
@@ -240,7 +255,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         //初始化时间轴
         initTimeSeekBarView();
         //初始化历史记录
-        //initRecord();
+        initRecord();
         //网络测速
         DeviceBandwidthSampler.getInstance().startSampling();
         netSpeed();
@@ -252,7 +267,6 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
      */
     private void getSocketAddress()
     {
-        llLoading.setVisibility(View.VISIBLE);
         new CameraSocketTask(this)
         {
             @Override
@@ -264,7 +278,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
                     Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     socketIp = (String) map.get("ip");
                     socketPort = Integer.parseInt((String) map.get("port"));
-                    initSocket0(null, null);
+                    //initSocket0(null, null);
                 }
                 else
                 {
@@ -279,27 +293,23 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
      */
     private void initSurfaceView()
     {
-//        ivvVideo.setOnClickListener(new CustomSurfaceView.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View view)
-//            {
-//                if (playerState == PLAYER_NOT_FULL)
-//                {
-//                    if (llTime.getVisibility() == View.GONE)
-//                    {
-//                        llOper.setVisibility(View.GONE);
-//                        llTime.setVisibility(View.VISIBLE);
-//                    }
-//                    else
-//                    {
-//                        llOper.setVisibility(View.VISIBLE);
-//                        llTime.setVisibility(View.GONE);
-//                    }
-//                }
-//            }
-//        });
         initSurfaceViewSize();
+        ivvVideo.setBackground(new BitmapDrawable(preview));
+        ivvVideo.setOnClickListener(new CustomSurfaceView.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if (llNetSpeed.getVisibility() == View.GONE)
+                {
+                    llNetSpeed.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    llNetSpeed.setVisibility(View.GONE);
+                }
+            }
+        });
 
         surfaceHolder = ivvVideo.getHolder();
         surfaceHolder.setKeepScreenOn(true);
@@ -714,50 +724,37 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
                     isChangeTimeStart = false;
                 }
                 //TODO 移动到最终位置后，如果该位置没有录像的话，就移向前面有录像的一段，如果时间大于当前时间的话，则播放实时视频
-                //如果大于当前时间则反回当前时间
-                if (date.getTime() > new Date().getTime())
+                //判断该时间是否有录像
+                if (!isInRecord(date))
                 {
-                    timeSeekBar.setValue(new Date().getTime());
-                    tvNowTime.setText(DateUtil.convertByFormat(new Date(), "MM/dd HH:mm:ss"));
-                    isRecorder = false;
-                    cameraStreamSocketClient.close();
-                    stopPlay();
-                    initSocket0(null, null);
-                    tvPlayType.setText("直播");
+                    //  timeSeekBar.setValue(getLastRecordTime(date).getTime());
+                    ToastHelper.getInstance(CameraHKHistoryActivity.this).shortShowMessage("该时间点没有录像");
                 }
                 else
                 {
-                    //判断该时间是否有录像
-                    if (!isInRecord(date))
+                    tvPlayType.setText("回放");
+                    cancelSeekBarTimer();
+
+                    Date dayBegin = new Date(getEarliestTimeByDate(chooseDate).getStartTime());
+                    if (!isRecorder)
                     {
-                        //  timeSeekBar.setValue(getLastRecordTime(date).getTime());
-                        ToastHelper.getInstance(CameraHKHistoryActivity.this).shortShowMessage("该时间点没有录像");
+                        //设备为录像，并加载当天起始录像点到23:59:59,然后移位置到当前
+                        isRecorder = true;
+                        String beginTime = DateUtil.convertByFormat(getEarliestTimeByDate(chooseDate)
+                                .getStartTime(), "yyyy-MM-dd HH:mm:ss");
+                        String endTime = chooseDate + " 23:59:59";
+                        //reloadVideoView(beginTime, endTime);
+                        if (cameraStreamSocketClient != null)
+                            cameraStreamSocketClient.close();
+                        stopPlay();
+                        initSocket0(beginTime, endTime);
+                        changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
                     }
                     else
                     {
-                        tvPlayType.setText("回放");
-                        cancelSeekBarTimer();
-
-                        Date dayBegin = new Date(getEarliestTimeByDate(chooseDate).getStartTime());
-                        if (!isRecorder)
-                        {
-                            //设备为录像，并加载当天起始录像点到23:59:59,然后移位置到当前
-                            isRecorder = true;
-                            String beginTime = DateUtil.convertByFormat(getEarliestTimeByDate(chooseDate)
-                                    .getStartTime(), "yyyy-MM-dd HH:mm:ss");
-                            String endTime = chooseDate + " 23:59:59";
-                            //reloadVideoView(beginTime, endTime);
-                            cameraStreamSocketClient.close();
-                            stopPlay();
-                            initSocket0(beginTime, endTime);
-                            changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
-                        }
-                        else
-                        {
-                            //如果已加载录像流则只改变播放流位置即可
-                            long position = (date.getTime() - dayBegin.getTime()) / 1000;
-                            changePosition(position);
-                        }
+                        //如果已加载录像流则只改变播放流位置即可
+                        long position = (date.getTime() - dayBegin.getTime()) / 1000;
+                        changePosition(position);
                     }
                 }
             }
@@ -988,7 +985,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     }
 
 
-    @OnClick(R.id.ib_snapshot)
+    @OnClick(R.id.ll_snapshot)
     public void takePic(View view)
     {
         PermissionRequest.verifyStoragePermissions(this);
@@ -1051,7 +1048,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         //player.pause(port, 1);
     }
 
-    @OnClick(R.id.ib_record)
+    @OnClick(R.id.ll_btn_record)
     public void record(View view)
     {
         if (recordTimer == null)
@@ -1162,7 +1159,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         }
     }
 
-    @OnClick(R.id.ib_fullscreen)
+    @OnClick(R.id.ll_fullscreen)
     public void fullScreen(View view)
     {
         if (playerState == PLAYER_NOT_FULL)
@@ -1230,6 +1227,33 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         }
     }
 
+    @OnClick(R.id.tv_now_time)
+    public void chooseDate(View view)
+    {
+        Intent intent = new Intent(CameraHKHistoryActivity.this, CameraDateActivity.class);
+        intent.putExtra("camera", camera);
+        startActivityForResult(intent, 1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && requestCode == 1)
+        {
+            if (data != null)
+            {
+                String chooseResult = data.getStringExtra("choose_date");
+                if (chooseResult != null)
+                {
+                    chooseDate = data.getStringExtra("choose_date");
+                    tvNowChooseTime.setText(chooseDate);
+                    initRecord();
+                }
+            }
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
@@ -1269,8 +1293,6 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
             flVideo.setLayoutParams(layoutParams);
         }
         llHead.setVisibility(viewType);
-        llOper.setVisibility(viewType);
-        llMessage.setVisibility(viewType);
     }
 
     @Override
@@ -1374,18 +1396,6 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         }.execute();
     }
 
-    @OnClick(R.id.iv_pause)
-    public void pause(View view)
-    {
-        pause();
-    }
-
-    @OnClick(R.id.iv_play)
-    public void resume(View view)
-    {
-        resume();
-    }
-
     @OnClick(R.id.iv_take_pic)
     public void jumpPhotoList(View view)
     {
@@ -1448,6 +1458,68 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         }
     }
 
+    @OnClick(R.id.ll_play)
+    public void playHistory(View view)
+    {
+        if (playState == STATE_STOP)
+        {
+            List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(chooseDate);
+            if (recordItems != null)
+            {
+                String beginTime = DateUtil.convertByFormat(getEarliestTimeByDate(chooseDate)
+                        .getStartTime(), "yyyy-MM-dd HH:mm:ss");
+                String endTime = chooseDate + " 23:59:59";
+                initSocket0(beginTime, endTime);
+                playState = STATE_PLAY;
+                ivvVideo.setBackground(null);
+            }
+            else
+            {
+                ToastHelper.getInstance(this).shortShowMessage("该摄像头无录像");
+            }
+        }
+        else
+        {
+            if (cameraStreamSocketClient != null)
+                cameraStreamSocketClient.close();
+            stopPlay();
+            playState = STATE_STOP;
+        }
+    }
+
+    @OnClick(R.id.iv_left_time)
+    public void leftTime(View view)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateUtil.convertToDate(chooseDate + " 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        chooseDate = DateUtil.convertYYYY_MM_DD(calendar.getTime());
+        tvNowChooseTime.setText(chooseDate);
+        if (cameraStreamSocketClient != null)
+            cameraStreamSocketClient.close();
+        if (player != null)
+        {
+            player.freePort(port);
+            player.closeStream(port);
+        }
+        initRecord();
+    }
+
+    @OnClick(R.id.iv_right_time)
+    public void rightTime(View view)
+    {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateUtil.convertToDate(chooseDate + " 00:00:00", "yyyy-MM-dd HH:mm:ss"));
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        if (!(calendar.getTime().getTime() > new Date().getTime()))
+        {
+            chooseDate = DateUtil.convertYYYY_MM_DD(calendar.getTime());
+            tvNowChooseTime.setText(chooseDate);
+            initRecord();
+        }
+    }
+
+
     /**
      * 请求查询进度线程
      */
@@ -1494,18 +1566,22 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
      */
     private void initRecord()
     {
+        llTimeLoading.setVisibility(View.VISIBLE);
+        llTime.setVisibility(View.GONE);
+        llNoRecord.setVisibility(View.GONE);
+
         //当前时间
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String nowDate = format.format(new Date());
-        String endTime = nowDate + " 23:59:59";
+        //String nowDate = format.format(new Date());
+        String endTime = chooseDate + " 23:59:59";
 
-
+        tvNowChooseTime.setText(chooseDate);
         //当前时间加一个月
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        Date date = cal.getTime();
-        String beginTime = format.format(date) + " 00:00:00";
+//        Calendar cal = Calendar.getInstance();
+//        cal.add(Calendar.DATE, -1);
+//        Date date = cal.getTime();
+        String beginTime = chooseDate + " 00:00:00";
 
         new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
                 camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
@@ -1516,6 +1592,10 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
                 super.onPostExecute(result);
                 if (result.getError() == null)
                 {
+                    llTimeLoading.setVisibility(View.GONE);
+                    llNoRecord.setVisibility(View.GONE);
+                    llTime.setVisibility(View.VISIBLE);
+
                     List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
                     for (RecordItem recordItem : recordItems)
                     {
@@ -1558,9 +1638,9 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
                     }
 
                     //TODO 渲染时间轴
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    String date = simpleDateFormat.format(new Date());
-                    initTimeSeekRecord(date);
+//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//                    String date = simpleDateFormat.format(new Date());
+                    initTimeSeekRecord(chooseDate);
                 }
                 else
                 {
@@ -1579,7 +1659,11 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     {
         List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(date);
         if (recordItems == null)
+        {
+            llTime.setVisibility(View.GONE);
+            llNoRecord.setVisibility(View.VISIBLE);
             return;
+        }
         List<RecordItem> changeRecordItems = new ArrayList<>();
         for (RecordItem recordItem : recordItems)
         {
@@ -1589,7 +1673,10 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
             changeRecordItems.add(recordItem1);
         }
         if (timeSeekBar != null)
+        {
             timeSeekBar.setRecordList(changeRecordItems);
+            timeSeekBar.setValue(getEarliestTime(recordItems).getStartTime());
+        }
     }
 
     /**

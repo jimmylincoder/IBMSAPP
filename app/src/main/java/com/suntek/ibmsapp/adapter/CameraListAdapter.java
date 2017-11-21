@@ -19,6 +19,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.page.camera.CameraHKHistoryActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.PreviewUtil;

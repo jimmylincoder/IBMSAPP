@@ -83,142 +83,23 @@ import butterknife.OnClick;
  *
  * @author jimmy
  */
-public class CameraPlayHKActivity extends BaseActivity implements Runnable,
+public class CameraPlayHKActivity extends BaseCameraPlayActivity implements Runnable,
         ConnectionClassManager.ConnectionClassStateChangeListener
 {
-    //全屏
-    private final int PLAYER_FULLSCREEN = 0;
-    //非全屏
-    private final int PLAYER_NOT_FULL = 1;
-    //截图保存位置
-    private final String PIC_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + "/ibms";
-    //视频view
-    @BindView(R.id.video_view)
-    CustomSurfaceView ivvVideo;
-    //顶部标题
-    @BindView(R.id.ll_head)
-    LinearLayout llHead;
-    //视频底部操作
-    @BindView(R.id.ll_oper)
-    LinearLayout llOper;
-    //当前时间
-    @BindView(R.id.ll_time)
-    LinearLayout llTime;
-    //云台控制
-    @BindView(R.id.ll_message)
-    LinearLayout llMessage;
-    //视频界面
-    @BindView(R.id.fl_video)
-    FrameLayout flVideo;
-    //当前时间
-    @BindView(R.id.tv_nowtime)
-    TextView tvNowTime;
-    //时间轴
-    @BindView(R.id.ta_time)
-    TimeSeekBarView timeSeekBar;
-    //摄像机名称
-    @BindView(R.id.tv_camera_name)
-    TextView tvCameraName;
-    @BindView(R.id.tv_type)
-    TextView tvPlayType;
-    @BindView(R.id.ll_loading)
-    LinearLayout llLoading;
-    @BindView(R.id.tv_load_percent)
-    TextView tvLoadPercent;
-    @BindView(R.id.ll_fail)
-    LinearLayout llFail;
-    @BindView(R.id.iv_take_pic)
-    ImageView ivTakePic;
-    @BindView(R.id.ll_take_pic)
-    LinearLayout llTakePic;
-    @BindView(R.id.tv_net_state)
-    TextView tvNetState;
-    @BindView(R.id.tv_net_speed)
-    TextView tvNetSpeed;
-    @BindView(R.id.ll_change_time)
-    LinearLayout llChangeTime;
-    @BindView(R.id.tv_change_time)
-    TextView tvChangeTime;
-    @BindView(R.id.ll_record)
-    LinearLayout llRecord;
-    @BindView(R.id.tv_record_time)
-    TextView tvRecordTime;
-    @BindView(R.id.ll_sfv)
-    LinearLayout llSfv;
-    @BindView(R.id.iv_pot)
-    ImageView ivPot;
-    //时间选择
-    private PopupWindow dateChoose;
-    //菜单
-    private PopupWindow menu;
-    //当前日期 yyyy-MM-dd
-    private String chooseDate;
-    //当前时间handler
-    private Handler timeHandler;
-    private boolean mBackPressed;
-    //是否停止当前时间线程
-    private boolean isTimeRun = true;
-    //全屏状态
-    private int playerState = PLAYER_NOT_FULL;
-    //时间轴定时器
-    private Timer seekBarTimer;
-    //查询进度
-    private Timer queryProgressTimer;
-    //当前视频会话
-    private String session;
-    //是否隐藏
-    private boolean isBackGround = false;
-    //当前摄像头
-    private Camera camera;
-    //存储录像对应时间段
-    private Map<String, Object> recordMap = new HashMap<>();
-    //是否为录像状态
-    private boolean isRecorder = false;
-    //日历选择
-    GridCalendarView gcv;
-    //记录录像开始时间
-    private long recordBeginTime;
-    private long changePosition;
-    // 最后缓存的字节数
-    private long lastTotalRxBytes = 0;
-    // 当前缓存时间
-    private long lastTimeStamp = 0;
-    //网络检测线程
-    private Timer netSpeedTimer;
-    private boolean isChangeTimeStart;
+    @BindView(R.id.ll_full_oper)
+    LinearLayout llFullOper;
+    @BindView(R.id.iv_sounds)
+    ImageView ivSounds;
+    @BindView(R.id.tv_stream_type)
+    TextView tvStreamType;
+    @BindView(R.id.iv_play_state)
+    ImageView ivPlayState;
+    @BindView(R.id.ll_full_back)
+    LinearLayout llFullBack;
 
-    private Player player;
-    int port;
-
-    //socket ip和端口
-    private String socketIp;
-    private int socketPort;
-
-
-    private int bitmapLen;
-    private int bitmapWidth;
-    private int bitmapHeight;
-
-    //视频流sokcet连接类
-    private CameraStreamSocketClient cameraStreamSocketClient;
-    private String TAG = CameraPlayHKActivity.class.getName();
-
-
-    private String recordFilePath = "/sdcard/DCIM/Camera/ibms/";
-    private FileOutputStream fileOutputStream;
-    private File recordFile;
-
-    private boolean record = false;
-    private boolean isSetRecordSuccess = false;
-    private Timer recordTimer;
-    private SurfaceHolder surfaceHolder;
-
-    private boolean isRequestRecord = false;
-    private int pauseState = 0;
-    //缓冲1m
-    private static final int MAX_BUFFER_SIZE = 1024 * 1024 * 1;
-    private static final int MIN_BUFFER_SIZE = 1;
-    private int size = MAX_BUFFER_SIZE;
+    private final static int SOUNDS_ON = 0;
+    private final static int SOUNDS_OFF = 1;
+    private int soundsType = SOUNDS_ON;
 
     @Override
     public int getLayoutId()
@@ -266,7 +147,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     Map<String, Object> map = (Map<String, Object>) result.getResultData();
                     socketIp = (String) map.get("ip");
                     socketPort = Integer.parseInt((String) map.get("port"));
-                    initSocket0(null, null);
+                    initSocket0(null, null, "1");
                 }
                 else
                 {
@@ -286,17 +167,27 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             @Override
             public void onClick(View view)
             {
-                if (playerState == PLAYER_NOT_FULL)
+                if (playerState == PLAYER_FULLSCREEN)
                 {
-                    if (llTime.getVisibility() == View.GONE)
+                    if (llFullOper.getVisibility() == View.GONE)
+                        llFullOper.setVisibility(View.VISIBLE);
+                    else
+                        llFullOper.setVisibility(View.GONE);
+
+                    if (llFullBack.getVisibility() == View.GONE)
+                        llFullBack.setVisibility(View.VISIBLE);
+                    else
+                        llFullBack.setVisibility(View.GONE);
+                }
+                else
+                {
+                    if (llNetSpeed.getVisibility() == View.GONE)
                     {
-                        llOper.setVisibility(View.GONE);
-                        llTime.setVisibility(View.VISIBLE);
+                        llNetSpeed.setVisibility(View.VISIBLE);
                     }
                     else
                     {
-                        llOper.setVisibility(View.VISIBLE);
-                        llTime.setVisibility(View.GONE);
+                        llNetSpeed.setVisibility(View.GONE);
                     }
                 }
             }
@@ -369,7 +260,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
      * @param beginTime
      * @param endTime
      */
-    private void initSocket0(String beginTime, String endTime)
+    private void initSocket0(String beginTime, String endTime, String streamType)
     {
         cameraStreamSocketClient = CameraStreamSocketClient.getInstance()
                 .setOnCameraStreamDataListener(new OnCameraStreamDataListener()
@@ -378,7 +269,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     public void onReceiveMediaChannel(int mediaChannel)
                     {
                         //接收到mediaChannel就请求播放
-                        play(mediaChannel + "", beginTime, endTime);
+                        play(mediaChannel + "", beginTime, endTime, streamType);
                         startQueryProgress();
                     }
 
@@ -491,6 +382,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     {
                         if (llLoading != null && llLoading.getVisibility() == View.VISIBLE)
                             llLoading.setVisibility(View.GONE);
+                        ivPlayState.setBackgroundResource(R.mipmap.ic_oper_stop);
                     }
                 });
             }
@@ -551,47 +443,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 播放请求
-     *
-     * @param mediaChannel
-     * @param startTime
-     * @param endTime
-     */
-    private void play(String mediaChannel, String startTime, String endTime)
-    {
-        new CameraPlayHKTask(CameraPlayHKActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
-                camera.getChannel(), camera.getUserName(), camera.getPassword(), "0", startTime, endTime)
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() == null)
-                {
-                    Map<String, Object> map = (Map<String, Object>) result.getResultData();
-                    session = (String) map.get("session");
-                    Log.e(TAG, "session:" + session);
-                    if (isRecorder)
-                        changePosition(changePosition);
-                    if (!isRequestRecord)
-                    {
-                        initRecord();
-                        isRequestRecord = true;
-                    }
-                }
-                else
-                {
-                    //ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
-                    if (llLoading != null)
-                        llLoading.setVisibility(View.GONE);
-                    if (llFail != null)
-                        llFail.setVisibility(View.VISIBLE);
-                }
-            }
-        }.execute();
     }
 
     /**
@@ -724,7 +575,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                     isRecorder = false;
                     cameraStreamSocketClient.close();
                     stopPlay();
-                    initSocket0(null, null);
+                    initSocket0(null, null, "1");
                     tvPlayType.setText("直播");
                 }
                 else
@@ -751,7 +602,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             //reloadVideoView(beginTime, endTime);
                             cameraStreamSocketClient.close();
                             stopPlay();
-                            initSocket0(beginTime, endTime);
+                            initSocket0(beginTime, endTime, "1");
                             changePosition = (date.getTime() - dayBegin.getTime()) / 1000;
                         }
                         else
@@ -989,9 +840,19 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }
     }
 
-
-    @OnClick(R.id.ib_snapshot)
+    @OnClick(R.id.ll_snapshot)
     public void takePic(View view)
+    {
+        takePic();
+    }
+
+    @OnClick(R.id.iv_full_take_pic)
+    public void fullTakePic(View view)
+    {
+        takePic();
+    }
+
+    private void takePic()
     {
         PermissionRequest.verifyStoragePermissions(this);
         File localFile = new File(PIC_PATH);
@@ -1041,12 +902,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
     @OnClick(R.id.ib_talk)
     public void talk(View view)
     {
-        //ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
-        cameraStreamSocketClient.close();
-        stopPlay();
-        Intent intent = new Intent(CameraPlayHKActivity.this, CameraHKHistoryActivity.class);
-        intent.putExtra("camera", camera);
-        startActivity(intent);
+        ToastHelper.getInstance(this).shortShowMessage("该摄像头不支持通话");
     }
 
     @OnClick(R.id.ib_voice)
@@ -1056,8 +912,19 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         //player.pause(port, 1);
     }
 
-    @OnClick(R.id.ib_record)
+    @OnClick(R.id.ll_btn_record)
     public void record(View view)
+    {
+        record();
+    }
+
+    @OnClick(R.id.iv_full_record)
+    public void fullRecord(View view)
+    {
+        record();
+    }
+
+    public void record()
     {
         if (recordTimer == null)
             recordTimer = new Timer();
@@ -1167,18 +1034,16 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }
     }
 
-    @OnClick(R.id.ib_fullscreen)
+    @OnClick(R.id.ll_fullscreen)
     public void fullScreen(View view)
     {
         if (playerState == PLAYER_NOT_FULL)
         {
             ivvVideo.setStart_Top(-1);
-            //surfaceHolder.setFixedSize(800, 1920);
-//            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) ivvVideo.getLayoutParams();
-//            layoutParams.gravity = Gravity.CENTER;
-//            layoutParams.weight = ViewGroup.LayoutParams.MATCH_PARENT;
-//            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-//            ivvVideo.setLayoutParams(layoutParams);
+
+            llFullOper.setVisibility(View.GONE);
+            llNetSpeed.setVisibility(View.GONE);
+            llFullBack.setVisibility(View.GONE);
 
             NiceUtil.hideActionBar(this);
             NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -1186,6 +1051,23 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             playerState = PLAYER_FULLSCREEN;
 
             initSurfaceViewSize();
+        }
+    }
+
+    @OnClick(R.id.ll_full_back)
+    public void exitFull(View view)
+    {
+        if (playerState == PLAYER_FULLSCREEN)
+        {
+            NiceUtil.showActionBar(this);
+            NiceUtil.scanForActivity(this).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            setFullScreenLayout(View.VISIBLE);
+            playerState = PLAYER_NOT_FULL;
+
+            surfaceHolder.setFixedSize(800, 800);
+            ivvVideo.setStart_Top(-1);
+            initSurfaceViewSize();
+            llFullOper.setVisibility(View.GONE);
         }
     }
 
@@ -1235,6 +1117,116 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }
     }
 
+    @OnClick(R.id.ll_stream_type)
+    public void streamType(View view)
+    {
+        setStreamType(view);
+    }
+
+    @OnClick(R.id.tv_fulL_stream)
+    public void fullStreamType(View view)
+    {
+        setStreamType(view);
+    }
+
+    private void setStreamType(View view)
+    {
+        int[] location = new int[2];
+        View view1 = getLayoutInflater().inflate(R.layout.view_stream_type, null);
+        TextView tvClean = (TextView) view1.findViewById(R.id.tv_clean);
+        TextView tvFast = (TextView) view1.findViewById(R.id.tv_fast);
+        view1.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        view.getLocationInWindow(location);
+        int popupWidth = view1.getMeasuredWidth();
+        int popupHeight = view1.getMeasuredHeight();
+        if (streamMenu == null)
+        {
+            streamMenu = new PopupWindow(view1, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            //menu.setAnimationStyle(R.style.Popupwindow);
+            LinearLayout llClean = (LinearLayout) view1.findViewById(R.id.ll_clean);
+            LinearLayout llFast = (LinearLayout) view1.findViewById(R.id.ll_fast);
+            //LinearLayout llDate = (LinearLayout) view1.findViewById(R.id.ll_date);
+            llClean.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    if (cameraStreamSocketClient != null && streamType == STREAM_FAST)
+                    {
+                        tvClean.setTextColor(getResources().getColor(R.color.blue_30));
+                        tvFast.setTextColor(getResources().getColor(R.color.gray_light));
+                        streamType = STREAM_CLEAN;
+                        cameraStreamSocketClient.close();
+                        stopPlay();
+                        tvStreamType.setText("高清");
+                        initSocket0(null, null, "0");
+                        streamMenu.dismiss();
+                    }
+                }
+            });
+
+            llFast.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    if (cameraStreamSocketClient != null && streamType == STREAM_CLEAN)
+                    {
+                        tvFast.setTextColor(getResources().getColor(R.color.blue_30));
+                        tvClean.setTextColor(getResources().getColor(R.color.gray_light));
+                        streamType = STREAM_FAST;
+                        cameraStreamSocketClient.close();
+                        stopPlay();
+                        tvStreamType.setText("流畅");
+                        initSocket0(null, null, "1");
+                        streamMenu.dismiss();
+                    }
+                }
+            });
+            streamMenu.setOutsideTouchable(true);
+            streamMenu.showAtLocation(view, Gravity.NO_GRAVITY, (location[0] + view.getWidth() / 2)
+                    - popupWidth / 2, location[1] - popupHeight);
+        }
+        else
+        {
+            if (streamMenu.isShowing())
+                streamMenu.dismiss();
+            else
+                streamMenu.showAtLocation(view, Gravity.NO_GRAVITY, (location[0] + view.getWidth() / 2)
+                        - popupWidth / 2, location[1] - popupHeight);
+        }
+    }
+
+    @OnClick(R.id.ll_play)
+    public void playReal(View view)
+    {
+        playReal();
+    }
+
+    @OnClick(R.id.iv_full_stop)
+    public void fullPlayRead(View view)
+    {
+        playReal();
+    }
+
+    private void playReal()
+    {
+        if (playState == STATE_STOP)
+        {
+            initSocket0(null, null, "1");
+            playState = STATE_PLAY;
+        }
+        else
+        {
+            ivPlayState.setBackgroundResource(R.mipmap.ic_oper_play);
+            if (cameraStreamSocketClient != null)
+                cameraStreamSocketClient.close();
+            stopPlay();
+            playState = STATE_STOP;
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
@@ -1250,6 +1242,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                 surfaceHolder.setFixedSize(800, 800);
                 ivvVideo.setStart_Top(-1);
                 initSurfaceViewSize();
+                llFullOper.setVisibility(View.GONE);
                 return true;
             }
             else
@@ -1287,6 +1280,11 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         {
             isBackGround = false;
         }
+        if (playState == STATE_STOP)
+        {
+            initSocket0(null, null, "1");
+            playState = STATE_PLAY;
+        }
     }
 
     @Override
@@ -1311,72 +1309,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * 停止播放视频
-     */
-    private void stopPlay()
-    {
-        if (session == null)
-            return;
-
-        new CameraStopTask(this, session)
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() != null)
-                {
-                    session = null;
-                }
-            }
-        }.execute();
-    }
-
-    private void pause()
-    {
-        if (session == null)
-            return;
-        new CameraPauseTask(this, session)
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() == null)
-                {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage("暂停成功");
-                }
-                else
-                {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
-                }
-            }
-        }.execute();
-    }
-
-    private void resume()
-    {
-        if (session == null)
-            return;
-        new CameraResumeTask(this, session)
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() == null)
-                {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage("恢复播放成功");
-                }
-                else
-                {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
-                }
-            }
-        }.execute();
     }
 
     @OnClick(R.id.iv_pause)
@@ -1439,7 +1371,7 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
                             String beginTime = format.format(new Date(recordItem.getStartTime()));
                             String endTime = chooseDate + " 23:59:59";
                             cameraStreamSocketClient.close();
-                            initSocket0(beginTime, endTime);
+                            initSocket0(beginTime, endTime, "1");
                         }
                     }
                     //TODO 加载至该天有录像的地方  重新加载顶部时间
@@ -1453,148 +1385,47 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
         }
     }
 
-    /**
-     * 请求查询进度线程
-     */
-    private void startQueryProgress()
+    @OnClick(R.id.ll_history)
+    public void history(View view)
     {
-        if (queryProgressTimer == null)
+        if (cameraStreamSocketClient != null)
+            cameraStreamSocketClient.close();
+        stopPlay();
+        if (player != null)
         {
-            queryProgressTimer = new Timer();
-            queryProgressTimer.schedule(new TimerTask()
-            {
-                @Override
-                public void run()
-                {
-                    queryProgress();
-                }
-            }, 5000, 8000);
+            player.closeStream(port);
+            player.freePort(port);
         }
+        playState = STATE_STOP;
+        Intent intent = new Intent(CameraPlayHKActivity.this, CameraHKHistoryActivity.class);
+        intent.putExtra("camera", camera);
+        startActivity(intent);
     }
 
-    /**
-     * 请求查询进度
-     */
-    private void queryProgress()
+    @OnClick(R.id.ll_sounds)
+    public void sounds(View view)
     {
-        if (session == null)
-            return;
-
-        new CameraQueryProgressTask(this, session)
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() == null)
-                {
-
-                }
-            }
-        }.execute();
+        sounds();
     }
 
-    /**
-     * 初始化历史录像，获取最近一个月录像
-     */
-    private void initRecord()
+    @OnClick(R.id.iv_full_sounds)
+    public void fullSounds(View view)
     {
-        //当前时间
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String nowDate = format.format(new Date());
-        String endTime = nowDate + " 23:59:59";
-
-
-        //当前时间加一个月
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        Date date = cal.getTime();
-        String beginTime = format.format(date) + " 00:00:00";
-
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-                if (result.getError() == null)
-                {
-                    List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
-                    for (RecordItem recordItem : recordItems)
-                    {
-                        String bt = format1.format(recordItem.getStartTime());
-                        String et = format1.format(recordItem.getEndTime());
-                        String[] beginStrs = bt.split(" ");
-                        String[] endStrs = et.split(" ");
-                        String beginDate = beginStrs[0];
-                        String endDate1 = endStrs[0];
-                        List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(beginDate);
-                        List<RecordItem> recordItems2 = (List<RecordItem>) recordMap.get(endDate1);
-                        if (recordItems1 == null)
-                            recordItems1 = new ArrayList<RecordItem>();
-                        if (recordItems2 == null)
-                            recordItems2 = new ArrayList<RecordItem>();
-
-                        if (!beginDate.equals(endDate1))
-                        {
-                            RecordItem recordItem1 = new RecordItem();
-                            RecordItem recordItem2 = new RecordItem();
-
-                            recordItem1.setDeviceId(recordItem.getDeviceId());
-                            recordItem1.setStartTime(recordItem.getStartTime());
-                            recordItem1.setEndTime(DateUtil.convertToLong(beginDate + " 23:59:59", "yyyy-MM-dd HH:mm:ss"));
-                            recordItems1.add(recordItem1);
-
-                            recordItem2.setDeviceId(recordItem.getDeviceId());
-                            recordItem2.setStartTime(DateUtil.convertToLong(endDate1 + " 00:00:00", "yyyy-MM-dd HH:mm:ss"));
-                            recordItem2.setEndTime(recordItem.getEndTime());
-                            recordItems2.add(recordItem2);
-
-                            recordMap.put(beginDate, recordItems1);
-                            recordMap.put(endDate1, recordItems2);
-                        }
-                        else
-                        {
-                            recordItems1.add(recordItem);
-                            recordMap.put(beginDate, recordItems1);
-                        }
-                    }
-
-                    //TODO 渲染时间轴
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    String date = simpleDateFormat.format(new Date());
-                    initTimeSeekRecord(date);
-                }
-                else
-                {
-                    ToastHelper.getInstance(CameraPlayHKActivity.this).shortShowMessage(result.getError().getMessage());
-                }
-            }
-        }.execute();
+        sounds();
     }
 
-    /**
-     * 渲染时间轴录像
-     *
-     * @param date
-     */
-    private void initTimeSeekRecord(String date)
+    private void sounds()
     {
-        List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(date);
-        if (recordItems == null)
-            return;
-        List<RecordItem> changeRecordItems = new ArrayList<>();
-        for (RecordItem recordItem : recordItems)
+        if (soundsType == SOUNDS_ON)
         {
-            RecordItem recordItem1 = new RecordItem();
-            recordItem1.setStartTime(recordItem.getStartTime() / 1000);
-            recordItem1.setEndTime(recordItem.getEndTime() / 1000);
-            changeRecordItems.add(recordItem1);
+            ivSounds.setBackgroundResource(R.mipmap.ic_oper_no_sounds);
+            soundsType = SOUNDS_OFF;
         }
-        if (timeSeekBar != null)
-            timeSeekBar.setRecordList(changeRecordItems);
+        else
+        {
+            ivSounds.setBackgroundResource(R.mipmap.ic_oper_sounds);
+            soundsType = SOUNDS_ON;
+        }
     }
 
     /**
@@ -1618,63 +1449,6 @@ public class CameraPlayHKActivity extends BaseActivity implements Runnable,
             }
         }
         gcv.setCalendarInfos(calendarInfos);
-    }
-
-    /**
-     * 通过当前日期获取最早日期记录
-     *
-     * @param date
-     * @return
-     */
-    private RecordItem getEarliestTimeByDate(String date)
-    {
-        List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(date);
-        return getEarliestTime(recordItems);
-    }
-
-    /**
-     * 获取录像最早时间录像
-     *
-     * @param recordItems
-     */
-    private RecordItem getEarliestTime(List<RecordItem> recordItems)
-    {
-        RecordItem recordItemTemp = new RecordItem();
-        recordItemTemp.setStartTime(0);
-        for (RecordItem recordItem : recordItems)
-        {
-            long bt = recordItem.getStartTime();
-            if (recordItemTemp.getStartTime() == 0)
-                recordItemTemp = recordItem;
-
-            if (bt < recordItemTemp.getStartTime())
-            {
-                recordItemTemp = recordItem;
-            }
-        }
-
-        return recordItemTemp;
-    }
-
-
-    /**
-     * 改变位置
-     *
-     * @param position
-     */
-    private void changePosition(long position)
-    {
-        if (session == null)
-            return;
-
-        new CameraChangePositionTask(this, session, Long.toString(position))
-        {
-            @Override
-            protected void onPostExecute(TaskResult result)
-            {
-                super.onPostExecute(result);
-            }
-        }.execute();
     }
 
     @Override
