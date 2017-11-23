@@ -152,6 +152,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".page.camera.CameraPlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
         <meta-data
             android:name="UMENG_APPKEY"
             android:value="5a02606b8f4a9d0784000264">

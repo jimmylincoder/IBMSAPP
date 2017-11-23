@@ -21,6 +21,7 @@ import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraHKHistoryActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
+import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.PreviewUtil;
 import com.suntek.ibmsapp.widget.UnityDialog;
@@ -154,7 +155,7 @@ public class CameraListAdapter extends BaseAdapter
             @Override
             public void onClick(View v)
             {
-                Intent intent = new Intent(context, CameraPlayHKActivity.class);
+                Intent intent = new Intent(context, CameraPlayerActivity.class);
                 Camera camera = cameraList.get(position);
                 if (camera.getIsUsed().equals("1"))
                 {
