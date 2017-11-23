@@ -156,7 +156,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@color/col_303037"
+            android:background="@color/col_3e4047"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -168,9 +168,9 @@
 
                 <ImageView
                     android:id="@+id/iv_play_state"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_oper_play"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_oper_play"/>
 
             </LinearLayout>
 
@@ -183,9 +183,9 @@
 
                 <ImageView
                     android:id="@+id/iv_sounds"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_oper_sounds"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_oper_voice_on"/>
 
             </LinearLayout>
 
@@ -197,9 +197,9 @@
                 >
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_oper_mutil_screen"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_oper_mutil_screen"/>
 
 
             </LinearLayout>
@@ -212,12 +212,18 @@
                 android:gravity="center"
                 >
 
-                <TextView
-                    android:id="@+id/tv_stream_type"
+                <!--<TextView-->
+                <!--android:id="@+id/tv_stream_type"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="流畅"-->
+                <!--android:textColor="@color/white"/>-->
+                <ImageView
+                    android:id="@+id/iv_stream_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="流畅"
-                    android:textColor="@color/white"/>
+                    android:background="@drawable/btn_oper_fluent"/>
+
             </LinearLayout>
 
             <LinearLayout
@@ -228,9 +234,9 @@
                 android:gravity="center">
 
                 <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:background="@mipmap/ic_oper_fullscreen"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_oper_full_screen"/>
 
             </LinearLayout>
 
@@ -257,9 +263,9 @@
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:background="@mipmap/ic_oper_take_pic"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_oper_take_pic"/>
 
                 </LinearLayout>
 
@@ -271,9 +277,9 @@
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="25dp"
-                        android:background="@mipmap/ic_oper_record"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_oper_record"/>
 
                 </LinearLayout>
 
@@ -285,9 +291,9 @@
                     android:gravity="center">
 
                     <ImageView
-                        android:layout_width="35dp"
-                        android:layout_height="25dp"
-                        android:background="@mipmap/ic_oper_control"/>
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_oper_talk"/>
 
                 </LinearLayout>
             </LinearLayout>
@@ -297,12 +303,14 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
+            android:background="@color/col_e6e6e6"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
+                android:paddingLeft="10dp"
                 android:gravity="left|center_vertical"
                 android:orientation="horizontal">
 
@@ -316,16 +324,10 @@
             <LinearLayout
                 android:id="@+id/ll_history"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:background="@color/white"
+                android:background="@mipmap/bg_record_example"
                 android:orientation="horizontal">
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
 
             </LinearLayout>
 

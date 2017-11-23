@@ -11,10 +11,7 @@ import android.util.AttributeSet;
 import org.MediaPlayer.PlayM4.Player;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * 海康播放view

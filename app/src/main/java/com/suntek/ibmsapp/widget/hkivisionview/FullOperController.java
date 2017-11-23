@@ -56,7 +56,7 @@ public class FullOperController extends AbstractControlView
         ImageView ivSounds = (ImageView) fullOper.findViewById(R.id.iv_full_sounds);
         ImageView ivTakePic = (ImageView) fullOper.findViewById(R.id.iv_full_take_pic);
         ImageView ivRecord = (ImageView) fullOper.findViewById(R.id.iv_full_record);
-        TextView tvStreamType = (TextView) fullOper.findViewById(R.id.tv_fulL_stream);
+        ImageView ivStream = (ImageView) fullOper.findViewById(R.id.iv_fulL_stream);
 
         llBack.setOnClickListener(new OnClickListener()
         {
@@ -98,7 +98,7 @@ public class FullOperController extends AbstractControlView
                 onItemClickListener.record(v);
             }
         });
-        tvStreamType.setOnClickListener(new OnClickListener()
+        ivStream.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v)

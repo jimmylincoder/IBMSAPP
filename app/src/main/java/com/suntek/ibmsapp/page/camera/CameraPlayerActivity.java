@@ -80,8 +80,10 @@ public class CameraPlayerActivity extends BaseActivity
     TextView tvRecordTime;
     @BindView(R.id.iv_pot)
     ImageView ivPot;
-    @BindView(R.id.tv_stream_type)
-    TextView tvStreamType;
+    @BindView(R.id.iv_stream_type)
+    ImageView ivStreamType;
+    @BindView(R.id.tv_camera_name)
+    TextView tvCameraName;
 
     //清晰度选择
     protected PopupWindow streamMenu;
@@ -108,6 +110,7 @@ public class CameraPlayerActivity extends BaseActivity
         netSpeedView = new NetSpeedController(this);
         fullOperView = new FullOperController(this);
         camera = (Camera) getIntent().getExtras().get("camera");
+        tvCameraName.setText(camera.getName());
         hikvisionVideoView.initInfo(camera);
         hikvisionVideoView.setController(netSpeedView);
         hikvisionVideoView.setOnPlayListener(new AbstractHkivisionVideoView.OnPlayListener()
@@ -411,16 +414,16 @@ public class CameraPlayerActivity extends BaseActivity
             public void OnHighQuality(View view)
             {
                 //hikvisionVideoView.release();
-                hikvisionVideoView.play(STREAM_HIGH_QUALITY + "");
-                tvStreamType.setText("高清");
+                hikvisionVideoView.playReal(STREAM_HIGH_QUALITY);
+                ivStreamType.setImageDrawable(getDrawable(R.drawable.btn_oper_high_quality));
             }
 
             @Override
             public void OnFluent(View view)
             {
                 //hikvisionVideoView.release();
-                hikvisionVideoView.play(STREAM_FLUENT + "");
-                tvStreamType.setText("流畅");
+                hikvisionVideoView.playReal(STREAM_FLUENT);
+                ivStreamType.setImageDrawable(getDrawable(R.drawable.btn_oper_fluent));
             }
         });
     }
