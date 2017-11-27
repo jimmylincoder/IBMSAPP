@@ -734,6 +734,7 @@
                 app:middleLineColor="@color/col_f7de0a"
                 app:recordColor="@color/col_b8b8b8"
                 app:style="1"
+                android:visibility="invisible"
                 app:timeTextColor="@color/col_272727"/>
 
             <View

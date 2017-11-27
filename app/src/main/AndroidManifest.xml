@@ -116,6 +116,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="portrait"/>
 
+        <activity
+            android:name=".page.camera.CameraPlayerHistoryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
         <!--海康历史视频播放-->
         <activity
             android:name=".page.camera.CameraHKHistoryActivity"

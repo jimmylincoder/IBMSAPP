@@ -31,4 +31,8 @@ public interface IControlAction
     int getState();
 
     void setController(AbstractControlView controller);
+
+    void getRecordByDate(String date, AbstractHkivisionVideoView.OnHistoryRecordListener onHistoryRecordListener);
+
+    void seekTo(long position);
 }

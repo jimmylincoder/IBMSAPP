@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
@@ -71,13 +72,55 @@
             android:id="@+id/ll_full_oper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="6"
-            android:orientation="horizontal">
+            android:layout_weight="3"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="5">
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@color/black_alpha_45"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingRight="15dp">
+
+                    <ImageView
+                        android:id="@+id/iv_full_stop"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:background="@drawable/btn_full_pause"/>
+
+                    <ImageView
+                        android:id="@+id/iv_full_sounds"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="20dp"
+                        android:background="@drawable/btn_full_voice_on"/>
+
+                    <ImageView
+                        android:id="@+id/iv_full_take_pic"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="20dp"
+                        android:background="@drawable/btn_full_take_pic"/>
+
+                    <ImageView
+                        android:id="@+id/iv_full_record"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="20dp"
+                        android:background="@drawable/btn_full_record"/>
+
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -85,46 +128,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:gravity="center|right"
-                android:orientation="horizontal"
-                android:paddingRight="15dp">
+                android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/iv_full_stop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/btn_full_play"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/col_8c8c8c"/>
 
-                <ImageView
-                    android:id="@+id/iv_full_sounds"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:background="@drawable/btn_full_voice_on"/>
-
-                <ImageView
-                    android:id="@+id/iv_full_take_pic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:background="@drawable/btn_full_take_pic"/>
-
-                <ImageView
-                    android:id="@+id/iv_full_record"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:background="@drawable/btn_full_record"/>
-
-
-                <ImageView
-                    android:id="@+id/iv_fulL_stream"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:background="@drawable/btn_full_fluent"/>
+                <com.suntek.ibmsapp.widget.TimeSeekBarView
+                    android:id="@+id/ta_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:backgroundColor="@color/transparent"
+                    app:lineColor="@color/col_8c8c8c"
+                    app:middleLineColor="@color/col_f7de0a"
+                    app:recordColor="@color/col_b8b8b8"
+                    app:style="1"
+                    app:timeTextColor="@color/white"/>
 
             </LinearLayout>
+
 
         </LinearLayout>
     </LinearLayout>

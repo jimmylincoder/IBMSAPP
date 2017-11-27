@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
@@ -43,7 +44,7 @@
                     android:id="@+id/tv_camera_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="停车场_通道33"
+                    android:text="历史录像"
                     android:textColor="@color/white"
                     android:textSize="15dp"/>
             </LinearLayout>
@@ -66,6 +67,7 @@
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:background="@mipmap/ic_more"
+                    android:visibility="gone"
                     />
 
             </LinearLayout>
@@ -197,10 +199,10 @@
                 >
 
                 <ImageView
-                    android:id="@+id/iv_mutil_screen"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/btn_oper_mutil_screen"/>
+                    android:background="@drawable/btn_oper_mutil_screen"
+                    android:visibility="gone"/>
 
 
             </LinearLayout>
@@ -223,7 +225,8 @@
                     android:id="@+id/iv_stream_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/btn_oper_fluent"/>
+                    android:background="@drawable/btn_oper_fluent"
+                    android:visibility="gone"/>
 
             </LinearLayout>
 
@@ -289,7 +292,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:visibility="gone">
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -304,55 +308,103 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
             android:background="@color/col_e6e6e6"
-            android:orientation="vertical"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp">
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:layout_marginTop="30dp"
+                android:layout_height="30dp"
                 android:gravity="left|center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:paddingLeft="10dp">
 
-                <LinearLayout
+                <com.suntek.ibmsapp.widget.SelectDateView
+                    android:id="@+id/sdv_date"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical">
+                    android:layout_height="match_parent">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="设备录像"
-                        android:textSize="14sp"
-                        android:textStyle="bold"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="right|center_vertical">
-
-                    <ImageView
-                        android:layout_width="17dp"
-                        android:layout_height="17dp"
-                        android:background="@mipmap/ic_next"/>
-
-                </LinearLayout>
+                </com.suntek.ibmsapp.widget.SelectDateView>
 
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_history"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:background="@mipmap/bg_record_example"
+                android:layout_height="70dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/white"
                 android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/ll_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="71dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="1dp"
+                    android:paddingTop="1dp"
+                    android:visibility="gone">
+
+
+                    <com.suntek.ibmsapp.widget.TimeSeekBarView
+                        android:id="@+id/ta_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:backgroundColor="@color/col_d3d3d3"
+                        app:lineColor="@color/col_8c8c8c"
+                        app:middleLineColor="@color/col_f7de0a"
+                        app:recordColor="@color/col_b8b8b8"
+                        app:style="1"
+                        app:timeTextColor="@color/col_272727"/>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_time_loading"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:background="@color/white"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingBottom="1dp"
+                    android:paddingTop="1dp">
+
+                    <com.wang.avi.AVLoadingIndicatorView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        app:indicator="BallClipRotate"
+                        app:indicator_color="@color/blue_30"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:text="正在加载中..."
+                        />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/ll_no_record"
+                    android:layout_width="match_parent"
+                    android:layout_height="71dp"
+                    android:background="@color/white"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingBottom="1dp"
+                    android:paddingTop="1dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="该时间段无录像"
+                        android:textColor="@color/gray_light"
+                        />
+
+                </LinearLayout>
 
             </LinearLayout>
 

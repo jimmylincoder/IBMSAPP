@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.TrafficStats;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
@@ -18,30 +17,38 @@ import android.widget.TextView;
 
 import com.facebook.network.connectionclass.ConnectionClassManager;
 import com.facebook.network.connectionclass.ConnectionQuality;
-import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.model.RecordItem;
+import com.suntek.ibmsapp.widget.TimeAlgorithm;
+import com.suntek.ibmsapp.widget.TimeSeekBarView;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * 全屏时的控制界面
+ * 历史录像全屏操作
  *
  * @author jimmy
  */
-public class FullOperController extends AbstractControlView implements
+public class FullRecordOperController extends AbstractControlView implements
         ConnectionClassManager.ConnectionClassStateChangeListener
 {
+    private Context context;
+
+    private FullRecordOperController.OnItemClickListener onItemClickListener;
+
+    private OnDateChangeListener onDateChangeListener;
+
     private Timer netSpeedTimer;
+
+    private TimeSeekBarView taTime;
 
     // 最后缓存的字节数
     protected long lastTotalRxBytes = 0;
     // 当前缓存时间
     protected long lastTimeStamp = 0;
-
-    private Context context;
-
-    private OnItemClickListener onItemClickListener;
 
     private TextView tvNetSpeed;
 
@@ -49,21 +56,19 @@ public class FullOperController extends AbstractControlView implements
 
     private ImageView ivSounds;
 
-    private ImageView ivStream;
-
-    public FullOperController(Context context)
+    public FullRecordOperController(Context context)
     {
         super(context);
         init(context);
     }
 
-    public FullOperController(Context context, @Nullable AttributeSet attrs)
+    public FullRecordOperController(Context context, @Nullable AttributeSet attrs)
     {
         super(context, attrs);
         init(context);
     }
 
-    public FullOperController(Context context, @Nullable AttributeSet attrs, int defStyleAttr)
+    public FullRecordOperController(Context context, @Nullable AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
         init(context);
@@ -76,7 +81,7 @@ public class FullOperController extends AbstractControlView implements
                 ViewGroup.LayoutParams.MATCH_PARENT);
         setOrientation(HORIZONTAL);
         LayoutInflater inflater = LayoutInflater.from(context);
-        View fullOper = inflater.inflate(R.layout.view_full_oper, null);
+        View fullOper = inflater.inflate(R.layout.view_full_record_opr, null);
         addView(fullOper, -1, params);
 
         LinearLayout llBack = (LinearLayout) fullOper.findViewById(R.id.ll_full_back);
@@ -84,7 +89,7 @@ public class FullOperController extends AbstractControlView implements
         ivSounds = (ImageView) fullOper.findViewById(R.id.iv_full_sounds);
         ImageView ivTakePic = (ImageView) fullOper.findViewById(R.id.iv_full_take_pic);
         ImageView ivRecord = (ImageView) fullOper.findViewById(R.id.iv_full_record);
-        ivStream = (ImageView) fullOper.findViewById(R.id.iv_fulL_stream);
+        taTime = (TimeSeekBarView) fullOper.findViewById(R.id.ta_time);
         LinearLayout llAnimNetSpeed = (LinearLayout) fullOper.findViewById(R.id.ll_anim_net_speed);
         tvNetSpeed = (TextView) fullOper.findViewById(R.id.tv_net_speed);
         final AnimationDrawable animDrawable = (AnimationDrawable) llAnimNetSpeed
@@ -92,15 +97,13 @@ public class FullOperController extends AbstractControlView implements
         animDrawable.start();
         netSpeed();
 
-        //网络测速
-        DeviceBandwidthSampler.getInstance().startSampling();
-
         llBack.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                onItemClickListener.back(v);
+                if (onItemClickListener != null)
+                    onItemClickListener.back(v);
             }
         });
         ivStop.setOnClickListener(new OnClickListener()
@@ -108,7 +111,8 @@ public class FullOperController extends AbstractControlView implements
             @Override
             public void onClick(View v)
             {
-                onItemClickListener.stop(v);
+                if (onItemClickListener != null)
+                    onItemClickListener.stop(v);
             }
         });
         ivSounds.setOnClickListener(new OnClickListener()
@@ -116,7 +120,8 @@ public class FullOperController extends AbstractControlView implements
             @Override
             public void onClick(View v)
             {
-                onItemClickListener.sounds(v);
+                if (onItemClickListener != null)
+                    onItemClickListener.sounds(v);
             }
         });
         ivTakePic.setOnClickListener(new OnClickListener()
@@ -124,7 +129,8 @@ public class FullOperController extends AbstractControlView implements
             @Override
             public void onClick(View v)
             {
-                onItemClickListener.takePic(v);
+                if (onItemClickListener != null)
+                    onItemClickListener.takePic(v);
             }
         });
         ivRecord.setOnClickListener(new OnClickListener()
@@ -132,19 +138,52 @@ public class FullOperController extends AbstractControlView implements
             @Override
             public void onClick(View v)
             {
-                onItemClickListener.record(v);
+                if (onItemClickListener != null)
+                    onItemClickListener.record(v);
             }
         });
-        ivStream.setOnClickListener(new OnClickListener()
+
+        taTime.setOnValueChangeListener(new TimeSeekBarView.OnValueChangeListener()
         {
             @Override
-            public void onClick(View v)
+            public void onValueChange(Date date)
             {
-                onItemClickListener.streamType(v);
+                if (onDateChangeListener != null)
+                    onDateChangeListener.onValueChange(date);
+            }
+
+            @Override
+            public void onStartValueChange(Date date)
+            {
+                if (onDateChangeListener != null)
+                    onDateChangeListener.onStartValueChange(date);
+            }
+
+            @Override
+            public void onStopValueChange(Date date)
+            {
+                if (onDateChangeListener != null)
+                    onDateChangeListener.onStopValueChange(date);
             }
         });
     }
 
+    public void setValue(long miliSec)
+    {
+        taTime.setValue(miliSec);
+    }
+
+    public void setRecordList(List<RecordItem> itemList)
+    {
+        taTime.setRecordList(itemList);
+    }
+
+    public Date getNowDate(String date)
+    {
+        TimeAlgorithm timeAlgorithm = taTime.getNowTimeValue();
+        long time = timeAlgorithm.getSec(date);
+        return new Date(time);
+    }
 
     /**
      * 网速
@@ -183,7 +222,7 @@ public class FullOperController extends AbstractControlView implements
         }
     };
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener)
+    public void setOnItemClickListener(FullRecordOperController.OnItemClickListener onItemClickListener)
     {
         this.onItemClickListener = onItemClickListener;
     }
@@ -196,23 +235,20 @@ public class FullOperController extends AbstractControlView implements
 
     public void setIvStopView(Drawable drawable)
     {
-        if (ivStop != null)
-            ivStop.setBackground(drawable);
+        this.ivStop.setBackground(drawable);
     }
 
     public void setIvSoundsView(Drawable drawable)
     {
-        if (ivSounds != null)
-            ivSounds.setBackground(drawable);
+        this.ivSounds.setBackground(drawable);
     }
 
-    public void setIvStreamView(Drawable drawable)
+    public void setOnDateChangeListener(OnDateChangeListener onDateChangeListener)
     {
-        if (ivStream != null)
-            ivStream.setBackground(drawable);
+        this.onDateChangeListener = onDateChangeListener;
     }
 
-    public static interface OnItemClickListener
+    public interface OnItemClickListener
     {
         void back(View view);
 
@@ -223,7 +259,15 @@ public class FullOperController extends AbstractControlView implements
         void takePic(View view);
 
         void record(View view);
+    }
 
-        void streamType(View view);
+
+    public interface OnDateChangeListener
+    {
+        void onValueChange(Date date);
+
+        void onStartValueChange(Date date);
+
+        void onStopValueChange(Date date);
     }
 }

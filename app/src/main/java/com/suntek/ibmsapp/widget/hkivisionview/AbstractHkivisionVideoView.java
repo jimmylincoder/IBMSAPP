@@ -21,12 +21,19 @@ import com.suntek.ibmsapp.component.tcp.CameraStreamSocketClient;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamDataListener;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamExceptionListener;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.model.RecordItem;
+import com.suntek.ibmsapp.page.camera.CameraHKHistoryActivity;
 import com.suntek.ibmsapp.task.base.BaseTask;
+import com.suntek.ibmsapp.task.camera.control.CameraChangePositionTask;
 import com.suntek.ibmsapp.task.camera.control.CameraPlayHKTask;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryProgressTask;
+import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.task.camera.control.CameraSocketTask;
 import com.suntek.ibmsapp.task.camera.control.CameraStopTask;
+import com.suntek.ibmsapp.util.DateUtil;
+import com.suntek.ibmsapp.util.RecordHander;
 import com.suntek.ibmsapp.widget.CustomSurfaceView;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import org.MediaPlayer.PlayM4.Player;
 import org.MediaPlayer.PlayM4.PlayerCallBack;
@@ -35,6 +42,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.Timer;
@@ -86,6 +95,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
     protected OnPlayStateListener onPlayStateListener;
     protected OnRecordListener onRecordListener;
     protected OnPlayListener onPlayListener;
+    protected OnHistoryRecordListener onHistoryRecordListener;
 
     //播放器
     protected Player player;
@@ -418,6 +428,26 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
 
 
     /**
+     * 改变位置
+     *
+     * @param position
+     */
+    protected void changePosition(long position)
+    {
+        if (session == null)
+            return;
+
+        new CameraChangePositionTask(context, session, Long.toString(position))
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+            }
+        }.execute();
+    }
+
+    /**
      * 查询进度
      */
     protected void queryProgress()
@@ -464,6 +494,31 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             }
         };
         taskStack.push(stopTask);
+    }
+
+    /**
+     * 获取最近时间
+     *
+     * @param beginTime
+     * @param endTime
+     */
+    protected void getRecord(String beginTime, String endTime)
+    {
+        new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
+                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
+                    Map<String, List<RecordItem>> recordMap = RecordHander.handleRecordList(recordItems);
+                    onHistoryRecordListener.onData(recordMap);
+                }
+            }
+        }.execute();
     }
 
     public void release()
@@ -514,6 +569,8 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         public void handleMessage(Message msg)
         {
             super.handleMessage(msg);
+            if (onPlayStateListener != null)
+                onPlayStateListener.onState(msg.arg1, "");
             switch (msg.arg1)
             {
                 case PREPARE:
@@ -575,5 +632,10 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
     public interface OnPlayListener
     {
         void onPlay(View view);
+    }
+
+    public interface OnHistoryRecordListener
+    {
+        void onData(Map<String, List<RecordItem>> recordMap);
     }
 }

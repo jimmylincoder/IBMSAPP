@@ -43,8 +43,11 @@ import java.util.TimerTask;
 import butterknife.BindView;
 import butterknife.OnClick;
 
+import static com.suntek.ibmsapp.R.id.iv_play_state;
 import static com.suntek.ibmsapp.page.camera.BaseCameraPlayActivity.STREAM_CLEAN;
 import static com.suntek.ibmsapp.page.camera.BaseCameraPlayActivity.STREAM_FAST;
+import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.FAIL;
+import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.PAUSE;
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.PLAYING;
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.STOP;
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.STREAM_FLUENT;
@@ -84,6 +87,12 @@ public class CameraPlayerActivity extends BaseActivity
     ImageView ivStreamType;
     @BindView(R.id.tv_camera_name)
     TextView tvCameraName;
+    @BindView(R.id.iv_play_state)
+    ImageView ivPlayState;
+    @BindView(R.id.iv_sounds)
+    ImageView ivSounds;
+    @BindView(R.id.iv_play)
+    ImageView ivPlay;
 
     //清晰度选择
     protected PopupWindow streamMenu;
@@ -97,6 +106,8 @@ public class CameraPlayerActivity extends BaseActivity
 
     private NetSpeedController netSpeedView;
     private FullOperController fullOperView;
+
+    private boolean isSounds = true;
 
     @Override
     public int getLayoutId()
@@ -146,7 +157,17 @@ public class CameraPlayerActivity extends BaseActivity
             @Override
             public void sounds(View view)
             {
-                ToastHelper.getInstance(CameraPlayerActivity.this).shortShowMessage("声音");
+                if (isSounds)
+                {
+                    ivSounds.setBackground(getDrawable(R.drawable.btn_oper_voice_off));
+                    fullOperView.setIvSoundsView(getDrawable(R.drawable.btn_full_voice_off));
+                }
+                else
+                {
+                    ivSounds.setBackground(getDrawable(R.drawable.btn_oper_voice_on));
+                    fullOperView.setIvSoundsView(getDrawable(R.drawable.btn_full_voice_on));
+                }
+                isSounds = !isSounds;
             }
 
             @Override
@@ -167,6 +188,28 @@ public class CameraPlayerActivity extends BaseActivity
                 setStreamType(view);
             }
         });
+        hikvisionVideoView.setOnPlayStateListener(new AbstractHkivisionVideoView.OnPlayStateListener()
+        {
+            @Override
+            public void onState(int state, String message)
+            {
+                switch (state)
+                {
+                    case PLAYING:
+                        if (ivPlayState != null)
+                            ivPlayState.setBackground(getDrawable(R.drawable.btn_oper_pause));
+                        fullOperView.setIvStopView(getDrawable(R.drawable.btn_full_pause));
+                        break;
+                    case STOP:
+                    case PAUSE:
+                    case FAIL:
+                        if (ivPlayState != null)
+                            ivPlayState.setBackground(getDrawable(R.drawable.btn_oper_play));
+                        fullOperView.setIvStopView(getDrawable(R.drawable.btn_full_play));
+                        break;
+                }
+            }
+        });
     }
 
     @Override
@@ -182,6 +225,12 @@ public class CameraPlayerActivity extends BaseActivity
         hikvisionVideoView.release();
     }
 
+    @OnClick(R.id.iv_mutil_screen)
+    public void mutilScreen(View view)
+    {
+        ToastHelper.getInstance(CameraPlayerActivity.this).shortShowMessage("多屏查看功能正在完善中...");
+    }
+
     @OnClick(R.id.ll_play)
     public void play(View view)
     {
@@ -189,7 +238,6 @@ public class CameraPlayerActivity extends BaseActivity
             hikvisionVideoView.playReal(AbstractHkivisionVideoView.STREAM_FLUENT);
         else
             hikvisionVideoView.release();
-
     }
 
     @OnClick(R.id.ll_snapshot)
@@ -200,6 +248,8 @@ public class CameraPlayerActivity extends BaseActivity
 
     private void takePic()
     {
+        if (hikvisionVideoView.getState() != PLAYING)
+            return;
         PermissionRequest.verifyStoragePermissions(this);
         Bitmap bitmap = hikvisionVideoView.takePic();
         Bitmap preview = BitmapUtil.centerSquareScaleBitmap(bitmap, 100);
@@ -224,8 +274,18 @@ public class CameraPlayerActivity extends BaseActivity
         record();
     }
 
+    @OnClick(R.id.ll_history)
+    public void jumpToHistory(View view)
+    {
+        Intent intent = new Intent(CameraPlayerActivity.this, CameraPlayerHistoryActivity.class);
+        intent.putExtra("camera", camera);
+        startActivity(intent);
+    }
+
     private void record()
     {
+        if (hikvisionVideoView.getState() != PLAYING)
+            return;
         if (isRecord)
         {
             File recordFile = hikvisionVideoView.stopRecord();
@@ -350,6 +410,22 @@ public class CameraPlayerActivity extends BaseActivity
         }).start();
     }
 
+    @OnClick(R.id.iv_sounds)
+    public void sounds(View view)
+    {
+        if (isSounds)
+        {
+            view.setBackground(getDrawable(R.drawable.btn_oper_voice_off));
+            fullOperView.setIvSoundsView(getDrawable(R.drawable.btn_full_voice_off));
+        }
+        else
+        {
+            view.setBackground(getDrawable(R.drawable.btn_oper_voice_on));
+            fullOperView.setIvSoundsView(getDrawable(R.drawable.btn_full_voice_on));
+        }
+        isSounds = !isSounds;
+    }
+
     @OnClick(R.id.ll_stream_type)
     public void streamType(View view)
     {
@@ -401,6 +477,7 @@ public class CameraPlayerActivity extends BaseActivity
         {
             llRecord.setVisibility(View.GONE);
             recordTimer.cancel();
+            recordTimer = null;
         }
     }
 
@@ -413,17 +490,19 @@ public class CameraPlayerActivity extends BaseActivity
             @Override
             public void OnHighQuality(View view)
             {
-                //hikvisionVideoView.release();
+                hikvisionVideoView.release();
                 hikvisionVideoView.playReal(STREAM_HIGH_QUALITY);
-                ivStreamType.setImageDrawable(getDrawable(R.drawable.btn_oper_high_quality));
+                ivStreamType.setBackground(getDrawable(R.drawable.btn_oper_high_quality));
+                fullOperView.setIvStreamView(getDrawable(R.drawable.btn_full_high_quality));
             }
 
             @Override
             public void OnFluent(View view)
             {
-                //hikvisionVideoView.release();
+                hikvisionVideoView.release();
                 hikvisionVideoView.playReal(STREAM_FLUENT);
-                ivStreamType.setImageDrawable(getDrawable(R.drawable.btn_oper_fluent));
+                ivStreamType.setBackground(getDrawable(R.drawable.btn_oper_fluent));
+                fullOperView.setIvStreamView(getDrawable(R.drawable.btn_full_fluent));
             }
         });
     }

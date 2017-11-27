@@ -8,10 +8,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
+import com.suntek.ibmsapp.model.RecordItem;
+import com.suntek.ibmsapp.util.DateUtil;
+
 import org.MediaPlayer.PlayM4.Player;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 海康播放view
@@ -41,7 +47,7 @@ public class HikvisionVideoView extends AbstractHkivisionVideoView implements IC
         if (socketIp == null && socketPort == null)
             getSocketIp(null, null, streamType);
         else
-            initSocket(null,null,streamType);
+            initSocket(null, null, streamType);
     }
 
     @Override
@@ -50,7 +56,7 @@ public class HikvisionVideoView extends AbstractHkivisionVideoView implements IC
         if (socketIp == null && socketPort == null)
             getSocketIp(beginTime, endTime, streamType);
         else
-            initSocket(beginTime,endTime,streamType);
+            initSocket(beginTime, endTime, streamType);
     }
 
     @Override
@@ -128,9 +134,29 @@ public class HikvisionVideoView extends AbstractHkivisionVideoView implements IC
         initController(controller);
     }
 
+    @Override
+    public void getRecordByDate(String date, OnHistoryRecordListener onHistoryRecordListener)
+    {
+        this.onHistoryRecordListener = onHistoryRecordListener;
+        String beginTime = date + " 00:00:00";
+        String endTime = date + " 23:59:59";
+        getRecord(beginTime, endTime);
+    }
+
+    @Override
+    public void seekTo(long position)
+    {
+        changePosition(position);
+    }
+
     public void setOnPlayListener(OnPlayListener onPlayListener)
     {
         this.onPlayListener = onPlayListener;
+    }
+
+    public void setOnPlayStateListener(OnPlayStateListener onPlayStateListener)
+    {
+        this.onPlayStateListener = onPlayStateListener;
     }
 
     public void initSurfaceView()
