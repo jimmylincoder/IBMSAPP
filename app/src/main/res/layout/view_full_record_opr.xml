@@ -141,8 +141,8 @@
                     android:layout_height="match_parent"
                     app:backgroundColor="@color/transparent"
                     app:lineColor="@color/col_8c8c8c"
-                    app:middleLineColor="@color/col_f7de0a"
-                    app:recordColor="@color/col_b8b8b8"
+                    app:middleLineColor="@color/red"
+                    app:recordColor="@color/col_e0eb8159"
                     app:style="1"
                     app:timeTextColor="@color/white"/>
 

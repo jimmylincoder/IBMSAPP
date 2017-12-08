@@ -27,6 +27,7 @@ import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.PreviewUtil;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.StreamTypePopView;
+import com.suntek.ibmsapp.widget.TalkView;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.suntek.ibmsapp.widget.hkivisionview.AbstractControlView;
 import com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView;
@@ -93,6 +94,12 @@ public class CameraPlayerActivity extends BaseActivity
     ImageView ivSounds;
     @BindView(R.id.iv_play)
     ImageView ivPlay;
+    @BindView(R.id.ll_talk)
+    LinearLayout llTalk;
+    @BindView(R.id.ll_oper_and_record)
+    LinearLayout llOperAndRecord;
+    @BindView(R.id.tav_talk)
+    TalkView tavTalk;
 
     //清晰度选择
     protected PopupWindow streamMenu;
@@ -133,6 +140,7 @@ public class CameraPlayerActivity extends BaseActivity
             }
         });
         initClick();
+        hikvisionVideoView.playReal(STREAM_FLUENT);
     }
 
     private void initClick()
@@ -208,6 +216,15 @@ public class CameraPlayerActivity extends BaseActivity
                         fullOperView.setIvStopView(getDrawable(R.drawable.btn_full_play));
                         break;
                 }
+            }
+        });
+        tavTalk.setOnHangUpListener(new TalkView.OnHangUpListener()
+        {
+            @Override
+            public void onHangUp(View view)
+            {
+                llTalk.setVisibility(View.GONE);
+                llOperAndRecord.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -424,6 +441,13 @@ public class CameraPlayerActivity extends BaseActivity
             fullOperView.setIvSoundsView(getDrawable(R.drawable.btn_full_voice_on));
         }
         isSounds = !isSounds;
+    }
+
+    @OnClick(R.id.ll_btn_talk)
+    public void talk(View view)
+    {
+        llOperAndRecord.setVisibility(View.GONE);
+        llTalk.setVisibility(View.VISIBLE);
     }
 
     @OnClick(R.id.ll_stream_type)

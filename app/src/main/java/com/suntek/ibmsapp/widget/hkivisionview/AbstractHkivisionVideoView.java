@@ -228,6 +228,27 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         surfaceHolder.setKeepScreenOn(true);
         surfaceHolder.setFixedSize(800, 800);
         surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        surfaceHolder.addCallback(new SurfaceHolder.Callback()
+        {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder)
+            {
+                if (player != null)
+                    player.play(port, holder);
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+            {
+
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder)
+            {
+
+            }
+        });
         videoView.postDelayed(new Runnable()
         {
             @Override
@@ -582,12 +603,15 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
                     playerState = PLAYING;
                     break;
                 case STOP:
+                    playerState = STOP;
                     addStateView(stopView);
                     break;
                 case PAUSE:
+                    playerState = PAUSE;
                     addStateView(stopView);
                     break;
                 case FAIL:
+                    playerState = FAIL;
                     addStateView(failView);
                     break;
             }

@@ -98,17 +98,18 @@
 
 
             <LinearLayout
-                android:layout_width="71dp"
-                android:layout_height="71dp"
-                android:layout_marginLeft="30dp"
-                android:background="@color/white"
-                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginBottom="10dp"
+                android:layout_gravity="bottom|left"
+                android:gravity="center|bottom"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:id="@+id/iv_take_pic"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"/>
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"/>
 
             </LinearLayout>
         </LinearLayout>
@@ -352,8 +353,8 @@
                         android:layout_height="match_parent"
                         app:backgroundColor="@color/col_d3d3d3"
                         app:lineColor="@color/col_8c8c8c"
-                        app:middleLineColor="@color/col_f7de0a"
-                        app:recordColor="@color/col_b8b8b8"
+                        app:middleLineColor="@color/red"
+                        app:recordColor="@color/col_e0eb8159"
                         app:style="1"
                         app:timeTextColor="@color/col_272727"/>
 

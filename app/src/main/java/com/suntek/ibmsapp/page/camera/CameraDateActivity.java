@@ -15,6 +15,7 @@ import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.task.camera.control.CameraQueryRecordTask;
 import com.suntek.ibmsapp.util.DateUtil;
+import com.suntek.ibmsapp.util.RecordHander;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -43,7 +44,7 @@ public class CameraDateActivity extends BaseActivity
     private ACache aCache;
 
     //存储录像对应时间段
-    private Map<String, Object> recordMap = new HashMap<>();
+    private Map<String, List<RecordItem>> recordMap = new HashMap<>();
 
     @BindView(R.id.avl_loading)
     AVLoadingIndicatorView avlLoading;
@@ -149,62 +150,11 @@ public class CameraDateActivity extends BaseActivity
                 {
                     avlLoading.setVisibility(View.GONE);
                     List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
-                    handleRecordTime(recordItems);
+                    recordMap = RecordHander.handleRecordList(recordItems);
+                    initDateChoose();
                 }
             }
         }.execute();
-    }
-
-    /**
-     * 处理返回的历史视频时间
-     *
-     * @param recordItems
-     */
-    private void handleRecordTime(List<RecordItem> recordItems)
-    {
-        //当前时间
-        SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        for (RecordItem recordItem : recordItems)
-        {
-            String bt = format1.format(recordItem.getStartTime());
-            String et = format1.format(recordItem.getEndTime());
-            String[] beginStrs = bt.split(" ");
-            String[] endStrs = et.split(" ");
-            String beginDate = beginStrs[0];
-            String endDate1 = endStrs[0];
-            List<RecordItem> recordItems1 = (List<RecordItem>) recordMap.get(beginDate);
-            List<RecordItem> recordItems2 = (List<RecordItem>) recordMap.get(endDate1);
-            if (recordItems1 == null)
-                recordItems1 = new ArrayList<RecordItem>();
-            if (recordItems2 == null)
-                recordItems2 = new ArrayList<RecordItem>();
-
-            if (!beginDate.equals(endDate1))
-            {
-                RecordItem recordItem1 = new RecordItem();
-                RecordItem recordItem2 = new RecordItem();
-
-                recordItem1.setDeviceId(recordItem.getDeviceId());
-                recordItem1.setStartTime(recordItem.getStartTime());
-                recordItem1.setEndTime(DateUtil.convertToLong(beginDate + " 23:59:59", "yyyy-MM-dd HH:mm:ss"));
-                recordItems1.add(recordItem1);
-
-                recordItem2.setDeviceId(recordItem.getDeviceId());
-                recordItem2.setStartTime(DateUtil.convertToLong(endDate1 + " 00:00:00", "yyyy-MM-dd HH:mm:ss"));
-                recordItem2.setEndTime(recordItem.getEndTime());
-                recordItems2.add(recordItem2);
-
-                recordMap.put(beginDate, recordItems1);
-                recordMap.put(endDate1, recordItems2);
-            }
-            else
-            {
-                recordItems1.add(recordItem);
-                recordMap.put(beginDate, recordItems1);
-            }
-        }
-        aCache.put("camera_history_" + camera.getId(), (Serializable) recordMap);
-        initDateChoose();
     }
 
     /**
@@ -215,7 +165,7 @@ public class CameraDateActivity extends BaseActivity
         List<CalendarInfo> calendarInfos = new ArrayList<>();
         if (recordMap != null)
         {
-            for (Map.Entry<String, Object> entry : recordMap.entrySet())
+            for (Map.Entry<String, List<RecordItem>> entry : recordMap.entrySet())
             {
                 String date = entry.getKey();
                 String[] strs = date.split("-");

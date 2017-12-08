@@ -180,14 +180,6 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                 getRecordData();
             }
         });
-        selectDateView.setOnDateClickListener(new SelectDateView.OnDateClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-
-            }
-        });
         seekBarView.setOnValueChangeListener(new TimeSeekBarView.OnValueChangeListener()
         {
             @Override
@@ -301,6 +293,27 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                 }
             }
         });
+        selectDateView.setOnDateClickListener(new SelectDateView.OnDateClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                Intent intent = new Intent(CameraPlayerHistoryActivity.this, CameraDateActivity.class);
+                intent.putExtra("camera", camera);
+                startActivityForResult(intent, 1);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == 1)
+        {
+            chooseDate = data.getStringExtra("choose_date");
+            getRecordData();
+        }
     }
 
     private void getRecordData()
@@ -308,7 +321,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         hikvisionVideoView.release();
         llNoRecord.setVisibility(View.GONE);
         llSeekBar.setVisibility(View.GONE);
-        llTimeLoading.setVisibility(View.GONE);
+        llTimeLoading.setVisibility(View.VISIBLE);
         hikvisionVideoView.getRecordByDate(chooseDate, new AbstractHkivisionVideoView.OnHistoryRecordListener()
         {
             @Override
@@ -467,8 +480,11 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                 recordItem1.setEndTime(recordItem.getEndTime() / 1000);
                 changeRecordItems.add(recordItem1);
             }
+            long nowTime = RecordHander.getEarliestTime(recordItems).getStartTime();
             seekBarView.setRecordList(changeRecordItems);
+            seekBarView.setValue(nowTime);
             fullRecordOperController.setRecordList(changeRecordItems);
+            fullRecordOperController.setValue(nowTime);
             llTimeLoading.setVisibility(View.GONE);
             llNoRecord.setVisibility(View.GONE);
             llSeekBar.setVisibility(View.VISIBLE);
