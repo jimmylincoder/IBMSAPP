@@ -23,7 +23,7 @@ android {
         //对消费者不可见，仅用于应用市场、程序内部识别版本，判断新旧等用途
         versionCode 1
         //展示给消费者，消费者会通过它认知自己安装的版本
-        versionName "1.1.2"
+        versionName "1.1.3"
         //单元测试
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //多dex打包
@@ -141,6 +141,8 @@ dependencies {
     compile 'com.wang.avi:library:1.0.0'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
+    compile 'pub.devrel:easypermissions:1.0.1'
+
 
 
     compile files('libs/AudioEngineSDK.jar')

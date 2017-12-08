@@ -1,6 +1,8 @@
 package com.suntek.ibmsapp.page.main;
 
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,10 +16,15 @@ import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseFragmentActivity;
+import com.suntek.ibmsapp.model.Version;
 import com.suntek.ibmsapp.page.main.fragment.CameraHistoryFragment;
 import com.suntek.ibmsapp.page.main.fragment.CameraListFragment;
 import com.suntek.ibmsapp.page.main.fragment.MeFragment;
 import com.suntek.ibmsapp.page.main.fragment.PhotoListFragment;
+import com.suntek.ibmsapp.task.version.CheckVersionTask;
+import com.suntek.ibmsapp.util.VersionUtil;
+import com.suntek.ibmsapp.widget.LoadingDialog;
+import com.suntek.ibmsapp.widget.UnityDialog;
 
 import java.util.ArrayList;
 
@@ -50,6 +57,7 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        checkUpdate();
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
         bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_video_active, "视频")
                 .setInactiveIcon(ContextCompat.getDrawable(this, R.mipmap.ic_video)))
@@ -212,5 +220,55 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
             finish();
             System.exit(0);
         }
+    }
+
+    private void checkUpdate()
+    {
+        new CheckVersionTask(this, VersionUtil.getAppInfo(this))
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+                    Version version = (Version) result.getResultData();
+                    String isUpdate = version.getIsUpdate();
+                    if ("0".equals(isUpdate))
+                    {
+
+                    }
+                    else
+                    {
+                        new UnityDialog(MainActivity.this)
+                                .setTitle("是否前往更新版本")
+                                .setHint("当前版本:" + VersionUtil.getAppInfo(MainActivity.this) + "\n" +
+                                        "更新版本:" + version.getVersionNum() + "\n" +
+                                        "更新内容:" + version.getUpdateContent())
+                                .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                                {
+                                    @Override
+                                    public void confirm(UnityDialog unityDialog, String content)
+                                    {
+                                        unityDialog.dismiss();
+                                        Intent intent = new Intent();
+                                        intent.setAction("android.intent.action.VIEW");
+                                        Uri uri = Uri.parse(version.getDownloadAddress());
+                                        intent.setData(uri);
+                                        startActivity(intent);
+                                    }
+                                })
+                                .setCancel("取消", new UnityDialog.OnCancelDialogListener()
+                                {
+                                    @Override
+                                    public void cancel(UnityDialog unityDialog)
+                                    {
+                                        unityDialog.dismiss();
+                                    }
+                                }).show();
+                    }
+                }
+            }
+        }.execute();
     }
 }
