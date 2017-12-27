@@ -43,8 +43,10 @@
                     android:id="@+id/tv_camera_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
                     android:text="停车场_通道33"
                     android:textColor="@color/white"
+                    android:ellipsize="end"
                     android:textSize="15dp"/>
             </LinearLayout>
 

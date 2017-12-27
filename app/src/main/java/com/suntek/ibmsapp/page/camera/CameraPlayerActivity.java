@@ -20,6 +20,7 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
+import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.FileUtil;
 import com.suntek.ibmsapp.util.NiceUtil;
@@ -141,6 +142,8 @@ public class CameraPlayerActivity extends BaseActivity
         });
         initClick();
         hikvisionVideoView.playReal(STREAM_FLUENT);
+        //添加历史记录
+        loadData();
     }
 
     private void initClick()
@@ -529,6 +532,32 @@ public class CameraPlayerActivity extends BaseActivity
                 fullOperView.setIvStreamView(getDrawable(R.drawable.btn_full_fluent));
             }
         });
+    }
+
+    @Override
+    public void loadData()
+    {
+        String cameraId = camera.getId();
+        String cameraName = camera.getName();
+        if (cameraName != null)
+            tvCameraName.setText(cameraName);
+
+        new CameraAddHistoryTask(this, cameraId)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if (result.getError() == null)
+                {
+
+                }
+                else
+                {
+                    ToastHelper.getInstance(CameraPlayerActivity.this).shortShowMessage(result.getError().getMessage());
+                }
+            }
+        }.execute();
     }
 
 }
