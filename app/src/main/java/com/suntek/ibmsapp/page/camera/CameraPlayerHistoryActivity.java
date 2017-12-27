@@ -355,6 +355,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
 
     private void takePic()
     {
+        if(hikvisionVideoView.getState() != PLAYING)
+            return;
         PermissionRequest.verifyStoragePermissions(this);
         Bitmap bitmap = hikvisionVideoView.takePic();
         Bitmap preview = BitmapUtil.centerSquareScaleBitmap(bitmap, 100);
@@ -521,6 +523,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
 
     private void record()
     {
+        if(hikvisionVideoView.getState() != PLAYING)
+            return;
         if (isRecord)
         {
             File recordFile = hikvisionVideoView.stopRecord();
@@ -562,8 +566,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     {
         if (isShow)
         {
-            if (recordTimer == null)
-                recordTimer = new Timer();
+            if(recordTimer == null)
+             recordTimer = new Timer();
             llRecord.setVisibility(View.VISIBLE);
             recordBeginTime = new Date().getTime();
             recordTimer.schedule(new TimerTask()
@@ -589,10 +593,13 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                             {
                                 if (tvRecordTime != null)
                                     tvRecordTime.setText(finalMin + ":" + finalSec);
-                                if (ivPot.getVisibility() == View.VISIBLE)
-                                    ivPot.setVisibility(View.INVISIBLE);
-                                else
-                                    ivPot.setVisibility(View.VISIBLE);
+                                if(ivPot != null)
+                                {
+                                    if (ivPot.getVisibility() == View.VISIBLE)
+                                        ivPot.setVisibility(View.INVISIBLE);
+                                    else
+                                        ivPot.setVisibility(View.VISIBLE);
+                                }
                             }
                         });
                     }
@@ -603,6 +610,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         {
             llRecord.setVisibility(View.GONE);
             recordTimer.cancel();
+            recordTimer = null;
         }
     }
 }
