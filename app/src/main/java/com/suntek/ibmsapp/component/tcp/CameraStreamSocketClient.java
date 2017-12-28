@@ -154,7 +154,7 @@ public class CameraStreamSocketClient
             receiveData = read(dataLength);
             //接收通道号
             int mediaChannel = -1;
-            if (receiveData != null)
+            if (receiveData != null && receiveData.length > 0)
                 mediaChannel = ByteArrayConveter.getInt(receiveData, 0);
             if (onCameraStreamDataListener != null && mediaChannel != -1)
                 onCameraStreamDataListener.onReceiveMediaChannel(mediaChannel);
