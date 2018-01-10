@@ -135,6 +135,9 @@
             android:name=".page.user.ResetPasswordActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".page.user.ServerSettingActivity"
+                  android:screenOrientation="portrait"/>
+
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

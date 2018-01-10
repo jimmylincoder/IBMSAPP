@@ -161,6 +161,13 @@ public class UserLoginActivity extends BaseActivity
                 .show();
     }
 
+    @OnClick(R.id.iv_logo)
+    public void setServer(View view)
+    {
+        Intent intent = new Intent(UserLoginActivity.this,ServerSettingActivity.class);
+        startActivity(intent);
+    }
+
     private void initArea()
     {
         String chooseArea = sharedHelper.getString("choose_area");

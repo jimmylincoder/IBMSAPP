@@ -83,7 +83,7 @@ public class CameraStreamSocketClient
     //视频数据
     private final int VIDEO_TYPE = 2;
 
-    private final int BUFFER_SIZE = 1024 * 2;
+    private final int BUFFER_SIZE = 1024 * 1;
     private byte[] headerDataByte = new byte[HEADER_LENGTH];
     private byte[] dataLengthByte = new byte[DATA_LENGTH];
     private byte[] bufferByte = new byte[BUFFER_SIZE];

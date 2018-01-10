@@ -1,5 +1,7 @@
 package com.suntek.ibmsapp.component;
 
+import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Config;
 import com.suntek.ibmsapp.component.http.BaseHttpProcesser;
 
@@ -24,8 +26,16 @@ public class IbmsHttpEngine extends BaseHttpProcesser
     @Config("http.time_out")
     private int timeOut;
 
+    private ACache aCache = ACache.get(BaseActivity.context);
+
     public IbmsHttpEngine()
     {
+        String serverIp = aCache.getAsString("server_ip");
+        String serverPort = aCache.getAsString("server_port");
+        if(serverIp != null && serverPort != null)
+        {
+            ibmsUrl = "http://" + serverIp + ":" + serverPort + "/api";
+        }
         init(ibmsUrl,null,isLog,timeOut);
     }
 
