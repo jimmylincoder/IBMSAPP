@@ -3,6 +3,8 @@ package com.suntek.ibmsapp.component.httpclient;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
+import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 import com.suntek.ibmsapp.component.http.BaseHttpEngine;
 import com.suntek.ibmsapp.component.http.BaseHttpRequest;
@@ -33,6 +35,8 @@ public class HttpClientResponse extends BaseHttpEngine
 {
     // Http Client
     private HttpClient httpClient;
+
+    private ACache aCache = ACache.get(BaseActivity.context);
 
     public HttpClientResponse()
     {
@@ -83,6 +87,12 @@ public class HttpClientResponse extends BaseHttpEngine
         byte[] encodedBytes =
                 secretKey == null ? jsonBytes : encryptor.encode(jsonBytes, secretKey);
 
+        String serverIp = aCache.getAsString("server_ip");
+        String serverPort = aCache.getAsString("server_port");
+        if(serverIp != null && serverPort != null)
+        {
+            baseUrl = "http://" + serverIp + ":" + serverPort + "/api";
+        }
         HttpPost post = new HttpPost(baseUrl);
         ByteArrayEntity byteArrayEntity = new ByteArrayEntity(encodedBytes);
         byteArrayEntity.setContentType("application/json");

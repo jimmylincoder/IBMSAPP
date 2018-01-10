@@ -8,11 +8,11 @@ import com.suntek.ibmsapp.manager.CameraManager;
 import com.suntek.ibmsapp.task.base.BaseTask;
 
 /**
- * 添加查看历史记录
+ * 删除历史记录
  *
  * @author jimmy
  */
-public class CameraAddHistoryTask extends BaseTask
+public class CameraDelHistoryTask extends BaseTask
 {
     private CameraManager cameraManager;
 
@@ -20,22 +20,20 @@ public class CameraAddHistoryTask extends BaseTask
 
     private String userCode;
 
-    public CameraAddHistoryTask(Context context,String userCode,String cameraId)
+    public CameraDelHistoryTask(Context context,String userCode,String cameraId)
     {
         super(context);
         this.cameraId = cameraId;
         this.userCode = userCode;
 
-        cameraManager = (CameraManager) ComponentEngine.getInstance(CameraManager.class);
-
-    }
+        cameraManager = (CameraManager) ComponentEngine.getInstance(CameraManager.class);    }
 
     @Override
     protected TaskResult doInBackground(Void... params)
     {
         try
         {
-            cameraManager.addHistory(userCode,cameraId);
+            cameraManager.delHistory(userCode,cameraId);
             return new TaskResult("",null);
         }catch (FHttpException e)
         {

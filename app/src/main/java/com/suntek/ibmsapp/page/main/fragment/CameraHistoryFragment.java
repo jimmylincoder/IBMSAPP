@@ -15,12 +15,12 @@ import com.suntek.ibmsapp.adapter.CameraHistoryAdapter;
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
-import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
-import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
+import com.suntek.ibmsapp.task.camera.CameraDelHistoryTask;
 import com.suntek.ibmsapp.task.camera.CameraHistoryListTask;
-import com.suntek.ibmsapp.widget.ToastHelper;
+
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
 
     private int currentPage = 1;
 
-    private ACache aCache;
-
     @BindView(R.id.ll_loading)
     LinearLayout llLoading;
 
     @BindView(R.id.ll_retry)
     LinearLayout llRetry;
+
+    private ACache aCache;
 
     @Override
     public int getLayoutId()
@@ -95,6 +95,23 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
             cameraHistoryAdapter.setCameraList(cameraList);
             cameraHistoryAdapter.notifyDataSetChanged();
         }
+        cameraHistoryAdapter.setOnDeleteListening(new CameraHistoryAdapter.OnDeleteListening()
+        {
+            @Override
+            public void onClick(String cameraId)
+            {
+                String userCode = aCache.getAsString("user");
+                new CameraDelHistoryTask(getActivity(),userCode,cameraId)
+                {
+                    @Override
+                    protected void onPostExecute(TaskResult result)
+                    {
+                        super.onPostExecute(result);
+                        getCameraHistory(1,true);
+                    }
+                }.execute();
+            }
+        });
     }
 
     @Override
@@ -122,7 +139,8 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
 
     private void getCameraHistory(int page, boolean isRefresh)
     {
-        new CameraHistoryListTask(getActivity(), page)
+        String userCode = aCache.getAsString("user");
+        new CameraHistoryListTask(getActivity(),userCode,page)
         {
             @Override
             protected void onPostExecute(TaskResult result)

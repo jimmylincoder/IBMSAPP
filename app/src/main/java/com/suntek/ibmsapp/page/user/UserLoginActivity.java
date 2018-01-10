@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.InputType;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -14,12 +15,14 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.HttpRequest;
 import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.User;
 import com.suntek.ibmsapp.page.main.MainActivity;
 import com.suntek.ibmsapp.task.user.UserLoginTask;
 import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
+import com.suntek.ibmsapp.widget.ClearEditText;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.ToastHelper;
 import com.suntek.ibmsapp.widget.UnityDialog;
@@ -36,10 +39,12 @@ import butterknife.OnClick;
 public class UserLoginActivity extends BaseActivity
 {
     @BindView(R.id.et_account)
-    EditText etAccount;
+    ClearEditText etAccount;
 
     @BindView(R.id.et_password)
-    EditText etPassword;
+    ClearEditText etPassword;
+
+    private ACache aCache;
 
     @Autowired
     SaveDataWithSharedHelper sharedHelper;
@@ -56,10 +61,38 @@ public class UserLoginActivity extends BaseActivity
         //设置全屏
         WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
         localLayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
-
-        //etAccount.setText("admin");
-        //etPassword.setText("suntek");
+        aCache = ACache.get(this);
+        initEditText();
         initArea();
+    }
+
+    private void initEditText()
+    {
+        String account = sharedHelper.getString("account");
+        etAccount.setText(account);
+        if(!"".equals(account))
+        {
+            String password = sharedHelper.getString("password");
+            etPassword.setText(password);
+        }
+        etAccount.setOnClearListening(new ClearEditText.OnClearListening()
+        {
+            @Override
+            public void onClick()
+            {
+                sharedHelper.save("account","");
+                sharedHelper.save("password","");
+                etPassword.setText("");
+            }
+        });
+        etPassword.setOnClearListening(new ClearEditText.OnClearListening()
+        {
+            @Override
+            public void onClick()
+            {
+                sharedHelper.save("password","");
+            }
+        });
     }
 
     @Override
@@ -110,17 +143,14 @@ public class UserLoginActivity extends BaseActivity
                 if (result.getError() == null)
                 {
                     User user = (User) result.getResultData();
-                    sharedHelper.save("user", user.getUserCode());
+                    aCache.put("user",user.getUserCode());
+                    sharedHelper.save("account",account);
+                    sharedHelper.save("password",password);
                     ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage("登录成功");
                     Intent intent = new Intent(UserLoginActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 }
-//                else
-//                {
-//
-//                    ToastHelper.getInstance(UserLoginActivity.this).shortShowMessage(result.getError().getMessage());
-//                }
             }
         }.execute();
     }
@@ -164,17 +194,26 @@ public class UserLoginActivity extends BaseActivity
     @OnClick(R.id.iv_logo)
     public void setServer(View view)
     {
-        Intent intent = new Intent(UserLoginActivity.this,ServerSettingActivity.class);
+        Intent intent = new Intent(UserLoginActivity.this, ServerSettingActivity.class);
         startActivity(intent);
+    }
+
+    @OnClick(R.id.ll_see_psw)
+    public void seePsw(View view)
+    {
+        if (etPassword.getInputType() == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
+            etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        else
+            etPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
     }
 
     private void initArea()
     {
-        String chooseArea = sharedHelper.getString("choose_area");
+        String chooseArea = aCache.getAsString("choose_area");
         if (chooseArea == null || "".equals(chooseArea))
         {
-            sharedHelper.save("choose_area", "1");
-            sharedHelper.save("choose_name", "华侨城中心小区");
+            aCache.put("choose_area", "1");
+            aCache.put("choose_name", "华侨城中心小区");
         }
     }
 }

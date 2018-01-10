@@ -31,6 +31,8 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.component.tcp.CameraStreamSocketClient;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamDataListener;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamExceptionListener;
@@ -96,6 +98,7 @@ public class CameraPlayHKActivity extends BaseCameraPlayActivity implements Runn
     ImageView ivPlayState;
     @BindView(R.id.ll_full_back)
     LinearLayout llFullBack;
+    private ACache aCache;
 
     private final static int SOUNDS_ON = 0;
     private final static int SOUNDS_OFF = 1;
@@ -112,6 +115,7 @@ public class CameraPlayHKActivity extends BaseCameraPlayActivity implements Runn
     {
         //获取摄像头信息
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
+        aCache = ACache.get(this);
         //获取socket连接ip和端口
         getSocketAddress();
         //初始化视频播放界面
@@ -508,10 +512,11 @@ public class CameraPlayHKActivity extends BaseCameraPlayActivity implements Runn
     {
         String cameraId = camera.getId();
         String cameraName = camera.getName();
+        String userCode = aCache.getAsString("user");
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this, cameraId)
+        new CameraAddHistoryTask(this,userCode,cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)

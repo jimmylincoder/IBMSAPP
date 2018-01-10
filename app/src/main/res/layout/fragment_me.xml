@@ -251,13 +251,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/col_e6e6e6"/>
 
             <LinearLayout
                 android:id="@+id/ll_login_out"
-                android:layout_width="130dp"
-                android:layout_height="40dp"
-                android:background="@mipmap/bg_logout"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:background="@color/white"
                 android:gravity="center">
 
                 <TextView
@@ -265,9 +270,14 @@
                     android:layout_height="wrap_content"
                     android:text="退出登录"
                     android:textColor="@color/col_fd0300"
-                    android:textSize="16sp"/>
+                    android:textSize="15sp"/>
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/col_e6e6e6"/>
 
         </LinearLayout>
 

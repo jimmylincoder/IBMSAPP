@@ -1,19 +1,25 @@
 package com.suntek.ibmsapp.adapter;
 
+import android.app.backup.SharedPreferencesBackupHelper;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.task.base.BaseTask;
+import com.suntek.ibmsapp.task.camera.CameraDelHistoryTask;
 import com.suntek.ibmsapp.util.BitmapUtil;
 import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.util.PreviewUtil;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
+import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.Date;
 import java.util.List;
@@ -35,6 +41,8 @@ public class CameraHistoryAdapter extends BaseAdapter
     private int ivPreviewWidth = 200;
 
     private int ivPreviewHeight = 110;
+
+    private OnDeleteListening onDeleteListening;
 
     public CameraHistoryAdapter(Context context, List<Camera> cameraList)
     {
@@ -77,40 +85,22 @@ public class CameraHistoryAdapter extends BaseAdapter
         holder.tvCameraName.setText(cameraList.get(i).getName());
         holder.tvPlayTime.setText(DateUtil.convertYYYY_MM_DD_HH_MM_SS(
                 new Date(cameraList.get(i).getPlayTime())));
-        String status = cameraList.get(i).getIsUsed();
-        if ("1".equals(status))
-        {
-            holder.tvOnlineStatus.setText("在线");
-            holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_1aa7f0));
-        }
-        else
-        {
-            holder.tvOnlineStatus.setText("离线");
-            holder.tvOnlineStatus.setTextColor(context.getResources().getColor(R.color.col_a5a5a5));
-        }
-
-//        String photoBase64 = cameraList.get(i).getPhotoBase64();
-//        String id = cameraList.get(i).getId();
-//        holder.ivPreview.setTag(id);
-//        if (photoBase64 != null)
-//        {
-//            if (holder.ivPreview.getTag() != null && holder.ivPreview.getTag().equals(id))
-//            {
-//                Bitmap bitmap = BitmapUtil.base64ToBitmap(photoBase64);
-//                holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap,
-//                        ivPreviewWidth, ivPreviewHeight));
-//            }
-//        }
-//        else
-//        {
-//            holder.ivPreview.setImageBitmap(null);
-//        }
-        Camera camera = cameraList.get(i);
+        holder.tvPlayCount.setText(cameraList.get(i).getPlayCount());
+                Camera camera = cameraList.get(i);
         Bitmap bitmap = PreviewUtil.getInstance().getPreview(camera.getId(), camera.getDeviceId());
         if (bitmap != null)
             holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap, ivPreviewWidth, ivPreviewHeight));
         else
             holder.ivPreview.setImageBitmap(null);
+
+        holder.btnDel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+               onDeleteListening.onClick(camera.getId());
+            }
+        });
         return view;
     }
 
@@ -125,8 +115,11 @@ public class CameraHistoryAdapter extends BaseAdapter
         @BindView(R.id.tv_camera_name)
         TextView tvCameraName;
 
-        @BindView(R.id.tv_online_status)
-        TextView tvOnlineStatus;
+        @BindView(R.id.tv_play_count)
+        TextView tvPlayCount;
+
+        @BindView(R.id.btn_del)
+        Button btnDel;
 
         public ViewHolder(View view)
         {
@@ -142,5 +135,20 @@ public class CameraHistoryAdapter extends BaseAdapter
     public void setCameraList(List<Camera> cameraList)
     {
         this.cameraList = cameraList;
+    }
+
+    public OnDeleteListening getOnDeleteListening()
+    {
+        return onDeleteListening;
+    }
+
+    public void setOnDeleteListening(OnDeleteListening onDeleteListening)
+    {
+        this.onDeleteListening = onDeleteListening;
+    }
+
+    public interface OnDeleteListening
+    {
+        void onClick(String cameraId);
     }
 }

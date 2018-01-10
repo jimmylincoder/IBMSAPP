@@ -47,6 +47,8 @@ public class Camera implements Serializable
 
     private String photoBase64;
 
+    private String playCount;
+
     public String getId()
     {
         return id;
@@ -217,6 +219,16 @@ public class Camera implements Serializable
         return photoBase64;
     }
 
+    public String getPlayCount()
+    {
+        return playCount;
+    }
+
+    public void setPlayCount(String playCount)
+    {
+        this.playCount = playCount;
+    }
+
     public static Camera generateByJson(Map<String, Object> content)
     {
         Camera camera = new Camera();
@@ -239,6 +251,7 @@ public class Camera implements Serializable
         camera.setVendorName((String) content.get("vendor_name"));
         camera.setIsUsed((String) content.get("is_used"));
         camera.setPhotoBase64((String) content.get("photo_base64"));
+        camera.setPlayCount((String) content.get("play_count"));
 
         return camera;
     }

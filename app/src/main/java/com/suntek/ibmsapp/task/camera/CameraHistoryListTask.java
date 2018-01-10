@@ -20,13 +20,16 @@ public class CameraHistoryListTask extends BaseTask
 {
     private int page;
 
+    private String userCode;
+
     CameraManager cameraManager;
 
-    public CameraHistoryListTask(Context context,int page)
+    public CameraHistoryListTask(Context context,String userCode,int page)
     {
         super(context);
 
         this.page = page;
+        this.userCode = userCode;
         cameraManager = (CameraManager) ComponentEngine.getInstance(CameraManager.class);
     }
 
@@ -35,7 +38,7 @@ public class CameraHistoryListTask extends BaseTask
     {
         try
         {
-            Page<List<Camera>> cameraPage = cameraManager.getCameraHistoryList(page);
+            Page<List<Camera>> cameraPage = cameraManager.getCameraHistoryList(userCode,page);
             return new TaskResult(cameraPage,null);
         }
         catch (FHttpException e)

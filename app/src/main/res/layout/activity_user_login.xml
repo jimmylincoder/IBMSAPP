@@ -57,7 +57,7 @@
                         android:layout_marginLeft="5dp"
                         android:background="@color/col_d0d0d0"/>
 
-                    <EditText
+                    <com.suntek.ibmsapp.widget.ClearEditText
                         android:id="@+id/et_account"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -67,6 +67,7 @@
                         android:hint="请输入账号"
                         android:maxLines="1"
                         android:textColorHint="@color/col_c6c8cf"
+                        android:layout_marginRight="8dp"
                         android:textSize="14dp"/>
 
                 </LinearLayout>
@@ -91,30 +92,55 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="10dp"
-                        android:background="@mipmap/ic_login_password"/>
-
-                    <View
-                        android:layout_width="1px"
-                        android:layout_height="25dp"
-                        android:layout_marginLeft="5dp"
-                        android:background="@color/col_d0d0d0"/>
-
-                    <EditText
-                        android:id="@+id/et_password"
+                    <LinearLayout
+                        android:layout_weight="1"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginLeft="10dp"
-                        android:background="@null"
-                        android:digits="@string/register_name_digits"
-                        android:hint="请输入密码"
-                        android:inputType="textPassword"
-                        android:maxLines="1"
-                        android:textColorHint="@color/col_c6c8cf"
-                        android:textSize="14dp"/>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="25dp"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="10dp"
+                            android:background="@mipmap/ic_login_password"/>
+
+                        <View
+                            android:layout_width="1px"
+                            android:layout_height="25dp"
+                            android:layout_marginLeft="5dp"
+                            android:background="@color/col_d0d0d0"/>
+
+                        <com.suntek.ibmsapp.widget.ClearEditText
+                            android:id="@+id/et_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="10dp"
+                            android:background="@null"
+                            android:digits="@string/register_name_digits"
+                            android:hint="请输入密码"
+                            android:inputType="textPassword"
+                            android:maxLines="1"
+                            android:textColorHint="@color/col_c6c8cf"
+                            android:textSize="14dp"/>
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_see_psw"
+                        android:layout_weight="9"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@mipmap/ic_login_paw_normal"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 

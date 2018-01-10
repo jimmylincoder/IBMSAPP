@@ -30,6 +30,8 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
@@ -175,6 +177,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     LinearLayout llChangeTime;
     @BindView(R.id.tv_change_time)
     TextView tvChangeTime;
+    private ACache aCache;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -227,7 +230,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     public void initViews(Bundle savedInstanceState)
     {
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
-
+        aCache = ACache.get(this);
         initVideoView();
         //getCameraAddress("2017-08-31 00:00:00", "2017-08-31 23:59:59");
         getCameraAddress(null, null);
@@ -300,10 +303,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     {
         String cameraId = camera.getId();
         String cameraName = camera.getName();
+        String userCode = aCache.getAsString("user");
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this, cameraId)
+        new CameraAddHistoryTask(this,userCode,cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)

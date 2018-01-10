@@ -15,7 +15,6 @@ import com.suntek.ibmsapp.page.about.AboutActivity;
 import com.suntek.ibmsapp.page.user.ResetPasswordActivity;
 import com.suntek.ibmsapp.page.user.UserLoginActivity;
 import com.suntek.ibmsapp.task.version.CheckVersionTask;
-import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.util.VersionUtil;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.ToastHelper;
@@ -31,9 +30,6 @@ import butterknife.OnClick;
  */
 public class MeFragment extends BaseFragment
 {
-    @Autowired
-    SaveDataWithSharedHelper sharedHelper;
-
     @BindView(R.id.tv_user_name)
     TextView tvUserName;
 
@@ -48,15 +44,14 @@ public class MeFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
-        String userName = sharedHelper.getString("userName");
-        tvUserName.setText(userName);
         aCache = ACache.get(getActivity());
+        String userName = aCache.getAsString("userName");
+        tvUserName.setText(userName);
     }
 
     @OnClick(R.id.ll_login_out)
     public void loginout(View view)
     {
-        sharedHelper.clear();
         aCache.clear();
         Intent intent = new Intent(getActivity(), UserLoginActivity.class);
         startActivity(intent);

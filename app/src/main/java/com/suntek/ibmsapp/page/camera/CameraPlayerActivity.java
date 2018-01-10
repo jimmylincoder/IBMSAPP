@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
@@ -102,6 +104,8 @@ public class CameraPlayerActivity extends BaseActivity
     @BindView(R.id.tav_talk)
     TalkView tavTalk;
 
+    private ACache aCache;
+
     //清晰度选择
     protected PopupWindow streamMenu;
     private int streamType = STREAM_FLUENT;
@@ -128,6 +132,7 @@ public class CameraPlayerActivity extends BaseActivity
     {
         netSpeedView = new NetSpeedController(this);
         fullOperView = new FullOperController(this);
+        aCache = ACache.get(this);
         camera = (Camera) getIntent().getExtras().get("camera");
         tvCameraName.setText(camera.getName());
         hikvisionVideoView.initInfo(camera);
@@ -538,11 +543,12 @@ public class CameraPlayerActivity extends BaseActivity
     public void loadData()
     {
         String cameraId = camera.getId();
+        String userCode = aCache.getAsString("user");
         String cameraName = camera.getName();
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this, cameraId)
+        new CameraAddHistoryTask(this,userCode,cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)

@@ -21,19 +21,12 @@ import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
-import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
-import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.task.camera.CameraListTask;
-import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
-import com.suntek.ibmsapp.widget.ToastHelper;
-import com.suntek.ibmsapp.widget.UnityDialog;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-
 import butterknife.BindView;
 import butterknife.OnClick;
 
@@ -57,9 +50,6 @@ public class CameraListFragment extends BaseFragment
 
     @BindView(R.id.tv_area)
     TextView tvArea;
-
-    @Autowired
-    SaveDataWithSharedHelper sharedHelper;
 
     @BindView(R.id.ll_loading)
     LinearLayout llLoading;
@@ -108,7 +98,7 @@ public class CameraListFragment extends BaseFragment
     private void init()
     {
         aCache = ACache.get(getActivity());
-        areaId = sharedHelper.getString("choose_org_code");
+        areaId = aCache.getAsString("choose_org_code");
     }
 
     /**
@@ -230,9 +220,9 @@ public class CameraListFragment extends BaseFragment
     public void onResume()
     {
         super.onResume();
-        tvArea.setText(sharedHelper.getString("choose_name"));
-        String chooseAreaId = sharedHelper.getString("choose_org_code");
-        if (!areaId.equals(chooseAreaId))
+        tvArea.setText(aCache.getAsString("choose_name"));
+        String chooseAreaId = aCache.getAsString("choose_org_code");
+        if (areaId == null || !areaId.equals(chooseAreaId))
         {
             currentPage = 1;
             areaId = chooseAreaId;

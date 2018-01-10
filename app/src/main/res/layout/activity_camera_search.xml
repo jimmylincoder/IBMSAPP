@@ -32,11 +32,12 @@
                     android:layout_marginLeft="10dp"
                     android:background="@mipmap/ic_search"/>
 
-                <EditText
+                <com.suntek.ibmsapp.widget.ClearEditText
                     android:id="@+id/et_keyword"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
                     android:background="@null"
                     android:hint="搜索摄像头"
                     android:maxLines="1"

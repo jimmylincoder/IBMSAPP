@@ -11,11 +11,9 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.AreaListAdapter;
 
 import com.suntek.ibmsapp.component.base.BaseActivity;
-import com.suntek.ibmsapp.component.core.Autowired;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Area;
 import com.suntek.ibmsapp.task.area.AreaListTask;
-import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
-import com.suntek.ibmsapp.widget.ToastHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +36,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private List<Area> areas;
 
-    @Autowired
-    SaveDataWithSharedHelper sharedHelper;
+    private ACache aCache;
 
     @BindView(R.id.tv_now_area)
     TextView tvNowArea;
@@ -59,6 +56,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        aCache = ACache.get(this);
         lvArea.setOnItemClickListener(this);
         initNowArea();
         initAreaListView("1");
@@ -68,7 +66,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     {
         llLoading.setVisibility(View.VISIBLE);
         lvArea.setVisibility(View.GONE);
-        tvNowArea.setText(sharedHelper.getString("choose_name"));
+        tvNowArea.setText(aCache.getAsString("choose_name"));
         areas = new ArrayList<>();
         Area area = new Area();
         area.setId("1");
@@ -153,8 +151,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         String orgCode = areas.get(i).getOgrCode();
         String id = areas.get(i).getId();
         String name = areas.get(i).getName();
-        sharedHelper.save("choose_org_code", orgCode);
-        sharedHelper.save("choose_name", name);
+        aCache.put("choose_org_code", orgCode);
+        aCache.put("choose_name", name);
         if ("01".equals(orgCode))
         {
             finish();

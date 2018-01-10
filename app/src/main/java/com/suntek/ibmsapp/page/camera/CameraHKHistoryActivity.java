@@ -31,6 +31,8 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.component.tcp.CameraStreamSocketClient;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamDataListener;
 import com.suntek.ibmsapp.component.tcp.OnCameraStreamExceptionListener;
@@ -161,6 +163,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     LinearLayout llFullBack;
     @BindView(R.id.ll_full_oper)
     LinearLayout llFullOper;
+    private ACache aCache;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -248,6 +251,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
         //获取摄像头信息
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
         preview = getIntent().getExtras().getParcelable("preview");
+        aCache = ACache.get(this);
         //获取socket连接ip和端口
         getSocketAddress();
         //初始化视频播放界面
@@ -684,10 +688,11 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
     {
         String cameraId = camera.getId();
         String cameraName = camera.getName();
+        String userCode = aCache.getAsString("user");
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this, cameraId)
+        new CameraAddHistoryTask(this,userCode,cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)
