@@ -2,17 +2,22 @@ package com.suntek.ibmsapp.adapter;
 
 import android.app.backup.SharedPreferencesBackupHelper;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraDelHistoryTask;
 import com.suntek.ibmsapp.util.BitmapUtil;
@@ -85,8 +90,20 @@ public class CameraHistoryAdapter extends BaseAdapter
         holder.tvCameraName.setText(cameraList.get(i).getName());
         holder.tvPlayTime.setText(DateUtil.convertYYYY_MM_DD_HH_MM_SS(
                 new Date(cameraList.get(i).getPlayTime())));
-        holder.tvPlayCount.setText(cameraList.get(i).getPlayCount());
-                Camera camera = cameraList.get(i);
+        String playCountStr = cameraList.get(i).getPlayCount();
+        if (playCountStr != null)
+        {
+            int playCount = Integer.parseInt(playCountStr);
+            if (playCount > 99)
+                holder.tvPlayCount.setText("99+");
+            else
+                holder.tvPlayCount.setText(playCount + "");
+        }
+        else
+        {
+            holder.tvPlayCount.setText("");
+        }
+        Camera camera = cameraList.get(i);
         Bitmap bitmap = PreviewUtil.getInstance().getPreview(camera.getId(), camera.getDeviceId());
         if (bitmap != null)
             holder.ivPreview.setImageBitmap(BitmapUtil.zoomBitmap(bitmap, ivPreviewWidth, ivPreviewHeight));
@@ -98,9 +115,23 @@ public class CameraHistoryAdapter extends BaseAdapter
             @Override
             public void onClick(View v)
             {
-               onDeleteListening.onClick(camera.getId());
+                onDeleteListening.onClick(camera);
             }
         });
+        holder.llContent.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(context, CameraPlayerActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("camera", camera);
+                intent.putExtras(bundle);
+                context.startActivity(intent);
+            }
+        });
+        holder.swMore.quickClose();
+
         return view;
     }
 
@@ -120,6 +151,12 @@ public class CameraHistoryAdapter extends BaseAdapter
 
         @BindView(R.id.btn_del)
         Button btnDel;
+
+        @BindView(R.id.ll_content)
+        LinearLayout llContent;
+
+        @BindView(R.id.sml_more)
+        SwipeMenuLayout swMore;
 
         public ViewHolder(View view)
         {
@@ -149,6 +186,6 @@ public class CameraHistoryAdapter extends BaseAdapter
 
     public interface OnDeleteListening
     {
-        void onClick(String cameraId);
+        void onClick(Camera camera);
     }
 }

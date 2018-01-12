@@ -1,12 +1,10 @@
 package com.suntek.ibmsapp.page.main.fragment;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,7 +16,6 @@ import com.suntek.ibmsapp.adapter.CameraListAdapter;
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
 import com.suntek.ibmsapp.component.cache.ACache;
-import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
@@ -222,7 +219,11 @@ public class CameraListFragment extends BaseFragment
         super.onResume();
         tvArea.setText(aCache.getAsString("choose_name"));
         String chooseAreaId = aCache.getAsString("choose_org_code");
-        if (areaId == null || !areaId.equals(chooseAreaId))
+        if(areaId == null)
+            areaId = "";
+        if(chooseAreaId == null)
+            chooseAreaId = "";
+        if (!areaId.equals(chooseAreaId))
         {
             currentPage = 1;
             areaId = chooseAreaId;

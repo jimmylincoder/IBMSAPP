@@ -11,6 +11,7 @@ import com.suntek.ibmsapp.component.http.BaseHttpRequest;
 import com.suntek.ibmsapp.component.http.BaseHttpResponse;
 import com.suntek.ibmsapp.component.http.Encryptor;
 import com.suntek.ibmsapp.component.http.FHttpException;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.NoHttpResponseException;
@@ -36,7 +37,7 @@ public class HttpClientResponse extends BaseHttpEngine
     // Http Client
     private HttpClient httpClient;
 
-    private ACache aCache = ACache.get(BaseActivity.context);
+    private SaveDataWithSharedHelper sharedHelper;
 
     public HttpClientResponse()
     {
@@ -55,6 +56,7 @@ public class HttpClientResponse extends BaseHttpEngine
     {
         super(baseUrl, secretKey, isLog, timeout);
         this.httpClient = new DefaultHttpClient();
+        this.sharedHelper = new SaveDataWithSharedHelper();
 
         //设置超时
         httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout * 1000);
@@ -87,9 +89,9 @@ public class HttpClientResponse extends BaseHttpEngine
         byte[] encodedBytes =
                 secretKey == null ? jsonBytes : encryptor.encode(jsonBytes, secretKey);
 
-        String serverIp = aCache.getAsString("server_ip");
-        String serverPort = aCache.getAsString("server_port");
-        if(serverIp != null && serverPort != null)
+        String serverIp = sharedHelper.getString("server_ip");
+        String serverPort = sharedHelper.getString("server_port");
+        if(!"".equals(serverIp) && !"".equals(serverPort))
         {
             baseUrl = "http://" + serverIp + ":" + serverPort + "/api";
         }

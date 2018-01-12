@@ -7,7 +7,9 @@ import android.widget.EditText;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.cache.ACache;
+import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.component.core.Config;
+import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
 import com.suntek.ibmsapp.widget.ToastHelper;
 
 import butterknife.BindView;
@@ -32,6 +34,9 @@ public class ServerSettingActivity extends BaseActivity
     @Config("http.ibms_url")
     private String ibmsUrl;
 
+    @Autowired
+    SaveDataWithSharedHelper sharedHelper;
+
     @Override
     public int getLayoutId()
     {
@@ -42,10 +47,10 @@ public class ServerSettingActivity extends BaseActivity
     public void initViews(Bundle savedInstanceState)
     {
         aCache = ACache.get(this);
-        String serverIp = aCache.getAsString("server_ip");
-        String serverPort = aCache.getAsString("server_port");
+        String serverIp = sharedHelper.getString("server_ip");
+        String serverPort = sharedHelper.getString("server_port");
 
-        if(serverIp == null && serverPort == null)
+        if("".equals(serverIp) && "".equals(serverPort))
         {
             String str = ibmsUrl.substring(7);
             String[] strs = str.split("/");
@@ -74,8 +79,8 @@ public class ServerSettingActivity extends BaseActivity
     {
         String serverIp = etServerIp.getText() + "";
         String serverPort = etServerPort.getText() + "";
-        aCache.put("server_ip",serverIp);
-        aCache.put("server_port",serverPort);
+        sharedHelper.save("server_ip",serverIp);
+        sharedHelper.save("server_port",serverPort);
         ToastHelper.getInstance(this).shortShowMessage("保存设置成功");
     }
 }

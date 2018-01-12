@@ -1,6 +1,5 @@
 package com.suntek.ibmsapp.page.main.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.View;
@@ -20,6 +19,7 @@ import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
 import com.suntek.ibmsapp.task.camera.CameraDelHistoryTask;
 import com.suntek.ibmsapp.task.camera.CameraHistoryListTask;
+import com.suntek.ibmsapp.widget.LoadingDialog;
 
 
 import java.io.Serializable;
@@ -35,7 +35,7 @@ import butterknife.OnClick;
  *
  * @author jimmy
  */
-public class CameraHistoryFragment extends BaseFragment implements AdapterView.OnItemClickListener, PullToRefreshBase.OnRefreshListener
+public class CameraHistoryFragment extends BaseFragment implements  PullToRefreshBase.OnRefreshListener
 {
     @BindView(R.id.ptr_history)
     PullToRefreshListView ptrHistory;
@@ -69,7 +69,6 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
         cameraList = new ArrayList<>();
         cameraHistoryAdapter = new CameraHistoryAdapter(getActivity(), cameraList);
         ptrHistory.setAdapter(cameraHistoryAdapter);
-        ptrHistory.setOnItemClickListener(this);
         ptrHistory.setOnRefreshListener(this);
         ptrHistory.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
         {
@@ -98,32 +97,25 @@ public class CameraHistoryFragment extends BaseFragment implements AdapterView.O
         cameraHistoryAdapter.setOnDeleteListening(new CameraHistoryAdapter.OnDeleteListening()
         {
             @Override
-            public void onClick(String cameraId)
+            public void onClick(Camera camera)
             {
                 String userCode = aCache.getAsString("user");
-                new CameraDelHistoryTask(getActivity(),userCode,cameraId)
+                LoadingDialog.getInstance(getActivity()).showLoading("删除中，请稍候...");
+                new CameraDelHistoryTask(getActivity(),userCode,camera.getId())
                 {
                     @Override
                     protected void onPostExecute(TaskResult result)
                     {
                         super.onPostExecute(result);
-                        getCameraHistory(1,true);
+                        LoadingDialog.getInstance(getActivity()).loadingDiss();
+                        cameraList.remove(camera);
+                        cameraHistoryAdapter.notifyDataSetChanged();
                     }
                 }.execute();
             }
         });
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
-    {
-        Intent intent = new Intent(getActivity(), CameraPlayerActivity.class);
-        Camera camera = cameraList.get(i - 1);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("camera", camera);
-        intent.putExtras(bundle);
-        startActivity(intent);
-    }
 
     @Override
     public void onRefresh(PullToRefreshBase refreshView)

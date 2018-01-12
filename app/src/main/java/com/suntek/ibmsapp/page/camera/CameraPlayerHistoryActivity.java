@@ -28,6 +28,7 @@ import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.PreviewUtil;
 import com.suntek.ibmsapp.util.RecordHander;
 import com.suntek.ibmsapp.util.SizeUtil;
+import com.suntek.ibmsapp.widget.DateChoosePopView;
 import com.suntek.ibmsapp.widget.SelectDateView;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
@@ -105,6 +106,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     ImageView ivPlayState;
     @BindView(R.id.iv_sounds)
     ImageView ivSounds;
+    @BindView(R.id.iv_oper_record)
+    ImageView ivRecord;
 
     private NetSpeedController netSpeedView;
     private FullRecordOperController fullRecordOperController;
@@ -113,6 +116,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
 
     private String chooseDate;
     private Date nowDate;
+    private DateChoosePopView dateChoosePopView;
 
     //记录录像开始时间
     private long recordBeginTime;
@@ -298,22 +302,20 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void onClick(View view)
             {
-                Intent intent = new Intent(CameraPlayerHistoryActivity.this, CameraDateActivity.class);
-                intent.putExtra("camera", camera);
-                startActivityForResult(intent, 1);
+                if(dateChoosePopView == null)
+                    dateChoosePopView = DateChoosePopView.getInstance(CameraPlayerHistoryActivity.this,camera);
+                dateChoosePopView.showCenter(view);
+                dateChoosePopView.setOnDateSelectedListener(new DateChoosePopView.OnDateSelectedListener()
+                {
+                    @Override
+                    public void onDateSelected(String date)
+                    {
+                        chooseDate = date;
+                        getRecordData();
+                    }
+                });
             }
         });
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1 && resultCode == 1)
-        {
-            chooseDate = data.getStringExtra("choose_date");
-            getRecordData();
-        }
     }
 
     private void getRecordData()
@@ -364,7 +366,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         localFile.mkdirs();
         ivTakePic.setImageBitmap(preview);
         showPreview();
-        FileUtil.saveImageToGallery(this, bitmap);
+        if (bitmap != null)
+            FileUtil.saveImageToGallery(this, bitmap);
         ToastHelper.getInstance(this).shortShowMessage("截图成功");
     }
 
@@ -566,6 +569,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     {
         if (isShow)
         {
+            ivRecord.setBackground(getDrawable(R.mipmap.ic_oper_record_processing));
             if(recordTimer == null)
              recordTimer = new Timer();
             llRecord.setVisibility(View.VISIBLE);
@@ -608,6 +612,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         }
         else
         {
+            ivRecord.setBackground(getDrawable(R.drawable.btn_oper_record));
             llRecord.setVisibility(View.GONE);
             recordTimer.cancel();
             recordTimer = null;

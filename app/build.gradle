@@ -142,7 +142,7 @@ dependencies {
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
     compile 'pub.devrel:easypermissions:1.0.1'
-
+    compile 'com.prolificinteractive:material-calendarview:1.4.0'
 
 
     compile files('libs/AudioEngineSDK.jar')

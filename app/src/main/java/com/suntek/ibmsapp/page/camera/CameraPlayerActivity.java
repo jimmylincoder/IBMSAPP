@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import android.widget.TextView;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.cache.ACache;
-import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
 import com.suntek.ibmsapp.task.camera.CameraAddHistoryTask;
@@ -103,6 +101,8 @@ public class CameraPlayerActivity extends BaseActivity
     LinearLayout llOperAndRecord;
     @BindView(R.id.tav_talk)
     TalkView tavTalk;
+    @BindView(R.id.iv_oper_record)
+    ImageView ivRecord;
 
     private ACache aCache;
 
@@ -282,7 +282,8 @@ public class CameraPlayerActivity extends BaseActivity
         localFile.mkdirs();
         ivTakePic.setImageBitmap(preview);
         showPreview();
-        FileUtil.saveImageToGallery(this, bitmap);
+        if (bitmap != null)
+            FileUtil.saveImageToGallery(this, bitmap);
         ToastHelper.getInstance(this).shortShowMessage("截图成功");
     }
 
@@ -468,8 +469,10 @@ public class CameraPlayerActivity extends BaseActivity
     {
         if (isShow)
         {
+            ivRecord.setBackground(getDrawable(R.mipmap.ic_oper_record_processing));
             if (recordTimer == null)
                 recordTimer = new Timer();
+
             llRecord.setVisibility(View.VISIBLE);
             recordBeginTime = new Date().getTime();
             recordTimer.schedule(new TimerTask()
@@ -507,6 +510,7 @@ public class CameraPlayerActivity extends BaseActivity
         }
         else
         {
+            ivRecord.setBackground(getDrawable(R.drawable.btn_oper_record));
             llRecord.setVisibility(View.GONE);
             recordTimer.cancel();
             recordTimer = null;
@@ -548,7 +552,7 @@ public class CameraPlayerActivity extends BaseActivity
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this,userCode,cameraId)
+        new CameraAddHistoryTask(this, userCode, cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)
