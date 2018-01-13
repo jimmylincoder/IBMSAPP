@@ -103,6 +103,7 @@ public class CameraPlayerActivity extends BaseActivity
     TalkView tavTalk;
     @BindView(R.id.iv_oper_record)
     ImageView ivRecord;
+    StreamTypePopView streamTypePopView;
 
     private ACache aCache;
 
@@ -147,6 +148,8 @@ public class CameraPlayerActivity extends BaseActivity
         });
         initClick();
         hikvisionVideoView.playReal(STREAM_FLUENT);
+        streamTypePopView = StreamTypePopView.getInstance(context);
+        streamTypePopView.initSelected();
         //添加历史记录
         loadData();
     }
@@ -519,7 +522,6 @@ public class CameraPlayerActivity extends BaseActivity
 
     private void setStreamType(View view)
     {
-        StreamTypePopView streamTypePopView = StreamTypePopView.getInstance(context);
         streamTypePopView.showUp(view);
         streamTypePopView.setOnItemClickListener(new StreamTypePopView.OnItemClickListener()
         {

@@ -302,8 +302,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void onClick(View view)
             {
-                if(dateChoosePopView == null)
-                    dateChoosePopView = DateChoosePopView.getInstance(CameraPlayerHistoryActivity.this,camera);
+                if (dateChoosePopView == null)
+                    dateChoosePopView = DateChoosePopView.getInstance(CameraPlayerHistoryActivity.this, camera);
                 dateChoosePopView.showCenter(view);
                 dateChoosePopView.setOnDateSelectedListener(new DateChoosePopView.OnDateSelectedListener()
                 {
@@ -338,14 +338,16 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     @OnClick(R.id.ll_play)
     public void play(View view)
     {
-        String beginTime = DateUtil.convertYYYY_MM_DD_HH_MM_SS(
-                new Date(RecordHander.getEarliestTime(recordMap.get(chooseDate)).getStartTime()));
-        String endTime = chooseDate + " 23:59:59";
-        if (hikvisionVideoView.getState() != PLAYING)
-            hikvisionVideoView.playHistory(beginTime, endTime, STREAM_HIGH_QUALITY);
-        else
-            hikvisionVideoView.release();
-
+        if (recordMap != null)
+        {
+            String beginTime = DateUtil.convertYYYY_MM_DD_HH_MM_SS(
+                    new Date(RecordHander.getEarliestTime(recordMap.get(chooseDate)).getStartTime()));
+            String endTime = chooseDate + " 23:59:59";
+            if (hikvisionVideoView.getState() != PLAYING)
+                hikvisionVideoView.playHistory(beginTime, endTime, STREAM_HIGH_QUALITY);
+            else
+                hikvisionVideoView.release();
+        }
     }
 
 
@@ -357,7 +359,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
 
     private void takePic()
     {
-        if(hikvisionVideoView.getState() != PLAYING)
+        if (hikvisionVideoView.getState() != PLAYING)
             return;
         PermissionRequest.verifyStoragePermissions(this);
         Bitmap bitmap = hikvisionVideoView.takePic();
@@ -471,12 +473,16 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         List<RecordItem> recordItems = recordMap.get(chooseDate);
         if (recordItems == null || recordItems.isEmpty())
         {
-            llSeekBar.setVisibility(View.GONE);
-            llTimeLoading.setVisibility(View.GONE);
-            llNoRecord.setVisibility(View.VISIBLE);
+            if (llSeekBar != null)
+                llSeekBar.setVisibility(View.GONE);
+            if (llTimeLoading != null)
+                llTimeLoading.setVisibility(View.GONE);
+            if (llNoRecord != null)
+                llNoRecord.setVisibility(View.VISIBLE);
         }
         else
         {
+            selectDateView.setNowTimeText(chooseDate);
             List<RecordItem> changeRecordItems = new ArrayList<>();
             for (RecordItem recordItem : recordItems)
             {
@@ -526,7 +532,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
 
     private void record()
     {
-        if(hikvisionVideoView.getState() != PLAYING)
+        if (hikvisionVideoView.getState() != PLAYING)
             return;
         if (isRecord)
         {
@@ -570,8 +576,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         if (isShow)
         {
             ivRecord.setBackground(getDrawable(R.mipmap.ic_oper_record_processing));
-            if(recordTimer == null)
-             recordTimer = new Timer();
+            if (recordTimer == null)
+                recordTimer = new Timer();
             llRecord.setVisibility(View.VISIBLE);
             recordBeginTime = new Date().getTime();
             recordTimer.schedule(new TimerTask()
@@ -597,7 +603,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                             {
                                 if (tvRecordTime != null)
                                     tvRecordTime.setText(finalMin + ":" + finalSec);
-                                if(ivPot != null)
+                                if (ivPot != null)
                                 {
                                     if (ivPot.getVisibility() == View.VISIBLE)
                                         ivPot.setVisibility(View.INVISIBLE);

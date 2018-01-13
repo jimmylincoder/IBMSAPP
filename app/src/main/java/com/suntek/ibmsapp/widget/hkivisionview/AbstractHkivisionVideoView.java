@@ -43,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -514,6 +515,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
                 }
             }
         };
+        stopTask.execute();
         taskStack.push(stopTask);
     }
 
@@ -538,6 +540,10 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
                     Map<String, List<RecordItem>> recordMap = RecordHander.handleRecordList(recordItems);
                     onHistoryRecordListener.onData(recordMap);
                 }
+                else
+                {
+                    onHistoryRecordListener.onData(new HashMap<>());
+                }
             }
         }.execute();
     }
@@ -554,6 +560,8 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         }
         //停止播放
         stopPlay();
+        if(player != null)
+            player.closeStream(port);
         //关闭socket连接
         if (cameraStreamSocketClient != null)
             cameraStreamSocketClient.close();

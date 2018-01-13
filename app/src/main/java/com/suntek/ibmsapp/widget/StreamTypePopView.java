@@ -91,6 +91,13 @@ public class StreamTypePopView
         });
     }
 
+    public void initSelected()
+    {
+        selectedPosition = 0;
+        tvFluent.setTextColor(context.getResources().getColor(R.color.blue_30));
+        tvHighQuality.setTextColor(context.getResources().getColor(R.color.gray_light));
+    }
+
     public static StreamTypePopView getInstance(Context context)
     {
         if (streamTypePopView == null)

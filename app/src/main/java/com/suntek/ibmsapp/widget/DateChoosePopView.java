@@ -101,7 +101,16 @@ public class DateChoosePopView
             {
                 if (onDateSelectedListener != null)
                 {
-                    String chooseDate = date.getYear() + "-" + date.getMonth() + "-" + date.getDay();
+                    int month = date.getMonth();
+                    int day = date.getDay();
+                    String monthStr = "";
+                    String dayStr = "";
+                    if(month < 10)
+                        monthStr = "0" + month;
+                    if(day < 10)
+                        dayStr = "0" + day;
+
+                    String chooseDate = date.getYear() + "-" + monthStr + "-" + dayStr;
                     if (recordMap != null)
                     {
                         List<RecordItem> recordItems = (List<RecordItem>) recordMap.get(chooseDate);
@@ -207,7 +216,7 @@ public class DateChoosePopView
 
         //当前时间加一个月
         Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.MONTH, -1);
+        cal.add(Calendar.WEEK_OF_MONTH, -1);
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
         avlLoading.setVisibility(View.VISIBLE);
