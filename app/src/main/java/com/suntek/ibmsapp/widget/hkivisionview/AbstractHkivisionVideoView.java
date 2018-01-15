@@ -413,6 +413,36 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         taskStack.push(socketAddressTask);
     }
 
+    /**
+     * 更新清晰度
+     */
+    public void changeStreamType(int streamType)
+    {
+        //停止请求线程
+        for (BaseTask task : taskStack)
+        {
+            if (!task.isCancelled())
+            {
+                task.cancel(true);
+            }
+        }
+        //停止播放
+        stateChange(PREPARE);
+        stopPlay();
+        if(player != null)
+            player.closeStream(port);
+        //关闭socket连接
+        if (cameraStreamSocketClient != null)
+            cameraStreamSocketClient.close();
+        //停止时间器
+        if (queryProgressTimer != null)
+            queryProgressTimer.cancel();
+
+        if (socketIp == null && socketPort == null)
+            getSocketIp(null, null, streamType);
+        else
+            initSocket(null, null, streamType);
+    }
 
     /**
      * 播放历史
@@ -498,7 +528,6 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
      */
     protected void stopPlay()
     {
-        stateChange(STOP);
         if (session == null)
             return;
 
@@ -559,6 +588,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             }
         }
         //停止播放
+        stateChange(STOP);
         stopPlay();
         if(player != null)
             player.closeStream(port);

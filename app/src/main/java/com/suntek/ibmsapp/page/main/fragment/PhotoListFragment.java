@@ -56,6 +56,10 @@ public class PhotoListFragment extends BaseFragment
     @BindView(R.id.iv_video_choose)
     ImageView ivVideoChoose;
 
+    Fragment photoFragment = null;
+
+    Fragment videoFragment = null;
+
     private int nowPosition = 0;
 
     private List<Fragment> fragmentList = new ArrayList<>();
@@ -73,17 +77,27 @@ public class PhotoListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        //initViewPager();
+        photoFragment = new PhotoFragment();
+        videoFragment = new VideoFragment();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
         initViewPager();
     }
 
     private void initViewPager()
     {
-        Fragment photoFragment = new PhotoFragment();
-        Fragment videoFragment = new VideoFragment();
-        fragmentList.add(photoFragment);
-        fragmentList.add(videoFragment);
+        if (!fragmentList.contains(photoFragment))
+            fragmentList.add(photoFragment);
+        if (!fragmentList.contains(videoFragment))
+            fragmentList.add(videoFragment);
 
-        photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
+        if (photoFragmentAdapter == null)
+            photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
         vpContent.setAdapter(photoFragmentAdapter);
         vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {

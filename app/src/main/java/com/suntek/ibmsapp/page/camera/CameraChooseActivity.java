@@ -1,6 +1,7 @@
 package com.suntek.ibmsapp.page.camera;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
@@ -15,6 +16,7 @@ import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Area;
 import com.suntek.ibmsapp.task.area.AreaListTask;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private ACache aCache;
 
+    private String chooseId = "1";
+
     @BindView(R.id.tv_now_area)
     TextView tvNowArea;
 
@@ -46,6 +50,9 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     @BindView(R.id.ll_error)
     LinearLayout llError;
+
+    @BindView(R.id.srl_refresh)
+    SwipeRefreshLayout srlRefresh;
 
     @Override
     public int getLayoutId()
@@ -59,7 +66,15 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         aCache = ACache.get(this);
         lvArea.setOnItemClickListener(this);
         initNowArea();
-        initAreaListView("1");
+        initAreaListView(chooseId, true);
+        srlRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                initAreaListView(chooseId, false);
+            }
+        });
     }
 
     private void initNowArea()
@@ -68,15 +83,23 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         lvArea.setVisibility(View.GONE);
         tvNowArea.setText(aCache.getAsString("choose_name"));
         areas = new ArrayList<>();
-        Area area = new Area();
-        area.setId("1");
-        area.setOgrCode("01");
-        area.setName("华侨城中心小区");
-        areas.add(area);
     }
 
-    private void initAreaListView(String parentId)
+    private void initAreaListView(String parentId, boolean isCache)
     {
+        if (isCache)
+        {
+            List<Area> areaCache = (List<Area>) aCache.getAsObject(parentId);
+            if (areaCache != null)
+            {
+                loadingView(false);
+                areas = areaCache;
+                areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areaCache);
+                lvArea.setAdapter(areaListAdapter);
+                return;
+            }
+        }
+
         new AreaListTask(this, parentId)
         {
             @Override
@@ -96,7 +119,19 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                     {
                         if (lvArea != null)
                         {
-                            areas.addAll(newAreas);
+                            areas.clear();
+                            if (parentId.equals("1"))
+                            {
+                                Area area = new Area();
+                                area.setId("1");
+                                area.setOgrCode("01");
+                                area.setName("华侨城中心小区");
+                                areas.add(area);
+                                areas.addAll(newAreas);
+                            }
+                            else
+                                areas = newAreas;
+                            aCache.put(parentId, (Serializable) areas);
                             areaListAdapter = new AreaListAdapter(CameraChooseActivity.this, areas);
                             lvArea.setAdapter(areaListAdapter);
                         }
@@ -114,6 +149,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                     if (llLoading != null)
                         llLoading.setVisibility(View.GONE);
                 }
+                if (srlRefresh != null)
+                    srlRefresh.setRefreshing(false);
             }
         }.execute();
     }
@@ -142,14 +179,15 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         llError.setVisibility(View.GONE);
         llLoading.setVisibility(View.VISIBLE);
         lvArea.setVisibility(View.GONE);
-        initAreaListView("1");
+        initAreaListView("1", true);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
+        loadingView(true);
         String orgCode = areas.get(i).getOgrCode();
-        String id = areas.get(i).getId();
+        chooseId = areas.get(i).getId();
         String name = areas.get(i).getName();
         aCache.put("choose_org_code", orgCode);
         aCache.put("choose_name", name);
@@ -160,7 +198,23 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         else
         {
             areas.clear();
-            initAreaListView(id);
+            initAreaListView(chooseId, true);
+        }
+    }
+
+    private void loadingView(boolean isShow)
+    {
+        if (isShow)
+        {
+            llError.setVisibility(View.GONE);
+            llLoading.setVisibility(View.VISIBLE);
+            lvArea.setVisibility(View.GONE);
+        }
+        else
+        {
+            llError.setVisibility(View.GONE);
+            llLoading.setVisibility(View.GONE);
+            lvArea.setVisibility(View.VISIBLE);
         }
     }
 }

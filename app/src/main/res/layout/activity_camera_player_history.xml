@@ -100,9 +100,9 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:layout_marginBottom="10dp"
                 android:layout_gravity="bottom|left"
+                android:layout_marginBottom="10dp"
+                android:layout_marginLeft="20dp"
                 android:gravity="center|bottom"
                 android:orientation="horizontal">
 
@@ -141,8 +141,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"
-                    android:textColor="@color/white"
                     android:text="00:00"
+                    android:textColor="@color/white"
                     android:textSize="16sp"/>
 
             </LinearLayout>
@@ -317,7 +317,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="25dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -333,20 +333,47 @@
             <LinearLayout
                 android:id="@+id/ll_history"
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
-                android:layout_marginTop="15dp"
-                android:background="@color/white"
-                android:orientation="horizontal">
+                android:layout_height="100dp"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/ll_time"
                     android:layout_width="match_parent"
-                    android:layout_height="71dp"
+                    android:layout_height="100dp"
                     android:orientation="vertical"
                     android:paddingBottom="1dp"
                     android:paddingTop="1dp"
                     android:visibility="gone">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/change_time_shape_corner"
+                            android:gravity="center"
+                            android:orientation="horizontal"
+                            android:paddingBottom="3dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:paddingTop="3dp">
+
+                            <TextView
+                                android:id="@+id/tv_change_time"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="12:12:12"
+                                android:textColor="@color/white"
+                                android:textSize="10sp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <com.suntek.ibmsapp.widget.TimeSeekBarView
                         android:id="@+id/ta_time"
@@ -366,7 +393,6 @@
                     android:id="@+id/ll_time_loading"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
-                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:paddingBottom="1dp"
@@ -392,7 +418,6 @@
                     android:id="@+id/ll_no_record"
                     android:layout_width="match_parent"
                     android:layout_height="71dp"
-                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:paddingBottom="1dp"
@@ -403,7 +428,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="该时间段无录像"
-                        android:textColor="@color/gray_light"
+                        android:textColor="@color/black_alpha_30"
                         />
 
                 </LinearLayout>

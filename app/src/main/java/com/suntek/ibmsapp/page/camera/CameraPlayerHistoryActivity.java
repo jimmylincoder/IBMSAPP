@@ -108,6 +108,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     ImageView ivSounds;
     @BindView(R.id.iv_oper_record)
     ImageView ivRecord;
+    @BindView(R.id.tv_change_time)
+    TextView tvChangeTime;
 
     private NetSpeedController netSpeedView;
     private FullRecordOperController fullRecordOperController;
@@ -140,6 +142,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         chooseDate = DateUtil.convertYYYY_MM_DD(new Date());
         hikvisionVideoView.initInfo(camera);
         hikvisionVideoView.setController(netSpeedView);
+        dateChoosePopView = DateChoosePopView.getInstance(context,camera);
         initListener();
     }
 
@@ -189,7 +192,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void onValueChange(Date date)
             {
-
+                tvChangeTime.setText(DateUtil.convertHH_MM_SS(date));
             }
 
             @Override
@@ -256,7 +259,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void onValueChange(Date date)
             {
-
+                tvChangeTime.setText(DateUtil.convertHH_MM_SS(date));
             }
 
             @Override
@@ -302,18 +305,16 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void onClick(View view)
             {
-                if (dateChoosePopView == null)
-                    dateChoosePopView = DateChoosePopView.getInstance(CameraPlayerHistoryActivity.this, camera);
                 dateChoosePopView.showCenter(view);
-                dateChoosePopView.setOnDateSelectedListener(new DateChoosePopView.OnDateSelectedListener()
-                {
-                    @Override
-                    public void onDateSelected(String date)
-                    {
-                        chooseDate = date;
-                        getRecordData();
-                    }
-                });
+            }
+        });
+        dateChoosePopView.setOnDateSelectedListener(new DateChoosePopView.OnDateSelectedListener()
+        {
+            @Override
+            public void onDateSelected(String date)
+            {
+                chooseDate = date;
+                getRecordData();
             }
         });
     }
@@ -412,6 +413,8 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         }
         else
         {
+            if (isRecord)
+                record();
             finish();
         }
     }
@@ -492,6 +495,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                 changeRecordItems.add(recordItem1);
             }
             long nowTime = RecordHander.getEarliestTime(recordItems).getStartTime();
+            tvChangeTime.setText(DateUtil.convertHH_MM_SS(new Date(nowTime)));
             seekBarView.setRecordList(changeRecordItems);
             seekBarView.setValue(nowTime);
             fullRecordOperController.setRecordList(changeRecordItems);

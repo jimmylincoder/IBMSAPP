@@ -382,6 +382,10 @@ public class CameraPlayerActivity extends BaseActivity
         }
         else
         {
+            //判断是否在录像中
+            if (isRecord)
+                record();
+            //保存预览图
             savePreview();
             finish();
         }
@@ -501,10 +505,13 @@ public class CameraPlayerActivity extends BaseActivity
                             {
                                 if (tvRecordTime != null)
                                     tvRecordTime.setText(finalMin + ":" + finalSec);
-                                if (ivPot.getVisibility() == View.VISIBLE)
-                                    ivPot.setVisibility(View.INVISIBLE);
-                                else
-                                    ivPot.setVisibility(View.VISIBLE);
+                                if (ivPot != null)
+                                {
+                                    if (ivPot.getVisibility() == View.VISIBLE)
+                                        ivPot.setVisibility(View.INVISIBLE);
+                                    else
+                                        ivPot.setVisibility(View.VISIBLE);
+                                }
                             }
                         });
                     }
@@ -528,8 +535,8 @@ public class CameraPlayerActivity extends BaseActivity
             @Override
             public void OnHighQuality(View view)
             {
-                hikvisionVideoView.release();
-                hikvisionVideoView.playReal(STREAM_HIGH_QUALITY);
+                ToastHelper.getInstance(CameraPlayerActivity.this).shortShowMessage("建议在6M以上带宽下播放高清模式");
+                hikvisionVideoView.changeStreamType(STREAM_HIGH_QUALITY);
                 ivStreamType.setBackground(getDrawable(R.drawable.btn_oper_high_quality));
                 fullOperView.setIvStreamView(getDrawable(R.drawable.btn_full_high_quality));
             }
@@ -537,8 +544,7 @@ public class CameraPlayerActivity extends BaseActivity
             @Override
             public void OnFluent(View view)
             {
-                hikvisionVideoView.release();
-                hikvisionVideoView.playReal(STREAM_FLUENT);
+                hikvisionVideoView.changeStreamType(STREAM_FLUENT);
                 ivStreamType.setBackground(getDrawable(R.drawable.btn_oper_fluent));
                 fullOperView.setIvStreamView(getDrawable(R.drawable.btn_full_fluent));
             }

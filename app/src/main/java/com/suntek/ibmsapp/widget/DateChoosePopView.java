@@ -9,12 +9,15 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
 import com.prolificinteractive.materialcalendarview.DayViewFacade;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.spans.DotSpan;
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.task.base.BaseTask;
@@ -64,6 +67,8 @@ public class DateChoosePopView
 
     private BaseTask historyTask;
 
+    private ACache aCache;
+
     private DateChoosePopView(Context context, Camera camera)
     {
         this.context = context;
@@ -77,6 +82,7 @@ public class DateChoosePopView
         popupWidth = contentView.getMeasuredWidth();
         popupHeight = contentView.getMeasuredHeight();
         popWindow.setAnimationStyle(R.style.anim_date_bottom);
+        aCache = ACache.get(context);
         initClick();
     }
 
@@ -103,8 +109,8 @@ public class DateChoosePopView
                 {
                     int month = date.getMonth();
                     int day = date.getDay();
-                    String monthStr = "";
-                    String dayStr = "";
+                    String monthStr = month + "";
+                    String dayStr = day + "";
                     if(month < 10)
                         monthStr = "0" + month;
                     if(day < 10)
@@ -146,8 +152,7 @@ public class DateChoosePopView
 
     public static DateChoosePopView getInstance(Context context, Camera camera)
     {
-        if (dateChoosePopView == null)
-            dateChoosePopView = new DateChoosePopView(context, camera);
+        dateChoosePopView = new DateChoosePopView(context, camera);
         return dateChoosePopView;
     }
 
@@ -214,11 +219,21 @@ public class DateChoosePopView
         String nowDate = format.format(new Date());
         String endTime = nowDate + " 23:59:59";
 
-        //当前时间加一个月
+        //当前时间加一个星期
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.WEEK_OF_MONTH, -1);
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
+
+        //判断是否有缓存
+        String recordJson = aCache.getAsString(camera.getDeviceId() + "_" + nowDate);
+        if(recordJson != null)
+        {
+            recordMap = (Map)JSON.parse(recordJson);
+            initDateChoose();
+            return;
+        }
+
         avlLoading.setVisibility(View.VISIBLE);
         historyTask = new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
                 camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
@@ -232,8 +247,13 @@ public class DateChoosePopView
                 {
                     avlLoading.setVisibility(View.GONE);
                     List<RecordItem> recordItems = (List<RecordItem>) result.getResultData();
-                    recordMap = RecordHander.handleRecordList(recordItems);
-                    initDateChoose();
+                    if(!recordItems.isEmpty())
+                    {
+                        recordMap = RecordHander.handleRecordList(recordItems);
+                        //将历史记录存入缓存
+                        aCache.put(camera.getDeviceId() + "_" + nowDate, JSON.toJSONString(recordMap));
+                        initDateChoose();
+                    }
                 }
             }
         };
@@ -261,6 +281,7 @@ public class DateChoosePopView
             }
         }
         mcvDate.addDecorator(new EventDecorator(R.color.red, calendarInfos));
+        mcvDate.invalidateDecorators();
     }
 
     public void setOnDateSelectedListener(OnDateSelectedListener onDateSelectedListener)
