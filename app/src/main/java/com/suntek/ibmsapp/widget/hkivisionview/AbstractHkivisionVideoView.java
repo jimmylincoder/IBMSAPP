@@ -273,6 +273,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
 
     protected void initSocket(String beginTime, String endTime, int streamType)
     {
+        stateChange(PREPARE);
         cameraStreamSocketClient = CameraStreamSocketClient.getInstance().
                 setOnCameraStreamDataListener(new OnCameraStreamDataListener()
                 {

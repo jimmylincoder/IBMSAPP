@@ -143,11 +143,11 @@ public class CameraPlayerActivity extends BaseActivity
             @Override
             public void onPlay(View view)
             {
-                hikvisionVideoView.playReal(STREAM_HIGH_QUALITY);
+                hikvisionVideoView.playReal(streamType);
             }
         });
         initClick();
-        hikvisionVideoView.playReal(STREAM_FLUENT);
+        hikvisionVideoView.playReal(streamType);
         streamTypePopView = StreamTypePopView.getInstance(context);
         streamTypePopView.initSelected();
         //添加历史记录

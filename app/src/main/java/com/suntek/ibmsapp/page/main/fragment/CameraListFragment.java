@@ -24,6 +24,7 @@ import com.suntek.ibmsapp.task.camera.CameraListTask;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 
@@ -53,6 +54,9 @@ public class CameraListFragment extends BaseFragment
 
     @BindView(R.id.ll_retry)
     LinearLayout llRetry;
+
+    @BindView(R.id.ll_loading_more)
+    LinearLayout llLoadingMore;
 
     private String areaId;
 
@@ -122,7 +126,6 @@ public class CameraListFragment extends BaseFragment
         });
 
 
-
         ptrCameraList.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
         {
             @Override
@@ -130,6 +133,7 @@ public class CameraListFragment extends BaseFragment
             {
                 if (currentPage < totalPage)
                 {
+                    llLoadingMore.setVisibility(View.VISIBLE);
                     getCameraList(++currentPage, false);
                 }
             }
@@ -186,6 +190,8 @@ public class CameraListFragment extends BaseFragment
                     }
                     else
                     {
+                        if (llLoadingMore != null)
+                            llLoadingMore.setVisibility(View.GONE);
                         cameraList.addAll(newCameraList);
                         aCache.put("camera_list", (Serializable) cameraList);
                     }
@@ -208,6 +214,8 @@ public class CameraListFragment extends BaseFragment
                         ptrCameraList.onRefreshComplete();
                     if (llRetry != null)
                         llRetry.setVisibility(View.VISIBLE);
+                    if (llLoadingMore != null)
+                        llLoadingMore.setVisibility(View.GONE);
                 }
             }
         }.execute();
@@ -219,9 +227,9 @@ public class CameraListFragment extends BaseFragment
         super.onResume();
         tvArea.setText(aCache.getAsString("choose_name"));
         String chooseAreaId = aCache.getAsString("choose_org_code");
-        if(areaId == null)
+        if (areaId == null)
             areaId = "";
-        if(chooseAreaId == null)
+        if (chooseAreaId == null)
             chooseAreaId = "";
         if (!areaId.equals(chooseAreaId))
         {
