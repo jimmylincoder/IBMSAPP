@@ -22,6 +22,7 @@ import com.suntek.ibmsapp.page.main.fragment.CameraListFragment;
 import com.suntek.ibmsapp.page.main.fragment.MeFragment;
 import com.suntek.ibmsapp.page.main.fragment.PhotoListFragment;
 import com.suntek.ibmsapp.task.version.CheckVersionTask;
+import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.VersionUtil;
 import com.suntek.ibmsapp.widget.LoadingDialog;
 import com.suntek.ibmsapp.widget.UnityDialog;
@@ -57,6 +58,9 @@ public class MainActivity extends BaseFragmentActivity implements BottomNavigati
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        //申请读取内存权限
+        PermissionRequest.verifyStoragePermissions(this);
+        //检测更新版本
         checkUpdate();
         bnbTab.setMode(BottomNavigationBar.MODE_FIXED);
         bnbTab.addItem(new BottomNavigationItem(R.mipmap.ic_video_active, "视频")

@@ -99,6 +99,7 @@ public class PhotoListFragment extends BaseFragment
         if (photoFragmentAdapter == null)
             photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
         vpContent.setAdapter(photoFragmentAdapter);
+        pageChange(nowPosition);
         vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
             @Override

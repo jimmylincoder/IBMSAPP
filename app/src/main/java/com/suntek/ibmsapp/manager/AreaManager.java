@@ -30,15 +30,15 @@ public class AreaManager extends BaseComponent
      */
     public List<Area> getAreaList(String parentId)
     {
-        Map<String,Object> params = new HashMap<>();
-        params.put("parent_id",parentId);
+        Map<String, Object> params = new HashMap<>();
+        params.put("parent_id", parentId);
 
-        HttpResponse response = ibmsHttpEngine.request("area.list",params);
-        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        HttpResponse response = ibmsHttpEngine.request("area.list", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
-            List<Map<String,Object>> data = (List<Map<String, Object>>) response.getData().get("area_list");
+            List<Map<String, Object>> data = (List<Map<String, Object>>) response.getData().get("area_list");
             List<Area> areas = new ArrayList<>();
-            for(Map<String,Object> map : data)
+            for (Map<String, Object> map : data)
             {
                 Area area = Area.generateByJson(map);
                 areas.add(area);
@@ -47,7 +47,29 @@ public class AreaManager extends BaseComponent
         }
         else
         {
-            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR,response.getErrorMessage());
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
+        }
+    }
+
+    /**
+     * 获取根节点
+     *
+     * @return
+     */
+    public Area getRootArea()
+    {
+        Map<String, Object> params = new HashMap<>();
+
+        HttpResponse response = ibmsHttpEngine.request("area.root", params);
+        if (response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+            Map<String, Object> data = (Map<String, Object>) response.getData().get("area");
+            Area area = Area.generateByJson(data);
+            return area;
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR, response.getErrorMessage());
         }
     }
 }
