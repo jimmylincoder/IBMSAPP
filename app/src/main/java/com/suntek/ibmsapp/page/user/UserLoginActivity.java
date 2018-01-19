@@ -17,8 +17,11 @@ import com.suntek.ibmsapp.component.RequestBody;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Autowired;
+import com.suntek.ibmsapp.model.Area;
 import com.suntek.ibmsapp.model.User;
 import com.suntek.ibmsapp.page.main.MainActivity;
+import com.suntek.ibmsapp.task.area.AreaRootTask;
+import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.user.UserLoginTask;
 import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
@@ -63,7 +66,6 @@ public class UserLoginActivity extends BaseActivity
         localLayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
         aCache = ACache.get(this);
         initEditText();
-        initArea();
     }
 
     private void initEditText()
@@ -133,6 +135,27 @@ public class UserLoginActivity extends BaseActivity
         }
 
         LoadingDialog.getInstance(this).showLoading("登录中，请稍候...");
+        //获取根节点缓存
+        new AreaRootTask(this)
+        {
+            @Override
+            protected void onPostExecute(TaskResult result)
+            {
+                super.onPostExecute(result);
+                if(result.getError() == null)
+                {
+                    Area area = (Area) result.getResultData();
+                    aCache.put("root_area",area);
+                    aCache.put("choose_org_code",area.getOgrCode());
+                    aCache.put("choose_name", area.getName());
+                    login(account,password);
+                }
+            }
+        }.execute();
+    }
+
+    private void login(String account,String password)
+    {
         new UserLoginTask(this, account, password)
         {
             @Override
@@ -205,15 +228,5 @@ public class UserLoginActivity extends BaseActivity
             etPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         else
             etPassword.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-    }
-
-    private void initArea()
-    {
-        String chooseArea = aCache.getAsString("choose_area");
-        if (chooseArea == null || "".equals(chooseArea))
-        {
-            aCache.put("choose_area", "1");
-            aCache.put("choose_name", "华侨城中心小区");
-        }
     }
 }

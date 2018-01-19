@@ -3,6 +3,7 @@ package com.suntek.ibmsapp.page.camera;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -75,6 +76,27 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                 initAreaListView(chooseId, false);
             }
         });
+        lvArea.setOnScrollListener(new AbsListView.OnScrollListener()
+        {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState)
+            {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+            {
+                boolean enable = false;
+                if (lvArea != null && lvArea.getChildCount() > 0)
+                {
+                    boolean firstItemVisible = lvArea.getFirstVisiblePosition() == 0;
+                    boolean topOfFirstItemVisible = lvArea.getChildAt(0).getTop() == 0;
+                    enable = firstItemVisible && topOfFirstItemVisible;
+                }
+                srlRefresh.setEnabled(enable);
+            }
+        });
     }
 
     private void initNowArea()
@@ -122,10 +144,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                             areas.clear();
                             if (parentId.equals("1"))
                             {
-                                Area area = new Area();
-                                area.setId("1");
-                                area.setOgrCode("01");
-                                area.setName("华侨城中心小区");
+                                Area area = (Area) aCache.getAsObject("root_area");
                                 areas.add(area);
                                 areas.addAll(newAreas);
                             }

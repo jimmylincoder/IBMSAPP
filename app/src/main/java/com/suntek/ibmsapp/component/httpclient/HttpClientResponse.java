@@ -171,7 +171,7 @@ public class HttpClientResponse extends BaseHttpEngine
         String debugMessageResponse = JSON.toJSONString(baseHttpResponse, true);
         if (isLog)
         {
-     //       Log.d("ApiEngine", String.format("response -> %s\n%s", serviceName, debugMessageResponse));
+            Log.d("ApiEngine", String.format("response -> %s\n%s", serviceName, debugMessageResponse));
         }
 
         return baseHttpResponse;
