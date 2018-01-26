@@ -6,16 +6,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.widget.MediaController;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Photo;
-import com.suntek.ibmsapp.page.photo.PhotoPagerFragment;
 import com.suntek.ibmsapp.widget.UnityDialog;
-import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
-
-import org.MediaPlayer.PlayM4.Player;
+import com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView;
 
 
 import java.io.File;
@@ -24,7 +20,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 
 /**
  * 视频播放界面

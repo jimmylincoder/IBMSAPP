@@ -23,7 +23,7 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <!--<com.tv.danmaku.ijk.media.widget.media.IjkVideoView-->
+                <com.suntek.ibmsapp.widget.ijkmedia.mediaedia.IjkVideoView-->
                 <!--android:id="@+id/sv_video"-->
                 <!--android:layout_width="match_parent"-->
                 <!--android:layout_height="200dp"/>-->

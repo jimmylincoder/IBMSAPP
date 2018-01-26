@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tv.danmaku.ijk.media.widget.media;
+package com.suntek.ibmsapp.widget.ijkmedia.media;
 
 import android.view.View;
 import android.widget.MediaController;

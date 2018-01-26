@@ -31,7 +31,6 @@ import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.component.cache.ACache;
-import com.suntek.ibmsapp.component.core.Autowired;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
@@ -50,8 +49,8 @@ import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
-import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
-import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
+import com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView;
+import com.suntek.ibmsapp.widget.ijkmedia.media.OnVideoTouchListener;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

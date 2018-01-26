@@ -1,4 +1,4 @@
-package com.tv.danmaku.ijk.media.widget.media;
+package com.suntek.ibmsapp.widget.ijkmedia.media;
 
 /**
  * @

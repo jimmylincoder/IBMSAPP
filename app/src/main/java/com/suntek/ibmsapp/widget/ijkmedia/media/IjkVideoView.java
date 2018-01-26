@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.tv.danmaku.ijk.media.widget.media;
+package com.suntek.ibmsapp.widget.ijkmedia.media;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
@@ -26,7 +25,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -40,9 +38,8 @@ import android.widget.MediaController;
 
 
 import com.suntek.ibmsapp.R;
-import com.suntek.ibmsapp.widget.ToastHelper;
-import com.tv.danmaku.ijk.media.application.Settings;
-import com.tv.danmaku.ijk.media.services.MediaPlayerService;
+import com.suntek.ibmsapp.widget.ijkmedia.application.Settings;
+import com.suntek.ibmsapp.widget.ijkmedia.services.MediaPlayerService;
 
 import java.io.File;
 import java.io.IOException;

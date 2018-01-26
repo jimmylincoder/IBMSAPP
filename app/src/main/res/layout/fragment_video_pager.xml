@@ -37,12 +37,12 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <com.tv.danmaku.ijk.media.widget.media.IjkVideoView
+        <com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView
             android:id="@+id/ijk_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        </com.tv.danmaku.ijk.media.widget.media.IjkVideoView>
+        </com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView>
 
     </LinearLayout>
 

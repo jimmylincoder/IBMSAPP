@@ -79,4 +79,23 @@ public class UserManager extends BaseComponent
         }
     }
 
+    /**
+     * 将用户数据保存至缓存
+     *
+     * @param user
+     */
+    public void saveUserByCache(User user)
+    {
+        aCache.put("user", user);
+    }
+
+    /**
+     * 从缓存从取出用户数据
+     */
+    public User getUserByCache()
+    {
+        User user = (User) aCache.getAsObject("user");
+        return user;
+    }
+
 }

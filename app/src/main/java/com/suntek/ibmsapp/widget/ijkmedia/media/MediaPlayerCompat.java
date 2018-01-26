@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tv.danmaku.ijk.media.widget.media;
+package com.suntek.ibmsapp.widget.ijkmedia.media;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;

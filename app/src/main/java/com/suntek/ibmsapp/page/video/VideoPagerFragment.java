@@ -12,7 +12,7 @@ import android.widget.MediaController;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseFragment;
-import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
+import com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView;
 
 import java.io.File;
 import java.io.FileInputStream;

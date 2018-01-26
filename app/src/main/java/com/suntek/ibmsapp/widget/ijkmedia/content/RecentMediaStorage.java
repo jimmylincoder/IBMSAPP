@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.tv.danmaku.ijk.media.content;
+package com.suntek.ibmsapp.widget.ijkmedia.content;
 
 import android.content.ContentValues;
 import android.content.Context;
