@@ -33,6 +33,9 @@ public class MeFragment extends BaseFragment
     @BindView(R.id.tv_user_name)
     TextView tvUserName;
 
+    @BindView(R.id.tv_dept_name)
+    TextView tvDeptName;
+
     private ACache aCache;
 
     @Override
@@ -46,7 +49,9 @@ public class MeFragment extends BaseFragment
     {
         aCache = ACache.get(getActivity());
         String userName = aCache.getAsString("userName");
+        String deptName = aCache.getAsString("deptName");
         tvUserName.setText(userName);
+        tvDeptName.setText(deptName);
     }
 
     @OnClick(R.id.ll_login_out)

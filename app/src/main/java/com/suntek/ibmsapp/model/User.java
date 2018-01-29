@@ -14,7 +14,9 @@ public class User implements Serializable
 
     private String userName;
 
-    private String password;
+    private String deptCode;
+
+    private String deptName;
 
     public String getUserCode()
     {
@@ -36,23 +38,33 @@ public class User implements Serializable
         this.userName = userName;
     }
 
-    public String getPassword()
+    public String getDeptCode()
     {
-        return password;
+        return deptCode;
     }
 
-    public void setPassword(String password)
+    public void setDeptCode(String deptCode)
     {
-        this.password = password;
+        this.deptCode = deptCode;
+    }
+
+    public String getDeptName()
+    {
+        return deptName;
+    }
+
+    public void setDeptName(String deptName)
+    {
+        this.deptName = deptName;
     }
 
     public static User generateByJson(Map<String,Object> content)
     {
         User user = new User();
         user.setUserName((String) content.get("user_name"));
-        user.setPassword((String) content.get("password"));
         user.setUserCode((String) content.get("user_code"));
-
+        user.setDeptCode((String) content.get("dept_code"));
+        user.setDeptName((String) content.get("dept_name"));
         return user;
     }
 }

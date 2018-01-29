@@ -45,6 +45,7 @@ public class UserManager extends BaseComponent
             User user = User.generateByJson(content);
             aCache.put("userCode", user.getUserCode());
             aCache.put("userName", user.getUserName());
+            aCache.put("deptName",user.getDeptName());
             return user;
         }
         else
