@@ -229,6 +229,14 @@ public class CameraPlayerActivity extends BaseActivity
                 }
             }
         });
+        hikvisionVideoView.setOnFailListener(new AbstractHkivisionVideoView.OnFailListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                hikvisionVideoView.playReal(streamType);
+            }
+        });
         tavTalk.setOnHangUpListener(new TalkView.OnHangUpListener()
         {
             @Override

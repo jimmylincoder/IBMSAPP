@@ -1,5 +1,6 @@
 package com.suntek.ibmsapp.widget.hkivisionview;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -7,6 +8,7 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -97,6 +99,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
     protected OnRecordListener onRecordListener;
     protected OnPlayListener onPlayListener;
     protected OnHistoryRecordListener onHistoryRecordListener;
+    protected OnFailListener onFailListener;
 
     //播放器
     protected Player player;
@@ -215,6 +218,15 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
                 }
             }
         });
+        failView.setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (onFailListener != null)
+                    onFailListener.onClick(v);
+            }
+        });
     }
 
     protected void initController(AbstractControlView controller)
@@ -256,7 +268,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             public void run()
             {
                 videoView.setFatherW_H(llVideoView.getRight(), llVideoView.getBottom());
-                videoView.setFatherTopAndBottom(llVideoView.getRight(), llVideoView.getBottom());
+                videoView.setFatherTopAndBottom(llVideoView.getTop(), llVideoView.getBottom());
             }
         }, 100);
     }
@@ -313,7 +325,8 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             @Override
             public void onConnectException(Throwable throwable)
             {
-
+                //停止播放
+                stateChange(STOP);
             }
 
             @Override
@@ -430,14 +443,17 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         //停止播放
         stateChange(PREPARE);
         stopPlay();
-        if(player != null)
+        if (player != null)
             player.closeStream(port);
         //关闭socket连接
         if (cameraStreamSocketClient != null)
             cameraStreamSocketClient.close();
         //停止时间器
         if (queryProgressTimer != null)
+        {
             queryProgressTimer.cancel();
+            queryProgressTimer = null;
+        }
 
         if (socketIp == null && socketPort == null)
             getSocketIp(null, null, streamType);
@@ -591,14 +607,17 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
         //停止播放
         stateChange(STOP);
         stopPlay();
-        if(player != null)
+        if (player != null)
             player.closeStream(port);
         //关闭socket连接
         if (cameraStreamSocketClient != null)
             cameraStreamSocketClient.close();
         //停止时间器
         if (queryProgressTimer != null)
+        {
             queryProgressTimer.cancel();
+            queryProgressTimer = null;
+        }
     }
 
     /**
@@ -700,5 +719,10 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
     public interface OnHistoryRecordListener
     {
         void onData(Map<String, List<RecordItem>> recordMap);
+    }
+
+    public interface OnFailListener
+    {
+        void onClick(View view);
     }
 }
