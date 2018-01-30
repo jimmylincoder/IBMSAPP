@@ -114,6 +114,7 @@ public class SelectDateView extends LinearLayout
     public void setNowTimeText(String date)
     {
         tvNowTime.setText(date);
+        chooseDate = date;
     }
 
     public void setOnDateListener(OnDateListener onDateListener)

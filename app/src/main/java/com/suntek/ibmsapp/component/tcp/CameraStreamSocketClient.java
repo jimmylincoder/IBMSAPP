@@ -430,21 +430,24 @@ public class CameraStreamSocketClient
         try
         {
             isStop = false;
+            if (socketThread != null)
+            {
+                socketThread.interrupt();
+                socketThread = null;
+            }
+            if (keepLiveTimer != null)
+            {
+                keepLiveTimer.cancel();
+                keepLiveTimer = null;
+            }
             if (inputStream != null)
                 inputStream.close();
             if (socket != null)
             {
-                socket.close();
                 socket.shutdownInput();
+                socket.close();
+                socket = null;
             }
-            if (socketThread != null)
-                socketThread.interrupt();
-            if (keepLiveTimer != null)
-                keepLiveTimer.cancel();
-
-            socket = null;
-            socketThread = null;
-            keepLiveTimer = null;
         } catch (IOException e)
         {
             onCameraStreamExceptionListener.onConnectException(e);

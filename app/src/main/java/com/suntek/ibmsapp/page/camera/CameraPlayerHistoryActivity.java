@@ -142,7 +142,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         chooseDate = DateUtil.convertYYYY_MM_DD(new Date());
         hikvisionVideoView.initInfo(camera);
         hikvisionVideoView.setController(netSpeedView);
-        dateChoosePopView = DateChoosePopView.getInstance(context,camera);
+        dateChoosePopView = DateChoosePopView.getInstance(context, camera);
         initListener();
     }
 
@@ -222,7 +222,10 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             @Override
             public void stop(View view)
             {
-                hikvisionVideoView.release();
+                if (hikvisionVideoView.getState() == PLAYING)
+                    hikvisionVideoView.release();
+                else if (hikvisionVideoView.getState() == STOP)
+                    playNowDate();
             }
 
             @Override
@@ -317,6 +320,25 @@ public class CameraPlayerHistoryActivity extends BaseActivity
                 getRecordData();
             }
         });
+        hikvisionVideoView.setOnFailListener(new AbstractHkivisionVideoView.OnFailListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                playNowDate();
+            }
+        });
+    }
+
+    private void playNowDate()
+    {
+        List<RecordItem> recordItems = null;
+        if (recordMap != null)
+            recordItems = recordMap.get(chooseDate);
+        RecordItem recordItem = RecordHander.getEarliestTime(recordItems);
+        String beginTime = DateUtil.convertYYYY_MM_DD_HH_MM_SS(new Date(recordItem.getStartTime()));
+        String endTime = chooseDate + " 23:59:59";
+        hikvisionVideoView.playHistory(beginTime, endTime, STREAM_HIGH_QUALITY);
     }
 
     private void getRecordData()

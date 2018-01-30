@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
-        android:text="播放失败,请检查摄像头配置"
+        android:text="播放失败,点击重试"
         android:textColor="@color/white"
         />
 

@@ -182,10 +182,10 @@ public class CustomSurfaceView extends SurfaceView
                     }
                     Log.e(TAG, "水平移动中 left:" + left + " right:" + right + " bottom:" + bottom + " top:" + top + " viewWidth:" +
                             this.getWidth() + " screenWidth:" + screenWidth);
-                    if (right <= screenWidth)
+                    if (right <= initViewWidth)
                     {
-                        left = screenWidth - this.getWidth();
-                        right = screenWidth;
+                        left = initViewWidth - this.getWidth();
+                        right = initViewWidth;
                     }
                     Log.e(TAG, "水平移动后 left:" + left + " right:" + right + " bottom:" + bottom + " top:" + top + " viewWidth:" +
                             this.getWidth() + " screenWidth:" + screenWidth);
@@ -261,7 +261,7 @@ public class CustomSurfaceView extends SurfaceView
         {
             isControl_Vertical = false;
         }
-        Log.e(TAG, "viewWidth:" + View_Width + " fatheView_W:" + fatherView_W);
+        Log.e(TAG, "viewWidth:" + View_Width + " fatheView_W:" + fatherView_W + "  View_Left:" + getRight());
         if (View_Width > fatherView_W)
         {
             isControl_Horizal = true;
@@ -398,10 +398,6 @@ public class CustomSurfaceView extends SurfaceView
             // 双击屏幕
             int left = 0, top = 0, right = 0, bottom = 0;
             int length = 0;
-            left = getLeft();
-            top = getTop();
-            bottom = getBottom();
-            right = getRight();
             if (getHeight() > fatherView_H)
             {
                 // 缩小模式

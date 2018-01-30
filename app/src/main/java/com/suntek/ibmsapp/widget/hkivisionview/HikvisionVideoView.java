@@ -159,6 +159,11 @@ public class HikvisionVideoView extends AbstractHkivisionVideoView implements IC
         this.onPlayStateListener = onPlayStateListener;
     }
 
+    public void setOnFailListener(OnFailListener onFailListener)
+    {
+        this.onFailListener = onFailListener;
+    }
+
     public void initSurfaceView()
     {
         videoView.setStart_Top(-1);
