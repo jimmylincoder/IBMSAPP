@@ -325,8 +325,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             @Override
             public void onConnectException(Throwable throwable)
             {
-                //停止播放
-                stateChange(STOP);
+                release();
             }
 
             @Override
@@ -447,7 +446,10 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             player.closeStream(port);
         //关闭socket连接
         if (cameraStreamSocketClient != null)
+        {
             cameraStreamSocketClient.close();
+            cameraStreamSocketClient = null;
+        }
         //停止时间器
         if (queryProgressTimer != null)
         {
@@ -611,7 +613,10 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
             player.closeStream(port);
         //关闭socket连接
         if (cameraStreamSocketClient != null)
+        {
             cameraStreamSocketClient.close();
+            cameraStreamSocketClient = null;
+        }
         //停止时间器
         if (queryProgressTimer != null)
         {

@@ -11,7 +11,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Timer;
@@ -63,6 +65,9 @@ public class CameraStreamSocketClient
 
     //数据流头标识 字节长度
     private final int DATA_HEADER_LEGNTH = 1;
+
+    //tcp超时时间
+    private final int TCP_TIME_OUT = 5;
 
     //接收的字节数组
     private byte[] receiveData;
@@ -311,9 +316,9 @@ public class CameraStreamSocketClient
                     {
                         this.cancel();
                     }
-                } catch (IOException e)
+                } catch (Exception e)
                 {
-                    e.printStackTrace();
+                    onCameraStreamExceptionListener.onConnectException(e);
                 }
             }
         }, liveIntervalTime * 1000, liveIntervalTime * 1000);
@@ -409,6 +414,7 @@ public class CameraStreamSocketClient
             try
             {
                 socket = new Socket(ip, Integer.parseInt(port));
+                //socket.setSoTimeout(TCP_TIME_OUT * 1000);
                 if (socket.isConnected())
                 {
                     inputStream = socket.getInputStream();
@@ -417,7 +423,7 @@ public class CameraStreamSocketClient
                 }
                 else
                     onCameraStreamExceptionListener.onConnectException(new Exception("连接失败"));
-            } catch (IOException e)
+            } catch (Exception e)
             {
                 log("run()  " + e.getMessage());
                 onCameraStreamExceptionListener.onConnectException(e);
@@ -448,9 +454,9 @@ public class CameraStreamSocketClient
                 socket.close();
                 socket = null;
             }
-        } catch (IOException e)
+        } catch (Exception e)
         {
-            onCameraStreamExceptionListener.onConnectException(e);
+            onCameraStreamExceptionListener.onHandleDataException(e);
         }
     }
 }

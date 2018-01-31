@@ -413,9 +413,9 @@ public class CustomSurfaceView extends SurfaceView
                     {
                         left = 0;
                     }
-                    if (right <= screenWidth)
+                    if (right <= initViewWidth)
                     {
-                        right = screenWidth;
+                        right = initViewWidth;
                     }
                     if (top >= 0)
                     {

@@ -1,8 +1,10 @@
 package com.suntek.ibmsapp.page.camera;
 
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -16,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.component.NetWorkStateReceiver;
 import com.suntek.ibmsapp.component.base.BaseActivity;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
@@ -126,6 +129,9 @@ public class CameraPlayerHistoryActivity extends BaseActivity
     private boolean isRecord = false;
 
     private boolean isSounds = true;
+
+    private NetWorkStateReceiver netWorkStateReceiver;
+
 
     @Override
     public int getLayoutId()
@@ -575,6 +581,7 @@ public class CameraPlayerHistoryActivity extends BaseActivity
         }
         else
         {
+            recordBeginTime = System.currentTimeMillis();
             showRecordTag(true);
             SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
             SimpleDateFormat format1 = new SimpleDateFormat("HHmmss");
@@ -649,5 +656,41 @@ public class CameraPlayerHistoryActivity extends BaseActivity
             recordTimer.cancel();
             recordTimer = null;
         }
+    }
+
+    //在onResume()方法注册
+    @Override
+    protected void onResume()
+    {
+        if (netWorkStateReceiver == null)
+        {
+            netWorkStateReceiver = new NetWorkStateReceiver();
+            netWorkStateReceiver.setOnNetworkStateLisener(new NetWorkStateReceiver.OnNetworkStateLisener()
+            {
+                @Override
+                public void onState(int state)
+                {
+                    if(state == NO_NETWORK_STATE)
+                    {
+                        ToastHelper.getInstance(CameraPlayerHistoryActivity.this).longShowMessage("当前手机未连接网络");
+                        hikvisionVideoView.release();
+                    }
+                    if(state == MOBILE_STATE)
+                        ToastHelper.getInstance(CameraPlayerHistoryActivity.this).shortShowMessage("请注意:当前手机正在处于手机网络状态");
+                }
+            });
+        }
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(netWorkStateReceiver, filter);
+        super.onResume();
+    }
+
+    //onPause()方法注销
+    @Override
+    protected void onPause()
+    {
+        unregisterReceiver(netWorkStateReceiver);
+        super.onPause();
     }
 }

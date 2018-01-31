@@ -97,30 +97,34 @@ public class PhotoListFragment extends BaseFragment
             fragmentList.add(videoFragment);
 
         if (photoFragmentAdapter == null)
-            photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
-        vpContent.setAdapter(photoFragmentAdapter);
-        pageChange(nowPosition);
-        vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
         {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
+            vpContent.setAdapter(photoFragmentAdapter);
+            vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
             {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+                {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int position)
-            {
-                nowPosition = position;
-                pageChange(position);
-            }
+                @Override
+                public void onPageSelected(int position)
+                {
+                    nowPosition = position;
+                    pageChange(position);
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int state)
-            {
+                @Override
+                public void onPageScrollStateChanged(int state)
+                {
 
-            }
-        });
+                }
+            });
+        }
+        pageChange(nowPosition);
+        photoFragmentAdapter.notifyDataSetChanged();
+
     }
 
     @OnClick(R.id.tv_photo)
