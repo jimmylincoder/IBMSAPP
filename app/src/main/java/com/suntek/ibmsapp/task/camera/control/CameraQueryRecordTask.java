@@ -26,31 +26,19 @@ public class CameraQueryRecordTask extends BaseTask
 
     private String parentId;
 
-    private String ip;
-
-    private String channel;
-
-    private String user;
-
-    private String password;
-
     private String beginTime;
 
     private String endTime;
 
     private String protocol;
 
-    public CameraQueryRecordTask(Context context, String deviceId, String parentId, String ip, String channel,
-                                 String user, String password, String beginTime, String endTime,String protocol)
+    public CameraQueryRecordTask(Context context, String deviceId, String parentId,
+                                 String beginTime, String endTime,String protocol)
     {
         super(context);
 
         this.deviceId = deviceId;
         this.parentId = parentId;
-        this.ip = ip;
-        this.channel = channel;
-        this.user = user;
-        this.password = password;
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.protocol = protocol;
@@ -63,8 +51,8 @@ public class CameraQueryRecordTask extends BaseTask
     {
         try
         {
-            List<RecordItem> res = cameraControlManager.queryRecord(deviceId, parentId, ip, channel,
-                    user, password, beginTime, endTime,protocol);
+            List<RecordItem> res = cameraControlManager.queryRecord(deviceId, parentId,
+                    beginTime, endTime,protocol);
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {

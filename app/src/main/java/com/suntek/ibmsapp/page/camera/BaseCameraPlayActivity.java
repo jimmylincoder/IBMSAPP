@@ -260,8 +260,8 @@ public abstract class BaseCameraPlayActivity extends BaseActivity
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
 
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(),
+                beginTime, endTime, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -476,8 +476,7 @@ public abstract class BaseCameraPlayActivity extends BaseActivity
      */
     protected void play(String mediaChannel, String startTime, String endTime, String streamType)
     {
-        new CameraPlayHKTask(BaseCameraPlayActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
-                camera.getChannel(), camera.getUserName(), camera.getPassword(), streamType, startTime, endTime)
+        new CameraPlayHKTask(BaseCameraPlayActivity.this, camera.getDeviceId(),mediaChannel,streamType, startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)

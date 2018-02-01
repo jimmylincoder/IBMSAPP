@@ -27,17 +27,7 @@ public class Camera implements Serializable
 
     private String place;
 
-    private String channel;
-
     private String orgCode;
-
-    private String ip;
-
-    private String port;
-
-    private String userName;
-
-    private String password;
 
     private long playTime;
 
@@ -89,16 +79,6 @@ public class Camera implements Serializable
         this.place = place;
     }
 
-    public String getChannel()
-    {
-        return channel;
-    }
-
-    public void setChannel(String channel)
-    {
-        this.channel = channel;
-    }
-
     public String getOrgCode()
     {
         return orgCode;
@@ -107,46 +87,6 @@ public class Camera implements Serializable
     public void setOrgCode(String orgCode)
     {
         this.orgCode = orgCode;
-    }
-
-    public String getIp()
-    {
-        return ip;
-    }
-
-    public void setIp(String ip)
-    {
-        this.ip = ip;
-    }
-
-    public String getPort()
-    {
-        return port;
-    }
-
-    public void setPort(String port)
-    {
-        this.port = port;
-    }
-
-    public String getUserName()
-    {
-        return userName;
-    }
-
-    public void setUserName(String userName)
-    {
-        this.userName = userName;
-    }
-
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
     }
 
     public void setPlayTime(long playTime)
@@ -236,12 +176,7 @@ public class Camera implements Serializable
         camera.setName((String) content.get("name"));
         camera.setType((String) content.get("type"));
         camera.setPlace((String) content.get("place"));
-        camera.setChannel((String) content.get("channel"));
         camera.setOrgCode((String) content.get("org_code"));
-        camera.setIp((String) content.get("ip"));
-        camera.setPort((String) content.get("port"));
-        camera.setUserName((String) content.get("user_name"));
-        camera.setPassword((String) content.get("password"));
         camera.setDeviceId((String) content.get("device_id"));
         camera.setParentId((String) content.get("parent_id"));
         //camera.setPlayTime((Integer) content.get("play_time"));

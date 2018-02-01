@@ -27,16 +27,11 @@ public class CameraControlManager extends BaseComponent
      *
      * @return
      */
-    public Map<String, Object> playByGb28181(String deivceId, String parentId, String ip, String channel,
-                                             String user, String password,
+    public Map<String, Object> playByGb28181(String deivceId, String parentId,
                                              String beginTime, String endTime)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("device_id", deivceId);
-        params.put("device_ip", ip);
-        params.put("channel", channel);
-        params.put("user", user);
-        params.put("password", password);
         params.put("parent_id", parentId);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);
@@ -59,17 +54,12 @@ public class CameraControlManager extends BaseComponent
      *
      * @return
      */
-    public Map<String, Object> playByHK(String mediaChannel, String streamType, String ip, String port,
-                                        String channel, String user, String password,
+    public Map<String, Object> playByHK(String deviceId,String mediaChannel, String streamType,
                                         String beginTime, String endTime)
     {
         Map<String, Object> params = new HashMap<>();
+        params.put("device_id",deviceId);
         params.put("media_channel", mediaChannel);
-        params.put("port", port);
-        params.put("device_ip", ip);
-        params.put("channel", channel);
-        params.put("user", user);
-        params.put("password", password);
         params.put("stream_type", streamType);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);
@@ -205,25 +195,16 @@ public class CameraControlManager extends BaseComponent
      *
      * @param deviceId
      * @param parentId
-     * @param ip
-     * @param channel
-     * @param user
-     * @param password
      * @param beginTime
      * @param endTime
      * @return
      */
-    public List<RecordItem> queryRecord(String deviceId, String parentId, String ip, String channel,
-                                        String user, String password,
+    public List<RecordItem> queryRecord(String deviceId, String parentId,
                                         String beginTime, String endTime, String protocol)
     {
         Map<String, Object> params = new HashMap<>();
         params.put("device_id", deviceId);
         params.put("parent_id", parentId);
-        params.put("device_ip", ip);
-        params.put("channel", channel);
-        params.put("user", user);
-        params.put("password", password);
         params.put("protocol", protocol);
         if (beginTime != null || !"".equals(beginTime))
             params.put("begin_time", beginTime);

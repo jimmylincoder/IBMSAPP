@@ -328,8 +328,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     {
         if (cameraPlayGB28181Task != null)
             cameraPlayGB28181Task.cancel(true);
-        cameraPlayGB28181Task = new CameraPlayGB28181Task(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
-                camera.getPassword(), startTime, endTime)
+        cameraPlayGB28181Task = new CameraPlayGB28181Task(this, camera.getDeviceId(), camera.getParentId(),
+                startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1168,8 +1168,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
 
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime,"GB28181")
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), beginTime, endTime,"GB28181")
         {
             @Override
             protected void onPostExecute(TaskResult result)

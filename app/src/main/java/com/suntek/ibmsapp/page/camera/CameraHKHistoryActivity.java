@@ -593,8 +593,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
      */
     private void play(String mediaChannel, String startTime, String endTime)
     {
-        new CameraPlayHKTask(CameraHKHistoryActivity.this, mediaChannel, camera.getIp(), camera.getPort(),
-                camera.getChannel(), camera.getUserName(), camera.getPassword(), "0", startTime, endTime)
+        new CameraPlayHKTask(CameraHKHistoryActivity.this, camera.getDeviceId(),mediaChannel, "0", startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1663,8 +1662,7 @@ public class CameraHKHistoryActivity extends BaseActivity implements Runnable,
 //        Date date = cal.getTime();
         String beginTime = chooseDate + " 00:00:00";
 
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(),beginTime, endTime, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)

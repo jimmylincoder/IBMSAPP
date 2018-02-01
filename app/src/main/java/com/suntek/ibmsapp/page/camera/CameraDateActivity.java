@@ -139,8 +139,8 @@ public class CameraDateActivity extends BaseActivity
     private void initRecord(String beginDate, String endDate)
     {
         avlLoading.setVisibility(View.VISIBLE);
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginDate, endDate, "Hikvision")
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(),
+                beginDate, endDate, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)

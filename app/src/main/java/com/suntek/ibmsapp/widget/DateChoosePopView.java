@@ -235,8 +235,8 @@ public class DateChoosePopView
         }
 
         avlLoading.setVisibility(View.VISIBLE);
-        historyTask = new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
+        historyTask = new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(),
+                beginTime, endTime, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)

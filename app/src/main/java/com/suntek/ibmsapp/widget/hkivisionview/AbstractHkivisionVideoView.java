@@ -292,7 +292,7 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
                     @Override
                     public void onReceiveMediaChannel(int mediaChannel)
                     {
-                        play(mediaChannel + "", beginTime, endTime, streamType + "");
+                        play(camera.getDeviceId(),mediaChannel + "", beginTime, endTime, streamType + "");
                         queryProgress();
                     }
 
@@ -471,10 +471,9 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
      * @param endTime      结束时间
      * @param streamType   清晰度
      */
-    protected void play(String mediaChannel, String beginTime, String endTime, String streamType)
+    protected void play(String deviceId, String mediaChannel, String beginTime, String endTime, String streamType)
     {
-        BaseTask playTask = new CameraPlayHKTask(context, mediaChannel, camera.getIp(), camera.getPort(),
-                camera.getChannel(), camera.getUserName(), camera.getPassword(), streamType, beginTime, endTime)
+        BaseTask playTask = new CameraPlayHKTask(context, deviceId, mediaChannel, streamType, beginTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -575,8 +574,8 @@ public abstract class AbstractHkivisionVideoView extends FrameLayout
      */
     protected void getRecord(String beginTime, String endTime)
     {
-        new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime, "Hikvision")
+        new CameraQueryRecordTask(context, camera.getDeviceId(), camera.getParentId(),
+                beginTime, endTime, "Hikvision")
         {
             @Override
             protected void onPostExecute(TaskResult result)
