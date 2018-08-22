@@ -18,10 +18,13 @@ public class CameraAddHistoryTask extends BaseTask
 
     private String cameraId;
 
-    public CameraAddHistoryTask(Context context,String cameraId)
+    private String userCode;
+
+    public CameraAddHistoryTask(Context context,String userCode,String cameraId)
     {
         super(context);
         this.cameraId = cameraId;
+        this.userCode = userCode;
 
         cameraManager = (CameraManager) ComponentEngine.getInstance(CameraManager.class);
 
@@ -32,7 +35,7 @@ public class CameraAddHistoryTask extends BaseTask
     {
         try
         {
-            cameraManager.addHistory(cameraId);
+            cameraManager.addHistory(userCode,cameraId);
             return new TaskResult("",null);
         }catch (FHttpException e)
         {

@@ -1,5 +1,7 @@
 package com.suntek.ibmsapp.component;
 
+import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.component.core.Config;
 import com.suntek.ibmsapp.component.http.BaseHttpProcesser;
 
@@ -26,7 +28,8 @@ public class IbmsHttpEngine extends BaseHttpProcesser
 
     public IbmsHttpEngine()
     {
-        init(ibmsUrl,null,isLog,timeOut);
+        //init(ibmsUrl,null,isLog,timeOut);
+        init(ibmsUrl,"Yes###",isLog,timeOut);
     }
 
     @Override

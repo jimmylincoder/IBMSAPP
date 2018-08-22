@@ -20,30 +20,18 @@ public class CameraPlayGB28181Task extends BaseTask
 
     private String deviceId;
 
-    private String ip;
-
-    private String channel;
-
-    private String user;
-
-    private String password;
-
     private String beginTime;
 
     private String endTime;
 
     private String parentId;
 
-    public CameraPlayGB28181Task(Context context, String deviceId, String parentId, String ip, String channel,
-                                 String user, String password, String beginTime, String endTime)
+    public CameraPlayGB28181Task(Context context, String deviceId, String parentId,
+                                 String beginTime, String endTime)
     {
         super(context);
 
         this.deviceId = deviceId;
-        this.ip = ip;
-        this.channel = channel;
-        this.user = user;
-        this.password = password;
         this.beginTime = beginTime;
         this.endTime = endTime;
         this.parentId = parentId;
@@ -56,7 +44,7 @@ public class CameraPlayGB28181Task extends BaseTask
     {
         try
         {
-            Map<String, Object> res = cameraControlManager.playByGb28181(deviceId, parentId, ip, channel, user, password, beginTime, endTime);
+            Map<String, Object> res = cameraControlManager.playByGb28181(deviceId, parentId,beginTime, endTime);
             return new TaskResult(res, null);
         } catch (FHttpException e)
         {

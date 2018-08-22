@@ -1,23 +1,38 @@
 package com.suntek.ibmsapp.page.photo;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.model.Photo;
 import com.suntek.ibmsapp.widget.GestureImageView.GestureImageView;
 import com.suntek.ibmsapp.widget.UnityDialog;
+import com.umeng.socialize.ShareAction;
+import com.umeng.socialize.UMShareAPI;
+import com.umeng.socialize.UMShareListener;
+import com.umeng.socialize.bean.SHARE_MEDIA;
+import com.umeng.socialize.media.UMImage;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+
+import static android.R.attr.data;
 
 /**
  * 查看相片界面
@@ -26,10 +41,15 @@ import butterknife.OnClick;
  */
 public class PhotoDetailActivity extends BaseActivity
 {
-    @BindView(R.id.giv_detail)
-    GestureImageView givPhoto;
+//    @BindView(R.id.giv_detail)
+//    GestureImageView givPhoto;
+
+    @BindView(R.id.vp_photo)
+    ViewPager vpPhoto;
 
     private String photoPath;
+
+    private List<String> pathList;
 
     @Override
     public int getLayoutId()
@@ -45,22 +65,41 @@ public class PhotoDetailActivity extends BaseActivity
 
     private void initData()
     {
+        pathList = new ArrayList<>();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(context)
+                .Builder(getApplicationContext())
                 .build();
         ImageLoader.getInstance().init(config);
         photoPath = getIntent().getStringExtra("photoPath");
-        FileInputStream fis = null;
-        try
+        List<Photo> paths = (List<Photo>) getIntent().getSerializableExtra("paths");
+        for (Photo photo : paths)
         {
-            fis = new FileInputStream(photoPath);
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
+            pathList.addAll(photo.getPhotoPaths());
         }
-        Bitmap bitmap = BitmapFactory.decodeStream(fis);
-        // ImageLoader.getInstance().displayImage("file://" + photoPath, givPhoto);
-        givPhoto.setImageBitmap(bitmap);
+
+        vpPhoto.setAdapter(new PhotoPagerAdapter(getSupportFragmentManager()));
+        vpPhoto.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+
+            }
+
+            @Override
+            public void onPageSelected(int position)
+            {
+                photoPath = pathList.get(position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state)
+            {
+
+            }
+        });
+        int index = pathList.indexOf(photoPath);
+        vpPhoto.setCurrentItem(index);
     }
 
     @Override
@@ -103,5 +142,71 @@ public class PhotoDetailActivity extends BaseActivity
                         finish();
                     }
                 }).show();
+    }
+
+    @OnClick(R.id.iv_share)
+    public void share(View view)
+    {
+        share();
+    }
+
+    private void share()
+    {
+        UMImage image = new UMImage(PhotoDetailActivity.this, new File(photoPath));
+        new ShareAction(PhotoDetailActivity.this).withText("hello").withMedia(image)
+                .setDisplayList(SHARE_MEDIA.QQ,SHARE_MEDIA.WEIXIN, SHARE_MEDIA.WEIXIN_CIRCLE)
+                .setCallback(new UMShareListener()
+                {
+                    @Override
+                    public void onStart(SHARE_MEDIA share_media)
+                    {
+
+                    }
+
+                    @Override
+                    public void onResult(SHARE_MEDIA share_media)
+                    {
+
+                    }
+
+                    @Override
+                    public void onError(SHARE_MEDIA share_media, Throwable throwable)
+                    {
+
+                    }
+
+                    @Override
+                    public void onCancel(SHARE_MEDIA share_media)
+                    {
+
+                    }
+                }).open();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        UMShareAPI.get(this).onActivityResult(requestCode, resultCode, data);
+    }
+
+    private class PhotoPagerAdapter extends FragmentStatePagerAdapter
+    {
+        public PhotoPagerAdapter(FragmentManager fm)
+        {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position)
+        {
+            return PhotoPagerFragment.newInstance(pathList.get(position));
+        }
+
+        @Override
+        public int getCount()
+        {
+            return pathList.size();
+        }
     }
 }

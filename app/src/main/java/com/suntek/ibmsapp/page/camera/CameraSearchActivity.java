@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraHistoryAdapter;
@@ -44,9 +45,23 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
     @BindView(R.id.ll_message)
     LinearLayout llMessage;
 
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+
+    @BindView(R.id.ll_retry)
+    LinearLayout llRetry;
+
+    @BindView(R.id.ll_list_size)
+    LinearLayout llListSize;
+
+    @BindView(R.id.tv_list_size)
+    TextView tvListSize;
+
     private CameraSearchAdapter cameraSearchAdapter;
 
     private List<Camera> cameraList;
+
+    private String keyword;
 
     @Override
     public int getLayoutId()
@@ -79,7 +94,7 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
             @Override
             public void afterTextChanged(Editable s)
             {
-                String keyword = s.toString();
+                keyword = s.toString();
                 if (!"".equals(keyword))
                     search(s.toString());
             }
@@ -100,41 +115,58 @@ public class CameraSearchActivity extends BaseActivity implements AdapterView.On
 
     public void search(String keyword)
     {
+        lvSearchResult.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
+        llMessage.setVisibility(View.GONE);
         new CameraSearchTask(this, keyword, 1)
         {
             @Override
             protected void onPostExecute(TaskResult result)
             {
                 super.onPostExecute(result);
+                if (llLoading != null)
+                    llLoading.setVisibility(View.GONE);
                 if (result.getError() == null)
                 {
                     Page<List<Camera>> cameraPage = (Page<List<Camera>>) result.getResultData();
                     cameraList = cameraPage.getData();
                     if (cameraList.isEmpty())
                     {
+                        llListSize.setVisibility(View.GONE);
                         lvSearchResult.setVisibility(View.GONE);
                         llMessage.setVisibility(View.VISIBLE);
                     }
                     else
                     {
+                        llListSize.setVisibility(View.VISIBLE);
                         llMessage.setVisibility(View.GONE);
                         lvSearchResult.setVisibility(View.VISIBLE);
+                        tvListSize.setText("共搜索到" + cameraList.size() + "个结果");
                     }
                     cameraSearchAdapter.setCameraList(cameraList);
                     cameraSearchAdapter.notifyDataSetChanged();
                 }
                 else
                 {
-                    ToastHelper.getInstance(CameraSearchActivity.this).shortShowMessage(result.getError().getMessage());
+                    // ToastHelper.getInstance(CameraSearchActivity.this).shortShowMessage(result.getError().getMessage());
+                    if (llRetry != null)
+                        llRetry.setVisibility(View.VISIBLE);
                 }
             }
         }.execute();
     }
 
+    @OnClick(R.id.ll_retry)
+    public void reTry(View view)
+    {
+        llRetry.setVisibility(View.GONE);
+        search(keyword);
+    }
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
-        Intent intent = new Intent(CameraSearchActivity.this, CameraPlayActivity.class);
+        Intent intent = new Intent(CameraSearchActivity.this, CameraPlayerActivity.class);
         Camera camera = cameraList.get(i);
         Bundle bundle = new Bundle();
         bundle.putSerializable("camera", camera);

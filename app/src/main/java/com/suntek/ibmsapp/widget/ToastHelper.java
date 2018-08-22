@@ -13,10 +13,11 @@ public class ToastHelper
     private static ToastHelper model;
     private Context context;
     private Toast toast;
-    private boolean isToastShow=false;
+    private boolean isToastShow = false;
+
     public ToastHelper(Context context)
     {
-        this.context=context.getApplicationContext();
+        this.context = context;
     }
 
     /**
@@ -27,9 +28,9 @@ public class ToastHelper
      */
     public static ToastHelper getInstance(Context context)
     {
-        if(model==null)
+        if (model == null)
         {
-            model=new ToastHelper(context);
+            model = new ToastHelper(context);
         }
         return model;
     }
@@ -41,29 +42,30 @@ public class ToastHelper
      */
     public void shortShowMessage(String message)
     {
-        if(isToastShow)
+        if (isToastShow)
         {
             toast.cancel();
-            isToastShow=false;
+            isToastShow = false;
         }
-        toast= Toast.makeText(context, message, Toast.LENGTH_SHORT);
+        toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
         toast.show();
-        isToastShow=true;
+        isToastShow = true;
     }
 
     /**
      * 长提示信息
+     *
      * @param message 内容
      */
     public void longShowMessage(String message)
     {
-        if(isToastShow)
+        if (isToastShow)
         {
             toast.cancel();
-            isToastShow=false;
+            isToastShow = false;
         }
-        toast= Toast.makeText(context, message, Toast.LENGTH_LONG);
+        toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
         toast.show();
-        isToastShow=true;
+        isToastShow = true;
     }
 }

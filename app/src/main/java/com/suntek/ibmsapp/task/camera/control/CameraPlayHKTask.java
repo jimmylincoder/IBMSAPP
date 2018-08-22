@@ -19,17 +19,9 @@ public class CameraPlayHKTask extends BaseTask
 {
     private CameraControlManager cameraControlManager;
 
-    private String port;
+    private String deviceId;
 
     private String mediaChannel;
-
-    private String ip;
-
-    private String channel;
-
-    private String user;
-
-    private String password;
 
     private String streamType;
 
@@ -37,19 +29,15 @@ public class CameraPlayHKTask extends BaseTask
 
     private String endTime;
 
-    public CameraPlayHKTask(Context context, String mediaChannel, String ip, String port, String channel,
-                            String user, String password, String streamType, String beginTime, String endTime)
+    public CameraPlayHKTask(Context context,String deviceId, String mediaChannel,String streamType,
+                            String beginTime, String endTime)
     {
         super(context);
+        this.deviceId = deviceId;
         this.mediaChannel = mediaChannel;
-        this.ip = ip;
-        this.channel = channel;
-        this.user = user;
-        this.password = password;
         this.streamType = streamType;
         this.beginTime = beginTime;
         this.endTime = endTime;
-        this.port = port;
 
         cameraControlManager = (CameraControlManager) ComponentEngine.getInstance(CameraControlManager.class);
     }
@@ -59,8 +47,8 @@ public class CameraPlayHKTask extends BaseTask
     {
         try
         {
-            Map<String, Object> res = cameraControlManager.playByHK(mediaChannel, streamType, ip, port,
-                    channel, user, password, beginTime, endTime);
+            Map<String, Object> res = cameraControlManager.playByHK(deviceId,mediaChannel, streamType,
+                    beginTime, endTime);
 
             return new TaskResult(res, null);
         } catch (FHttpException e)

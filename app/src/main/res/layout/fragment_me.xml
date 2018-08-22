@@ -47,10 +47,11 @@
                 android:textSize="16sp"/>
 
             <TextView
+                android:id="@+id/tv_dept_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="华侨城中心小区"
+                android:text="天鹅湖花园"
                 android:textColor="@color/white"
                 android:textSize="13sp"/>
 
@@ -74,6 +75,7 @@
                 android:id="@+id/ll_reset_password"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:background="@drawable/button_me_item"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -117,6 +119,7 @@
                 android:id="@+id/ll_update"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"
+                android:background="@drawable/button_me_item"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -164,6 +167,7 @@
                 android:id="@+id/ll_help"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:background="@drawable/button_me_item"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -207,6 +211,7 @@
                 android:id="@+id/ll_about"
                 android:layout_width="match_parent"
                 android:layout_height="49dp"
+                android:background="@drawable/button_me_item"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -247,13 +252,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/col_e6e6e6"/>
 
             <LinearLayout
                 android:id="@+id/ll_login_out"
-                android:layout_width="130dp"
-                android:layout_height="40dp"
-                android:background="@mipmap/bg_logout"
+                android:layout_width="match_parent"
+                android:layout_height="49dp"
+                android:background="@color/white"
                 android:gravity="center">
 
                 <TextView
@@ -261,9 +271,14 @@
                     android:layout_height="wrap_content"
                     android:text="退出登录"
                     android:textColor="@color/col_fd0300"
-                    android:textSize="16sp"/>
+                    android:textSize="15sp"/>
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/col_e6e6e6"/>
 
         </LinearLayout>
 

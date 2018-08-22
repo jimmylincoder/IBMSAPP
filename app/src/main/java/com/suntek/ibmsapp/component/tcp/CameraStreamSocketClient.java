@@ -11,7 +11,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Timer;
@@ -64,6 +66,9 @@ public class CameraStreamSocketClient
     //数据流头标识 字节长度
     private final int DATA_HEADER_LEGNTH = 1;
 
+    //tcp超时时间
+    private final int TCP_TIME_OUT = 5;
+
     //接收的字节数组
     private byte[] receiveData;
 
@@ -83,7 +88,7 @@ public class CameraStreamSocketClient
     //视频数据
     private final int VIDEO_TYPE = 2;
 
-    private final int BUFFER_SIZE = 1024;
+    private final int BUFFER_SIZE = 1024 * 1;
     private byte[] headerDataByte = new byte[HEADER_LENGTH];
     private byte[] dataLengthByte = new byte[DATA_LENGTH];
     private byte[] bufferByte = new byte[BUFFER_SIZE];
@@ -154,7 +159,7 @@ public class CameraStreamSocketClient
             receiveData = read(dataLength);
             //接收通道号
             int mediaChannel = -1;
-            if (receiveData != null)
+            if (receiveData != null && receiveData.length > 0)
                 mediaChannel = ByteArrayConveter.getInt(receiveData, 0);
             if (onCameraStreamDataListener != null && mediaChannel != -1)
                 onCameraStreamDataListener.onReceiveMediaChannel(mediaChannel);
@@ -164,7 +169,8 @@ public class CameraStreamSocketClient
             //读取第一字节类型
             receiveData = read(1);
             //处理流数据
-            handleBigData(receiveData[0], dataLength - 1);
+            if (receiveData != null && receiveData.length > 0)
+                handleBigData(receiveData[0], dataLength - 1);
         }
     }
 
@@ -184,6 +190,7 @@ public class CameraStreamSocketClient
                 if (bufferByte != null)
                 {
                     readLength = inputStream.read(bufferByte);
+                    readLength = readLength == -1 ? 0 : readLength;
                     outputStream.write(bufferByte, 0, readLength);
                     if (BUFFER_SIZE - readLength != 0)
                     {
@@ -309,9 +316,9 @@ public class CameraStreamSocketClient
                     {
                         this.cancel();
                     }
-                } catch (IOException e)
+                } catch (Exception e)
                 {
-                    e.printStackTrace();
+                    onCameraStreamExceptionListener.onConnectException(e);
                 }
             }
         }, liveIntervalTime * 1000, liveIntervalTime * 1000);
@@ -407,6 +414,7 @@ public class CameraStreamSocketClient
             try
             {
                 socket = new Socket(ip, Integer.parseInt(port));
+                //socket.setSoTimeout(TCP_TIME_OUT * 1000);
                 if (socket.isConnected())
                 {
                     inputStream = socket.getInputStream();
@@ -415,7 +423,7 @@ public class CameraStreamSocketClient
                 }
                 else
                     onCameraStreamExceptionListener.onConnectException(new Exception("连接失败"));
-            } catch (IOException e)
+            } catch (Exception e)
             {
                 log("run()  " + e.getMessage());
                 onCameraStreamExceptionListener.onConnectException(e);
@@ -428,24 +436,27 @@ public class CameraStreamSocketClient
         try
         {
             isStop = false;
+            if (socketThread != null)
+            {
+                socketThread.interrupt();
+                socketThread = null;
+            }
+            if (keepLiveTimer != null)
+            {
+                keepLiveTimer.cancel();
+                keepLiveTimer = null;
+            }
             if (inputStream != null)
                 inputStream.close();
             if (socket != null)
             {
-                socket.close();
                 socket.shutdownInput();
+                socket.close();
+                socket = null;
             }
-            if (socketThread != null)
-                socketThread.interrupt();
-            if (keepLiveTimer != null)
-                keepLiveTimer.cancel();
-
-            socket = null;
-            socketThread = null;
-            keepLiveTimer = null;
-        } catch (IOException e)
+        } catch (Exception e)
         {
-            onCameraStreamExceptionListener.onConnectException(e);
+            onCameraStreamExceptionListener.onHandleDataException(e);
         }
     }
 }

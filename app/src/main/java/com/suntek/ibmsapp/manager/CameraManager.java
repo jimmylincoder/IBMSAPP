@@ -63,10 +63,11 @@ public class CameraManager extends BaseComponent
      * @param page
      * @return
      */
-    public Page<List<Camera>> getCameraHistoryList(int page)
+    public Page<List<Camera>> getCameraHistoryList(String userCode,int page)
     {
         Map<String,Object> params = new HashMap<>();
         params.put("page",page + "");
+        params.put("user_code",userCode);
 
         List<Camera> cameraList = new ArrayList<>();
         HttpResponse response = ibmsHttpEngine.request("camera.history_list",params);
@@ -127,12 +128,33 @@ public class CameraManager extends BaseComponent
      *
      * @param cameraId
      */
-    public void addHistory(String cameraId)
+    public void addHistory(String userCode,String cameraId)
     {
         Map<String,Object> params = new HashMap<>();
         params.put("camera_id",cameraId);
+        params.put("user_code",userCode);
 
         HttpResponse response = ibmsHttpEngine.request("camera.add_history",params);
+        if(response.getCode() == HttpResponse.STATUS_SUCCESS)
+        {
+
+        }
+        else
+        {
+            throw new FHttpException(FHttpException.CODE_BUSINESS_ERROR,response.getErrorMessage());
+        }
+    }
+
+    /**
+     * 删除记录
+     */
+    public void delHistory(String userCode,String cameraId)
+    {
+        Map<String,Object> params = new HashMap<>();
+        params.put("camera_id",cameraId);
+        params.put("user_code",userCode);
+
+        HttpResponse response = ibmsHttpEngine.request("camera.del_history",params);
         if(response.getCode() == HttpResponse.STATUS_SUCCESS)
         {
 

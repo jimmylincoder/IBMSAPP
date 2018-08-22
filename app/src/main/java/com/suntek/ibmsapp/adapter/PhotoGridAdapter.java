@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.suntek.ibmsapp.R;
+import com.suntek.ibmsapp.widget.RectangularDisplay;
 import com.suntek.ibmsapp.widget.SquareBitmapDisplay;
 
 import java.io.File;
@@ -53,7 +54,7 @@ public class PhotoGridAdapter extends BaseAdapter
         this.chooseMap = new HashMap<>();
         this.videioBitmapMap = new HashMap<>();
         DisplayImageOptions options = new DisplayImageOptions.Builder().bitmapConfig(Bitmap.Config.RGB_565)
-                .cacheInMemory(true).cacheOnDisc(true).build();
+                .cacheInMemory(true).cacheOnDisc(true).displayer(new RectangularDisplay()).build();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
                 .Builder(context)
                 .defaultDisplayImageOptions(options)
@@ -103,6 +104,7 @@ public class PhotoGridAdapter extends BaseAdapter
         if (photoPaths.get(position).endsWith(".jpg"))
         {
             imageLoader.displayImage("file://" + photoPaths.get(position), holder.ivPhoto);
+            holder.llRecord.setVisibility(View.GONE);
         }
         else
         {
@@ -120,7 +122,7 @@ public class PhotoGridAdapter extends BaseAdapter
             {
                 holder.ivPhoto.setImageBitmap(null);
             }
-
+            holder.llRecord.setVisibility(View.VISIBLE);
 //            Bitmap preview = videioBitmapMap.get(filePath);
 //            if (preview == null)
 //            {
@@ -155,6 +157,9 @@ public class PhotoGridAdapter extends BaseAdapter
 
         @BindView(R.id.ll_choose)
         LinearLayout llChoose;
+
+        @BindView(R.id.ll_record)
+        LinearLayout llRecord;
 
         public ViewHolder(View view)
         {

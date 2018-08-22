@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -15,17 +15,13 @@ import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.adapter.CameraListAdapter;
 import com.suntek.ibmsapp.component.Page;
 import com.suntek.ibmsapp.component.base.BaseFragment;
-import com.suntek.ibmsapp.component.core.Autowired;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.page.camera.CameraChooseActivity;
-import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
-import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.page.camera.CameraSearchActivity;
 import com.suntek.ibmsapp.task.camera.CameraListTask;
-import com.suntek.ibmsapp.util.SaveDataWithSharedHelper;
-import com.suntek.ibmsapp.widget.ToastHelper;
-import com.suntek.ibmsapp.widget.UnityDialog;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,14 +41,22 @@ public class CameraListFragment extends BaseFragment
 
     private ListView actualListView;
 
+    private ACache aCache;
+
     @BindView(R.id.ptr_camera_list)
     PullToRefreshListView ptrCameraList;
 
     @BindView(R.id.tv_area)
     TextView tvArea;
 
-    @Autowired
-    SaveDataWithSharedHelper sharedHelper;
+    @BindView(R.id.ll_loading)
+    LinearLayout llLoading;
+
+    @BindView(R.id.ll_retry)
+    LinearLayout llRetry;
+
+    @BindView(R.id.ll_loading_more)
+    LinearLayout llLoadingMore;
 
     private String areaId;
 
@@ -71,6 +75,38 @@ public class CameraListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        init();
+        initPtrListView();
+        initCameraList();
+    }
+
+    private void initCameraList()
+    {
+        cameraList = (List<Camera>) aCache.getAsObject("camera_list");
+        if (cameraList == null)
+        {
+            ptrCameraList.setVisibility(View.GONE);
+            llLoading.setVisibility(View.VISIBLE);
+            getCameraList(currentPage, true);
+        }
+        else
+        {
+            cameraListAdapter.setCameraList(cameraList);
+            cameraListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void init()
+    {
+        aCache = ACache.get(getActivity());
+        areaId = aCache.getAsString("choose_org_code");
+    }
+
+    /**
+     * 初始化下拉刷新列表
+     */
+    private void initPtrListView()
+    {
         ptrCameraList.setMode(PullToRefreshBase.Mode.PULL_FROM_START);
         ptrCameraList.setOnRefreshListener(new PullToRefreshBase.OnRefreshListener<ListView>()
         {
@@ -79,7 +115,6 @@ public class CameraListFragment extends BaseFragment
             {
                 String label = DateUtils.formatDateTime(getActivity(), System.currentTimeMillis(),
                         DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_ALL);
-
                 // Update the LastUpdatedLabel
                 refreshView.getLoadingLayoutProxy().setLastUpdatedLabel(label);
 
@@ -90,6 +125,7 @@ public class CameraListFragment extends BaseFragment
 
         });
 
+
         ptrCameraList.setOnLastItemVisibleListener(new PullToRefreshBase.OnLastItemVisibleListener()
         {
             @Override
@@ -97,40 +133,8 @@ public class CameraListFragment extends BaseFragment
             {
                 if (currentPage < totalPage)
                 {
+                    llLoadingMore.setVisibility(View.VISIBLE);
                     getCameraList(++currentPage, false);
-                }
-            }
-        });
-
-        ptrCameraList.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
-                Intent intent = new Intent(getActivity(), CameraPlayHKActivity.class);
-                Camera camera = cameraList.get(position - 1);
-                if (camera.getIsUsed().equals("1"))
-                {
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("camera", camera);
-                    intent.putExtras(bundle);
-                    intent.putExtra("cameraId", cameraList.get(position - 1).getId());
-                    intent.putExtra("cameraName", cameraList.get(position - 1).getName());
-                    startActivity(intent);
-                }
-                else
-                {
-                    new UnityDialog(getActivity())
-                            .setTitle("温馨提示")
-                            .setHint("该摄像头已离线")
-                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
-                            {
-                                @Override
-                                public void confirm(UnityDialog unityDialog, String content)
-                                {
-                                    unityDialog.dismiss();
-                                }
-                            }).show();
                 }
             }
         });
@@ -140,14 +144,9 @@ public class CameraListFragment extends BaseFragment
         ptrCameraList.setEmptyView(view);
 
         cameraList = new ArrayList<>();
-
         cameraListAdapter = new CameraListAdapter(getActivity(), cameraList);
         actualListView = ptrCameraList.getRefreshableView();
         actualListView.setAdapter(cameraListAdapter);
-
-        areaId = sharedHelper.getString("choose_org_code");
-
-        getCameraList(currentPage, true);
     }
 
     @OnClick(R.id.ll_choose_camera)
@@ -164,6 +163,12 @@ public class CameraListFragment extends BaseFragment
         startActivity(intent);
     }
 
+    /**
+     * 获取摄像机列表
+     *
+     * @param page      页数
+     * @param isRefresh 是否为上拉刷新
+     */
     private void getCameraList(int page, boolean isRefresh)
     {
         new CameraListTask(getActivity(), areaId, page)
@@ -180,27 +185,37 @@ public class CameraListFragment extends BaseFragment
 
                     if (isRefresh)
                     {
+                        aCache.put("camera_list", (Serializable) newCameraList);
                         cameraList = newCameraList;
                     }
                     else
                     {
+                        if (llLoadingMore != null)
+                            llLoadingMore.setVisibility(View.GONE);
                         cameraList.addAll(newCameraList);
+                        aCache.put("camera_list", (Serializable) cameraList);
                     }
                     cameraListAdapter.setCameraList(cameraList);
                     cameraListAdapter.notifyDataSetChanged();
-                    try
-                    {
-                        ptrCameraList.onRefreshComplete();
-                    } catch (Exception e)
-                    {
-                        e.printStackTrace();
-                    }
 
+                    if (ptrCameraList != null)
+                    {
+                        ptrCameraList.setVisibility(View.VISIBLE);
+                        ptrCameraList.onRefreshComplete();
+                    }
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
                 }
                 else
                 {
-                    ToastHelper.getInstance(getActivity()).shortShowMessage(result.getError().getMessage());
-
+                    if (llLoading != null)
+                        llLoading.setVisibility(View.GONE);
+                    if (ptrCameraList != null)
+                        ptrCameraList.onRefreshComplete();
+                    if (llRetry != null)
+                        llRetry.setVisibility(View.VISIBLE);
+                    if (llLoadingMore != null)
+                        llLoadingMore.setVisibility(View.GONE);
                 }
             }
         }.execute();
@@ -210,12 +225,18 @@ public class CameraListFragment extends BaseFragment
     public void onResume()
     {
         super.onResume();
-        tvArea.setText(sharedHelper.getString("choose_name"));
-        String chooseAreaId = sharedHelper.getString("choose_org_code");
+        tvArea.setText(aCache.getAsString("choose_name"));
+        String chooseAreaId = aCache.getAsString("choose_org_code");
+        if (areaId == null)
+            areaId = "";
+        if (chooseAreaId == null)
+            chooseAreaId = "";
         if (!areaId.equals(chooseAreaId))
         {
             currentPage = 1;
             areaId = chooseAreaId;
+            ptrCameraList.setVisibility(View.GONE);
+            llLoading.setVisibility(View.VISIBLE);
             getCameraList(currentPage, true);
         }
     }
@@ -226,4 +247,14 @@ public class CameraListFragment extends BaseFragment
         Intent intent = new Intent(getActivity(), CameraSearchActivity.class);
         startActivity(intent);
     }
+
+    @OnClick(R.id.ll_retry)
+    public void retry(View view)
+    {
+        llRetry.setVisibility(View.GONE);
+        llLoading.setVisibility(View.VISIBLE);
+        ptrCameraList.setVisibility(View.GONE);
+        getCameraList(currentPage, true);
+    }
 }
+

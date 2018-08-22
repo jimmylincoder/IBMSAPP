@@ -389,10 +389,13 @@ public class TimeSeekBarView extends View
         //获得秒数
         int sec = Math.round(viewWidth / (2 * INTERVAL_LENGTH * screenDensity));
 
-        //获得开始时间
-        startTime = nowTimeValue.addOrSub(-sec).getSec(nowDate);
-        //获得结束时间
-        endTime = nowTimeValue.addOrSub(sec).getSec(nowDate);
+        if (nowTimeValue != null)
+        {
+            //获得开始时间
+            startTime = nowTimeValue.addOrSub(-sec).getSec(nowDate);
+            //获得结束时间
+            endTime = nowTimeValue.addOrSub(sec).getSec(nowDate);
+        }
         super.onLayout(changed, left, top, right, bottom);
     }
 

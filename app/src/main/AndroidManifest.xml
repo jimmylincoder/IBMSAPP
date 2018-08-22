@@ -20,11 +20,16 @@
     <!--获取网络状态-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!--写权限-->
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!--读权限-->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!--获取手机信息-->
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEM"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
@@ -50,7 +55,7 @@
 
         <!--登录界面-->
         <activity
-            android:name=".page.login.UserLoginActivity"
+            android:name=".page.user.UserLoginActivity"
             android:screenOrientation="portrait"/>
 
         <!--主界面-->
@@ -113,8 +118,65 @@
             android:screenOrientation="portrait"/>
 
         <activity
+            android:name=".page.camera.CameraPlayerHistoryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <!--海康历史视频播放-->
+        <activity
+            android:name=".page.camera.CameraHKHistoryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <activity
             android:name=".page.video.VideoDetailActivity"
             android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".page.user.ResetPasswordActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".page.user.ServerSettingActivity"
+                  android:screenOrientation="portrait"/>
+
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+        <activity
+            android:name="com.umeng.qq.tencent.AuthActivity"
+            android:launchMode="singleTask"
+            android:noHistory="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="tencent100424468"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".page.camera.CameraPlayerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="5a02606b8f4a9d0784000264">
+        </meta-data>
+
+        <activity
+            android:name="com.umeng.qq.tencent.AssistActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
     </application>
 
 </manifest>

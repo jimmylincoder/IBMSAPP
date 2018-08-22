@@ -30,6 +30,7 @@ import com.facebook.network.connectionclass.ConnectionQuality;
 import com.facebook.network.connectionclass.DeviceBandwidthSampler;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.base.BaseActivity;
+import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
 import com.suntek.ibmsapp.model.RecordItem;
 import com.suntek.ibmsapp.page.photo.PhotoListActivity;
@@ -48,8 +49,8 @@ import com.suntek.ibmsapp.util.PermissionRequest;
 import com.suntek.ibmsapp.util.SizeUtil;
 import com.suntek.ibmsapp.widget.TimeSeekBarView;
 import com.suntek.ibmsapp.widget.ToastHelper;
-import com.tv.danmaku.ijk.media.widget.media.IjkVideoView;
-import com.tv.danmaku.ijk.media.widget.media.OnVideoTouchListener;
+import com.suntek.ibmsapp.widget.ijkmedia.media.IjkVideoView;
+import com.suntek.ibmsapp.widget.ijkmedia.media.OnVideoTouchListener;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -175,6 +176,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     LinearLayout llChangeTime;
     @BindView(R.id.tv_change_time)
     TextView tvChangeTime;
+    private ACache aCache;
     //时间选择
     private PopupWindow dateChoose;
     //菜单
@@ -227,7 +229,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     public void initViews(Bundle savedInstanceState)
     {
         camera = (Camera) getIntent().getExtras().getSerializable("camera");
-
+        aCache = ACache.get(this);
         initVideoView();
         //getCameraAddress("2017-08-31 00:00:00", "2017-08-31 23:59:59");
         getCameraAddress(null, null);
@@ -300,10 +302,11 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     {
         String cameraId = camera.getId();
         String cameraName = camera.getName();
+        String userCode = aCache.getAsString("user");
         if (cameraName != null)
             tvCameraName.setText(cameraName);
 
-        new CameraAddHistoryTask(this, cameraId)
+        new CameraAddHistoryTask(this,userCode,cameraId)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -325,8 +328,8 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
     {
         if (cameraPlayGB28181Task != null)
             cameraPlayGB28181Task.cancel(true);
-        cameraPlayGB28181Task = new CameraPlayGB28181Task(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(), camera.getUserName(),
-                camera.getPassword(), startTime, endTime)
+        cameraPlayGB28181Task = new CameraPlayGB28181Task(this, camera.getDeviceId(), camera.getParentId(),
+                startTime, endTime)
         {
             @Override
             protected void onPostExecute(TaskResult result)
@@ -1165,8 +1168,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         Date date = cal.getTime();
         String beginTime = format.format(date) + " 00:00:00";
 
-        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), camera.getIp(), camera.getChannel(),
-                camera.getUserName(), camera.getPassword(), beginTime, endTime,"GB28181")
+        new CameraQueryRecordTask(this, camera.getDeviceId(), camera.getParentId(), beginTime, endTime,"GB28181")
         {
             @Override
             protected void onPostExecute(TaskResult result)

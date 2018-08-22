@@ -56,6 +56,10 @@ public class PhotoListFragment extends BaseFragment
     @BindView(R.id.iv_video_choose)
     ImageView ivVideoChoose;
 
+    Fragment photoFragment = null;
+
+    Fragment videoFragment = null;
+
     private int nowPosition = 0;
 
     private List<Fragment> fragmentList = new ArrayList<>();
@@ -73,39 +77,54 @@ public class PhotoListFragment extends BaseFragment
     @Override
     public void initViews(Bundle savedInstanceState)
     {
+        //initViewPager();
+        photoFragment = new PhotoFragment();
+        videoFragment = new VideoFragment();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
         initViewPager();
     }
 
     private void initViewPager()
     {
-        Fragment photoFragment = new PhotoFragment();
-        Fragment videoFragment = new VideoFragment();
-        fragmentList.add(photoFragment);
-        fragmentList.add(videoFragment);
+        if (!fragmentList.contains(photoFragment))
+            fragmentList.add(photoFragment);
+        if (!fragmentList.contains(videoFragment))
+            fragmentList.add(videoFragment);
 
-        photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
-        vpContent.setAdapter(photoFragmentAdapter);
-        vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        if (photoFragmentAdapter == null)
         {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            photoFragmentAdapter = new PhotoFragmentAdapter(getFragmentManager(), fragmentList);
+            vpContent.setAdapter(photoFragmentAdapter);
+            vpContent.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
             {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+                {
 
-            }
+                }
 
-            @Override
-            public void onPageSelected(int position)
-            {
-                nowPosition = position;
-                pageChange(position);
-            }
+                @Override
+                public void onPageSelected(int position)
+                {
+                    nowPosition = position;
+                    pageChange(position);
+                }
 
-            @Override
-            public void onPageScrollStateChanged(int state)
-            {
+                @Override
+                public void onPageScrollStateChanged(int state)
+                {
 
-            }
-        });
+                }
+            });
+        }
+        pageChange(nowPosition);
+        photoFragmentAdapter.notifyDataSetChanged();
+
     }
 
     @OnClick(R.id.tv_photo)
@@ -141,8 +160,13 @@ public class PhotoListFragment extends BaseFragment
                 @Override
                 public void onClick(View v)
                 {
-                    List<String> paths = ((PhotoFragment) fragmentList.get(0)).getSelectedPath();
+                    List<String> paths = new ArrayList<String>();
+                    if (nowPosition == 0)
+                        paths = ((PhotoFragment) fragmentList.get(0)).getSelectedPath();
+                    else
+                        paths = ((VideoFragment) fragmentList.get(1)).getSelectedPath();
 
+                    List<String> finalPaths = paths;
                     new UnityDialog(getActivity())
                             .setTitle("是否确认删除")
                             .setHint("是否确认删除选中照片")
@@ -159,7 +183,7 @@ public class PhotoListFragment extends BaseFragment
                                 @Override
                                 public void confirm(UnityDialog unityDialog, String content)
                                 {
-                                    for (String path : paths)
+                                    for (String path : finalPaths)
                                     {
                                         File file = new File(path);
                                         if (file.exists())
@@ -224,7 +248,10 @@ public class PhotoListFragment extends BaseFragment
     @OnClick(R.id.tv_all)
     public void selectAll(View view)
     {
-        ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        if (nowPosition == 0)
+            ((PhotoFragment) fragmentList.get(0)).selecteAll();
+        else
+            ((VideoFragment) fragmentList.get(1)).selecteAll();
     }
 
     public void showNormal()

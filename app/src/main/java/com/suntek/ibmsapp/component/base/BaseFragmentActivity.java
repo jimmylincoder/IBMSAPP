@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
+import com.suntek.ibmsapp.component.AppManager;
 import com.suntek.ibmsapp.component.core.ComponentEngine;
 
 import butterknife.ButterKnife;
@@ -36,6 +37,8 @@ public abstract class BaseFragmentActivity extends FragmentActivity
         initViews(savedInstanceState);
         //初始化ToolBar
         initToolBar();
+        AppManager.addActivity(this);
+
     }
 
     /**

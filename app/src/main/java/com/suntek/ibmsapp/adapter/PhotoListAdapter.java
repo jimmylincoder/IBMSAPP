@@ -2,6 +2,8 @@ package com.suntek.ibmsapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,7 @@ import com.suntek.ibmsapp.page.video.VideoDetailActivity;
 import com.suntek.ibmsapp.util.DateUtil;
 import com.suntek.ibmsapp.widget.NoScrollGridView;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,7 +67,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
     public int getChildrenCount(int groupPosition)
     {
         int total = photoList.get(groupPosition).getPhotoPaths().size();
-        int count = total / 4 + (total % 4);
+        int count = total / 3 + (total % 3);
         return count;
     }
 
@@ -150,7 +153,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
         }
         List<String> paths = photoList.get(groupPosition).getPhotoPaths();
         List<String> paths1 = new ArrayList<>();
-        for (int i = childPosition * 4; i < childPosition * 4 + 4; i++)
+        for (int i = childPosition * 3; i < childPosition * 3 + 3; i++)
         {
             if (i < paths.size())
                 paths1.add(paths.get(i));
@@ -180,6 +183,7 @@ public class PhotoListAdapter extends BaseExpandableListAdapter
                     {
                         intent = new Intent(context, VideoDetailActivity.class);
                     }
+                    intent.putExtra("paths", (Serializable) photoList);
                     intent.putExtra("photoPath", paths1.get(position));
                     context.startActivity(intent);
                 }

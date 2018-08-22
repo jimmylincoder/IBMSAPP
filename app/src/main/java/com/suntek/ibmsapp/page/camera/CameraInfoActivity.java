@@ -54,9 +54,6 @@ public class CameraInfoActivity extends BaseActivity
     {
         camera = (Camera) getIntent().getSerializableExtra("camera");
         tvName.setText(camera.getName());
-        tvChannel.setText(camera.getChannel());
-        tvIp.setText(camera.getIp());
-        tvPort.setText(camera.getPort());
         tvArea.setText(camera.getOrgName());
         tvVendor.setText(camera.getVendorName());
         if("1".equals(camera.getType()))
