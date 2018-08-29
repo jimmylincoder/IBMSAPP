@@ -236,7 +236,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
         initTimeView();
         loadData();
         initTimeSeekBarView();
-        initRecord();
+        //initRecord();
         DeviceBandwidthSampler.getInstance().startSampling();
         netSpeed();
 
@@ -352,7 +352,7 @@ public class CameraPlayActivity extends BaseActivity implements Runnable,
                         }
                         ivvVideo.start();
 
-                        startQueryProgress();
+                        //startQueryProgress();
                     }
                 }
                 else

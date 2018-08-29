@@ -19,7 +19,9 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.component.cache.ACache;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.page.camera.CameraGBPlayerActivity;
 import com.suntek.ibmsapp.page.camera.CameraHKHistoryActivity;
+import com.suntek.ibmsapp.page.camera.CameraPlayActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayHKActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
 import com.suntek.ibmsapp.util.BitmapUtil;
@@ -155,8 +157,23 @@ public class CameraListAdapter extends BaseAdapter
             @Override
             public void onClick(View v)
             {
-                Intent intent = new Intent(context, CameraPlayerActivity.class);
+                Intent intent = new Intent(context, CameraGBPlayerActivity.class);
                 Camera camera = cameraList.get(position);
+                if (null == camera.getDeviceId() || "".equals(camera.getDeviceId()))
+                {
+                    new UnityDialog(context)
+                            .setTitle("温馨提示")
+                            .setHint("该摄像头未设置国标编码，请登录英飞拓平台进行配置")
+                            .setConfirm("确定", new UnityDialog.OnConfirmDialogListener()
+                            {
+                                @Override
+                                public void confirm(UnityDialog unityDialog, String content)
+                                {
+                                    unityDialog.dismiss();
+                                }
+                            }).show();
+                    return;
+                };
                 if (camera.getIsUsed().equals("1"))
                 {
                     Bundle bundle = new Bundle();
