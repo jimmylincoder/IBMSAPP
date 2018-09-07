@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.mcxtzhang.swipemenulib.SwipeMenuLayout;
 import com.suntek.ibmsapp.R;
 import com.suntek.ibmsapp.model.Camera;
+import com.suntek.ibmsapp.page.camera.CameraGBPlayerActivity;
 import com.suntek.ibmsapp.page.camera.CameraPlayerActivity;
 import com.suntek.ibmsapp.task.base.BaseTask;
 import com.suntek.ibmsapp.task.camera.CameraDelHistoryTask;
@@ -123,7 +124,7 @@ public class CameraHistoryAdapter extends BaseAdapter
             @Override
             public void onClick(View v)
             {
-                Intent intent = new Intent(context, CameraPlayerActivity.class);
+                Intent intent = new Intent(context, CameraGBPlayerActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("camera", camera);
                 intent.putExtras(bundle);

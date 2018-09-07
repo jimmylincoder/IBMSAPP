@@ -149,7 +149,7 @@ public class CameraGBPlayerActivity extends BaseActivity
             public void stop(View view)
             {
                 if (videoView.getState() == PLAYING)
-                    videoView.stop();
+                    videoView.release();
                 else
                     videoView.playReal();
             }
@@ -321,7 +321,7 @@ public class CameraGBPlayerActivity extends BaseActivity
     @OnClick(R.id.ll_history)
     public void jumpToHistory(View view)
     {
-        Intent intent = new Intent(CameraGBPlayerActivity.this, CameraPlayerHistoryActivity.class);
+        Intent intent = new Intent(CameraGBPlayerActivity.this, CameraGBHistoryPlayerActivity.class);
         intent.putExtra("camera", camera);
         startActivity(intent);
     }
@@ -468,6 +468,13 @@ public class CameraGBPlayerActivity extends BaseActivity
     {
         unregisterReceiver(netWorkStateReceiver);
         super.onPause();
+    }
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+        videoView.stop();
     }
 
     @Override

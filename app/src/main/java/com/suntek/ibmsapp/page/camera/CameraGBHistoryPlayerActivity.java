@@ -50,6 +50,7 @@ import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.PAUSE;
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.PLAYING;
 import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.STOP;
+import static com.suntek.ibmsapp.widget.hkivisionview.AbstractHkivisionVideoView.STREAM_HIGH_QUALITY;
 
 /**
  * 国标历史播放界面
@@ -209,7 +210,7 @@ public class CameraGBHistoryPlayerActivity extends BaseActivity
             public void stop(View view)
             {
                 if (videoView.getState() == PLAYING)
-                    videoView.release();
+                    videoView.stop();
                 else if (videoView.getState() == STOP)
                     playNowDate();
             }
@@ -338,6 +339,21 @@ public class CameraGBHistoryPlayerActivity extends BaseActivity
         ToastHelper.getInstance(this).shortShowMessage("截图成功");
     }
 
+    @OnClick(R.id.ll_play)
+    public void play(View view)
+    {
+        if (recordMap != null)
+        {
+            String beginTime = DateUtil.convertYYYY_MM_DD_HH_MM_SS(
+                    new Date(RecordHander.getEarliestTime(recordMap.get(chooseDate)).getStartTime()));
+            String endTime = chooseDate + " 23:59:59";
+            if (videoView.getState() != PLAYING)
+                videoView.playHistory(beginTime, endTime);
+            else
+                videoView.stop();
+        }
+    }
+
     private void showPreview()
     {
         llTakePic.setVisibility(View.VISIBLE);
@@ -459,7 +475,7 @@ public class CameraGBHistoryPlayerActivity extends BaseActivity
 
     private void getRecordData()
     {
-        videoView.release();
+        videoView.stop();
         llNoRecord.setVisibility(View.GONE);
         llSeekBar.setVisibility(View.GONE);
         llTimeLoading.setVisibility(View.VISIBLE);
@@ -541,12 +557,12 @@ public class CameraGBHistoryPlayerActivity extends BaseActivity
                 @Override
                 public void onState(int state)
                 {
-                    if(state == NO_NETWORK_STATE)
+                    if (state == NO_NETWORK_STATE)
                     {
                         ToastHelper.getInstance(CameraGBHistoryPlayerActivity.this).longShowMessage("当前手机未连接网络");
-                        videoView.release();
+                        videoView.stop();
                     }
-                    if(state == MOBILE_STATE)
+                    if (state == MOBILE_STATE)
                         ToastHelper.getInstance(CameraGBHistoryPlayerActivity.this).shortShowMessage("请注意:当前手机正在处于手机网络状态");
                 }
             });
@@ -563,5 +579,12 @@ public class CameraGBHistoryPlayerActivity extends BaseActivity
     {
         unregisterReceiver(netWorkStateReceiver);
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        videoView.release();
+        super.onDestroy();
     }
 }

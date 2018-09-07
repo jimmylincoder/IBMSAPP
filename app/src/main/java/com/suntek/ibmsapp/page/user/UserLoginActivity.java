@@ -146,7 +146,8 @@ public class UserLoginActivity extends BaseActivity
                 {
                     Area area = (Area) result.getResultData();
                     aCache.put("root_area",area);
-                    aCache.put("choose_org_code",area.getOgrCode());
+                    aCache.put("choose_org_code",area.getId());
+                    aCache.put("root_id",area.getId());
                     aCache.put("choose_name", area.getName());
                     login(account,password);
                 }

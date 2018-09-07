@@ -41,7 +41,9 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
 
     private ACache aCache;
 
-    private String chooseId = "1";
+    private String chooseId = "";
+
+    private String rootId = "";
 
     @BindView(R.id.tv_now_area)
     TextView tvNowArea;
@@ -103,6 +105,8 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
     {
         llLoading.setVisibility(View.VISIBLE);
         lvArea.setVisibility(View.GONE);
+        rootId = aCache.getAsString("root_id");
+        chooseId = rootId;
         tvNowArea.setText(aCache.getAsString("choose_name"));
         areas = new ArrayList<>();
     }
@@ -142,7 +146,7 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
                         if (lvArea != null)
                         {
                             areas.clear();
-                            if (parentId.equals("1"))
+                            if (parentId.equals(rootId))
                             {
                                 Area area = (Area) aCache.getAsObject("root_area");
                                 areas.add(area);
@@ -198,19 +202,19 @@ public class CameraChooseActivity extends BaseActivity implements AdapterView.On
         llError.setVisibility(View.GONE);
         llLoading.setVisibility(View.VISIBLE);
         lvArea.setVisibility(View.GONE);
-        initAreaListView("1", true);
+        initAreaListView(rootId, true);
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l)
     {
         loadingView(true);
-        String orgCode = areas.get(i).getOgrCode();
+        String orgCode = areas.get(i).getId();
         chooseId = areas.get(i).getId();
         String name = areas.get(i).getName();
         aCache.put("choose_org_code", orgCode);
         aCache.put("choose_name", name);
-        if ("01".equals(orgCode))
+        if (rootId.equals(orgCode))
         {
             finish();
         }

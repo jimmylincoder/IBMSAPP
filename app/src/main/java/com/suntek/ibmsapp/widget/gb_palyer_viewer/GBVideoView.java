@@ -135,7 +135,6 @@ public class GBVideoView extends FrameLayout
         stopView = inflater.inflate(R.layout.view_video_stop, null);
         llStateContent.addView(stopView);
 
-        initVideoView();
         initClick();
     }
 
@@ -265,7 +264,9 @@ public class GBVideoView extends FrameLayout
 
     public Bitmap takePic()
     {
-        Bitmap bitmap = videoView.takePicture();
+        Bitmap bitmap = null;
+        if (playerState == PLAYING)
+            bitmap = videoView.takePicture();
         return bitmap;
     }
 
@@ -308,6 +309,11 @@ public class GBVideoView extends FrameLayout
             {
                 task.cancel(true);
             }
+        }
+        if (queryProgressTimer != null)
+        {
+            queryProgressTimer.cancel();
+            queryProgressTimer = null;
         }
         if (videoView != null)
         {
@@ -447,6 +453,7 @@ public class GBVideoView extends FrameLayout
 
     private void play(String beginTime, String endTime)
     {
+        initVideoView();
         stateChange(PREPARE);
         BaseTask playTask = new CameraPlayGB28181Task(context, camera.getDeviceId(), camera.getParentId(), beginTime, endTime)
         {
@@ -462,7 +469,7 @@ public class GBVideoView extends FrameLayout
                     session = (String) map.get("session");
                     videoView.setVideoPath(address);
                     videoView.start();
-                    //startQueryProgress();
+                    startQueryProgress();
                 }
                 else
                 {

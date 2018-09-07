@@ -28,8 +28,8 @@ public class IbmsHttpEngine extends BaseHttpProcesser
 
     public IbmsHttpEngine()
     {
-        //init(ibmsUrl,null,isLog,timeOut);
-        init(ibmsUrl,"Yes###",isLog,timeOut);
+        init(ibmsUrl,null,isLog,timeOut);
+        //init(ibmsUrl,"Yes###",isLog,timeOut);
     }
 
     @Override
